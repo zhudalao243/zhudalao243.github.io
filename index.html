@@ -235,7 +235,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新於</span>
-        <time title="修改時間：2021-08-16 15:15:27" itemprop="dateModified" datetime="2021-08-16T15:15:27+08:00">2021-08-16</time>
+        <time title="修改時間：2021-08-16 17:15:15" itemprop="dateModified" datetime="2021-08-16T17:15:15+08:00">2021-08-16</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -384,7 +384,25 @@
 <img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222032431.png" alt="image-20210815222032431" style="zoom:33%;">
 
 <h3 id="场景二"><a href="#场景二" class="headerlink" title="场景二"></a>场景二</h3><p>对象被一个栈对象删除引用，成为另一个栈对象的下游。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">new 栈对象9；</span><br><span class="line">对象9-&gt;对象3 = 对象3； //将栈对象3 挂在 栈对象9 下游</span><br><span class="line">对象2-&gt;对象3 = null； //对象2 删除引⽤用 对象3</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;../images/Golang中的GC垃圾回收机制/image-20210815222315895.png&quot; alt=&quot;image-20210815222315895&quot; style=&quot;zoom:50%;&quot; /&gt;</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;../images/Golang中的GC垃圾回收机制/image-20210815222346906.png&quot; alt=&quot;image-20210815222346906&quot; style=&quot;zoom:50%;&quot; /&gt;</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;../images/Golang中的GC垃圾回收机制/image-20210815222407645.png&quot; alt=&quot;image-20210815222407645&quot; style=&quot;zoom:50%;&quot; /&gt;</span><br><span class="line"></span><br><span class="line">### 场景三</span><br><span class="line"></span><br><span class="line">对象被一个堆对象删除引用，成为另一个堆对象的下游。</span><br><span class="line"></span><br><span class="line">​``` //伪码</span><br><span class="line">堆对象10-&gt;对象7 = 堆对象7； //将堆对象7 挂在 堆对象10 下游</span><br><span class="line">堆对象4-&gt;对象7 = null； //对象4 删除引⽤用 对象7</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;../images/Golang中的GC垃圾回收机制/image-20210815222602561.png&quot; alt=&quot;image-20210815222602561&quot; style=&quot;zoom:50%;&quot; /&gt;</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;../images/Golang中的GC垃圾回收机制/image-20210815222619017.png&quot; alt=&quot;image-20210815222619017&quot; style=&quot;zoom:50%;&quot; /&gt;</span><br><span class="line"></span><br><span class="line">&lt;img src=&quot;../images/Golang中的GC垃圾回收机制/image-20210815222633300.png&quot; alt=&quot;image-20210815222633300&quot; style=&quot;zoom:50%;&quot; /&gt;</span><br><span class="line"></span><br><span class="line">### 场景四</span><br><span class="line"></span><br><span class="line">对象从一个栈对象删除引用，成为另一个堆对象的下游。</span><br><span class="line"></span><br><span class="line">​``` //伪码</span><br><span class="line">栈对象1-&gt;对象2 = null； //对象1 删除引⽤用 对象2</span><br><span class="line">堆对象4-&gt;对象7 = null; //对象4 删除引⽤用 对象7</span><br><span class="line">堆对象4-&gt;对象2 = 栈对象2； //对象4 添加 下游 栈对象2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">new 栈对象9；</span><br><span class="line">对象9-&gt;对象3 = 对象3； //将栈对象3 挂在 栈对象9 下游</span><br><span class="line">对象2-&gt;对象3 = null； //对象2 删除引⽤用 对象3</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222315895-1629105238588.png" alt="image-20210815222315895" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222346906-1629105238588.png" alt="image-20210815222346906" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222407645-1629105238589.png" alt="image-20210815222407645" style="zoom:50%;">
+
+<h3 id="场景三"><a href="#场景三" class="headerlink" title="场景三"></a>场景三</h3><p>对象被一个堆对象删除引用，成为另一个堆对象的下游。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">堆对象10-&gt;对象7 = 堆对象7； //将堆对象7 挂在 堆对象10 下游</span><br><span class="line">堆对象4-&gt;对象7 = null； //对象4 删除引⽤用 对象7</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222602561-1629105297759.png" alt="image-20210815222602561" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222619017-1629105297759.png" alt="image-20210815222619017" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222633300-1629105297758.png" alt="image-20210815222633300" style="zoom:50%;">
+
+<h3 id="场景四"><a href="#场景四" class="headerlink" title="场景四"></a>场景四</h3><p>对象从一个栈对象删除引用，成为另一个堆对象的下游。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">栈对象1-&gt;对象2 = null； //对象1 删除引⽤用 对象2</span><br><span class="line">堆对象4-&gt;对象7 = null; //对象4 删除引⽤用 对象7</span><br><span class="line">堆对象4-&gt;对象2 = 栈对象2； //对象4 添加 下游 栈对象2</span><br></pre></td></tr></table></figure>
 
 <img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222835930.png" alt="image-20210815222835930" style="zoom:50%;">
 
