@@ -20,23 +20,60 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
-<meta property="og:type" content="website">
-<meta property="og:title" content="上善若水">
-<meta property="og:url" content="http://zhudalao243.github.io/index.html">
+<meta name="description" content="Golang中的GC垃圾回收机制Go 1.3 标记清除(mark and sweep) 流程：  暂停程序业务逻辑, 找出不不可达的对象，和可达对象。 开始标记，程序找出它所有可达的对象，并做上标记。 标记完了了之后，然后开始清除未标记的对象. 停⽌止暂停，让程序继续跑。然后循环重复这个过程，直到process程序⽣生命周期结束。  缺点：  STW，stop the world；让程序暂停，程序">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang中的GC垃圾回收机制">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/index.html">
 <meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="Golang中的GC垃圾回收机制Go 1.3 标记清除(mark and sweep) 流程：  暂停程序业务逻辑, 找出不不可达的对象，和可达对象。 开始标记，程序找出它所有可达的对象，并做上标记。 标记完了了之后，然后开始清除未标记的对象. 停⽌止暂停，让程序继续跑。然后循环重复这个过程，直到process程序⽣生命周期结束。  缺点：  STW，stop the world；让程序暂停，程序">
 <meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/.io//image-20210815202056508.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815202153446.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815202305099.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815202348203.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815202439107.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815202557320.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815203317889.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815203356122.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815203423861.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815213638805.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815213703432.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815213927896.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815214828157.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815214950520.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815215043176.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815215126841.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815215308921.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815215334937.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815220252392.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815220332343.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815220413361.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815220435567.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815220500445.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815220533566.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815220552303.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815221417608.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815221437818.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815222017066.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815222032431.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815222835930.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815222852740.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/15/images/Golang中的GC垃圾回收机制/image-20210815222910678.png">
+<meta property="article:published_time" content="2021-08-15T12:14:56.000Z">
+<meta property="article:modified_time" content="2021-08-15T14:43:12.706Z">
 <meta property="article:author" content="zzy">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/.io//image-20210815202056508.png">
 
 
-<link rel="canonical" href="http://zhudalao243.github.io/">
+<link rel="canonical" href="http://zhudalao243.github.io/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-TW","comments":"","permalink":"","path":"index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/","path":"2021/08/15/Golang中的GC垃圾回收机制/","title":"Golang中的GC垃圾回收机制"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>上善若水</title>
+<title>Golang中的GC垃圾回收机制 | 上善若水</title>
   
 
 
@@ -131,7 +168,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目錄
@@ -144,6 +181,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">Golang中的GC垃圾回收机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-1-3-%E6%A0%87%E8%AE%B0%E6%B8%85%E9%99%A4-mark-and-sweep"><span class="nav-number">1.1.</span> <span class="nav-text">Go 1.3 标记清除(mark and sweep)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-1-5-%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">Go 1.5 三色标记法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E6%B3%95%EF%A5%A7%E8%A2%ABSTW%E4%BF%9D%E6%8A%A4"><span class="nav-number">1.3.</span> <span class="nav-text">如果三色标记法不被STW保护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%BA%E5%BC%B1%E4%B8%89%E8%89%B2%E4%B8%8D%E5%8F%98%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">强弱三色不变式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%BA%E4%B8%89%E2%BE%8A%E8%89%B2%E4%B8%8D%EF%A5%A7%E5%8F%98%E5%BC%8F"><span class="nav-number">1.4.1.</span> <span class="nav-text">强三⾊色不不变式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%B1%E4%B8%89%E2%BE%8A%E8%89%B2%E4%B8%8D%EF%A5%A7%E5%8F%98%E5%BC%8F"><span class="nav-number">1.4.2.</span> <span class="nav-text">弱三⾊色不不变式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%8F%E9%9A%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">1.5.</span> <span class="nav-text">屏障机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E5%B1%8F%E9%9A%9C"><span class="nav-number">1.5.1.</span> <span class="nav-text">插入屏障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%B1%8F%E9%9A%9C"><span class="nav-number">1.5.2.</span> <span class="nav-text">删除屏障</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-1-8-%E6%B7%B7%E5%90%88%E5%86%99%E5%B1%8F%E9%9A%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">1.6.</span> <span class="nav-text">Go 1.8 混合写屏障机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%B8%80"><span class="nav-number">1.6.1.</span> <span class="nav-text">场景一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%BA%8C"><span class="nav-number">1.6.2.</span> <span class="nav-text">场景二</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.7.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -194,16 +232,17 @@
 </noscript>
 
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
     <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -216,9 +255,9 @@
       <meta itemprop="name" content="上善若水">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">Golang中的GC垃圾回收机制</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          Golang中的GC垃圾回收机制
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -251,7 +290,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="Golang中的GC垃圾回收机制"><a href="#Golang中的GC垃圾回收机制" class="headerlink" title="Golang中的GC垃圾回收机制"></a>Golang中的GC垃圾回收机制</h1><h2 id="Go-1-3-标记清除-mark-and-sweep"><a href="#Go-1-3-标记清除-mark-and-sweep" class="headerlink" title="Go 1.3 标记清除(mark and sweep)"></a>Go 1.3 标记清除(mark and sweep)</h2><blockquote>
+        <h1 id="Golang中的GC垃圾回收机制"><a href="#Golang中的GC垃圾回收机制" class="headerlink" title="Golang中的GC垃圾回收机制"></a>Golang中的GC垃圾回收机制</h1><h2 id="Go-1-3-标记清除-mark-and-sweep"><a href="#Go-1-3-标记清除-mark-and-sweep" class="headerlink" title="Go 1.3 标记清除(mark and sweep)"></a>Go 1.3 标记清除(mark and sweep)</h2><blockquote>
 <p>流程：</p>
 <ol>
 <li>暂停程序业务逻辑, 找出不不可达的对象，和可达对象。</li>
@@ -390,7 +429,6 @@
 <p>Go V1.5 三⾊色标记法， 堆空间启动写屏障，栈空间不启动， 全部扫描之后，需要重新扫描⼀一次栈(需要STW)， 效率普通</p>
 <p>Go V1.8 三⾊色标记法，混合写屏障机制， 栈空间不不启动，堆空间启动， 整体过程⼏几乎不不需要STW， 效率较高</p>
 
-      
     </div>
 
     
@@ -398,127 +436,22 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/" rel="prev" title="周易基础及其应用01">
+                  <i class="fa fa-chevron-left"></i> 周易基础及其应用01
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
     </footer>
   </article>
 </div>
 
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/" class="post-title-link" itemprop="url">周易基础及其应用01</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-15 14:59:26 / 修改時間：16:23:05" itemprop="dateCreated datePublished" datetime="2021-08-15T14:59:26+08:00">2021-08-15</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%93%B2%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">哲学</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%93%B2%E5%AD%A6/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/" itemprop="url" rel="index"><span itemprop="name">周易基础及其应用</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="周易基础及应用"><a href="#周易基础及应用" class="headerlink" title="周易基础及应用"></a>周易基础及应用</h1><p>千古奇书《周易》</p>
-<p>人更三圣：伏羲    周文王    孔夫子</p>
-<p>事历三古：远古    中古         近古</p>
-<p>《易经》它是以八卦为核心，以卦的形式来说明问题，以阴爻和阳爻来说明问题，以阴爻和阳爻的相互配合，以文字系统与符号系统相结合说明万事万物的根本规律。</p>
-<p>《易经》为群经之首。</p>
-<p>系词： <strong>夫《易》何为者也，开物成务斯如此也。</strong>  开物成务：开物是认识事物的本质，成务是怎么去解决这个问题。</p>
-<p><strong>不善易者，不得为将相。</strong>   </p>
-<p><strong>不知易不足以言大医。   ————孙思邈</strong></p>
-<p>易道广大，无所不包。</p>
-<p>《易》与天地准，故能弥纶天地之道。</p>
-<p>百姓日用而不知。</p>
-<img src="../images/周易基础及其应用01/image-20210815150334560.png" alt="image-20210815150334560" style="zoom:33%;">
-
-<h2 id="阴阳学说"><a href="#阴阳学说" class="headerlink" title="阴阳学说"></a>阴阳学说</h2><p>易以道阴阳。 ——庄子</p>
-<p>天地间无往而非阴阳，一动一静一语一默，皆是阴阳之理。 ———朱熹</p>
-<p>阳：天    上    昼    男    君    贵    福 ….</p>
-<p>阴：地    下    夜    女    臣    贱    祸 ….</p>
-<p><strong>一阴一阳之谓道。</strong></p>
-<p>主要内容：</p>
-<ul>
-<li>阴阳对立</li>
-<li>阴阳依存（互根）。有无相生，难易相成，长短相盈，高低相形，音声相合，前后相随，恒也。</li>
-<li>阴阳消长。阴阳动态变化，动态平衡。阴盛则阳病，阳盛则阴病。</li>
-<li>阴阳转换。消长属于量变，转化属于质变。</li>
-</ul>
-<p>中国哲学三大问题：天人、群己、身心</p>
-<p>重视对立，追求平衡。</p>
-<h2 id="五行学说"><a href="#五行学说" class="headerlink" title="五行学说"></a>五行学说</h2><p>世界上的万事万物的运动和发生发展都是”金木水火土“这五种状态，相互作用、相互运动的结果。  ——&gt;系统观</p>
-<h3 id="五行特点"><a href="#五行特点" class="headerlink" title="五行特点"></a>五行特点</h3><blockquote>
-<p>五行顺序              特性        方位    五德            季节</p>
-<p>一曰水    润下    润下寒冷    北方    智               冬季</p>
-<p>二曰火    炎上    炎热向上    南方    礼               夏季</p>
-<p>三曰木    曲直    生发条达    东方    仁               春季</p>
-<p>四曰金    从草    清凉萧杀    西方    义                秋季</p>
-<p>五曰土    稼穑    长养化育    中央    信      农历（三、六、九、十二月）</p>
-</blockquote>
-<h3 id="五行生克"><a href="#五行生克" class="headerlink" title="五行生克"></a>五行生克</h3><img src="../images/周易基础及其应用01/image-20210815160518695.png" alt="image-20210815160518695" style="zoom:33%;">
-
-<h3 id="五行旺相休囚死"><a href="#五行旺相休囚死" class="headerlink" title="五行旺相休囚死"></a>五行旺相休囚死</h3><p>P6</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
 
 
 
