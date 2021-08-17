@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="1&quot;分组密码的模式 -- 分组密码是如何迭代的&quot;   DES和AES都属于分组密码，只能加密固定长度的明文。如果需要加密任意长度的明文，就需要对分组密码进行迭代，而分组密码的迭代方法就称为分组密码的“模式”。 分组密码有很多种模式，如果模式的选择不恰当，就无法保证机密性。例如，如果使用ECB模式，明文中的一些规律就可以通过密文被识别出来。 分组密码的主要模式（ECB、CBC、C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分组密码的模式">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="1&quot;分组密码的模式 -- 分组密码是如何迭代的&quot;   DES和AES都属于分组密码，只能加密固定长度的明文。如果需要加密任意长度的明文，就需要对分组密码进行迭代，而分组密码的迭代方法就称为分组密码的“模式”。 分组密码有很多种模式，如果模式的选择不恰当，就无法保证机密性。例如，如果使用ECB模式，明文中的一些规律就可以通过密文被识别出来。 分组密码的主要模式（ECB、CBC、C">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817105748588.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817105913728.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110350744.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110416665.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110639241.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110715286.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111048158.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111109864.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111235512.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111629522.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112004499.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112246534.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112306254.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112459058.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112557257.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112653539.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112810129.png">
+<meta property="article:published_time" content="2021-08-17T02:45:08.000Z">
+<meta property="article:modified_time" content="2021-08-17T03:38:12.421Z">
+<meta property="article:author" content="zzy">
+<meta property="article:tag" content="密码学">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817105748588.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/","path":"2021/08/17/分组密码的模式/","title":"分组密码的模式"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>分组密码的模式 | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">分组密码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%8E%E6%96%87%E5%88%86%E7%BB%84%E5%92%8C%E5%AF%86%E6%96%87%E5%88%86%E7%BB%84"><span class="nav-number">2.1.</span> <span class="nav-text">明文分组和密文分组</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ECB-%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">ECB 模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CBC%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">CBC模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#XOR"><span class="nav-number">4.1.</span> <span class="nav-text">XOR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CBC"><span class="nav-number">4.2.</span> <span class="nav-text">CBC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%90%91%E9%87%8F"><span class="nav-number">4.3.</span> <span class="nav-text">初始化向量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CFB-%E6%A8%A1%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">CFB 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%90%91%E9%87%8F-1"><span class="nav-number">5.1.</span> <span class="nav-text">初始化向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFB%E6%A8%A1%E5%BC%8F%E4%B8%8E%E6%B5%81%E5%AF%86%E7%A0%81"><span class="nav-number">5.2.</span> <span class="nav-text">CFB模式与流密码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OFB-%E6%A8%A1%E5%BC%8F"><span class="nav-number">6.</span> <span class="nav-text">OFB 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%90%91%E9%87%8F-2"><span class="nav-number">6.1.</span> <span class="nav-text">初始化向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFB%E6%A8%A1%E5%BC%8F%E5%92%8COFB%E6%A8%A1%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="nav-number">6.2.</span> <span class="nav-text">CFB模式和OFB模式对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CTR-%E6%A8%A1%E5%BC%8F"><span class="nav-number">7.</span> <span class="nav-text">CTR 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E6%95%B0%E5%99%A8%E7%9A%84%E7%94%9F%E6%88%90%E6%96%B9%E6%B3%95"><span class="nav-number">7.1.</span> <span class="nav-text">计数器的生成方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OFB%E6%A8%A1%E5%BC%8F%E4%B8%8ECTR%E6%A8%A1%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="nav-number">7.2.</span> <span class="nav-text">OFB模式与CTR模式对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTR%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">7.3.</span> <span class="nav-text">CTR模式的特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分组密码的模式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-17 10:45:08 / 修改時間：11:38:12" itemprop="dateCreated datePublished" datetime="2021-08-17T10:45:08+08:00">2021-08-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;分组密码的模式 -- 分组密码是如何迭代的&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>DES和AES都属于分组密码，只能加密固定长度的明文。如果需要加密任意长度的明文，就需要对分组密码进行迭代，而分组密码的迭代方法就称为分组密码的“模式”。</p>
+<p>分组密码有很多种模式，如果模式的选择不恰当，就无法保证机密性。例如，如果使用ECB模式，明文中的一些规律就可以通过密文被识别出来。</p>
+<p>分组密码的主要模式（ECB、CBC、CFB、OFB、CTR）</p>
+</blockquote>
+<h2 id="分组密码"><a href="#分组密码" class="headerlink" title="分组密码"></a>分组密码</h2><blockquote>
+<p><strong>分组密码（blockcipher）</strong>是每次只能处理特定长度的一块数据的一类密码算法，这里的一块”就称为分组（block）。此外，一个分组的比特数就称为分组长度（blocklength）。</p>
+<p>例如，<strong>DES和三重DES的分组长度都是64比特</strong>。这些密码算法一次只能加密64比特的明文．并生成64比特的密文。</p>
+<p><strong>AES的分组长度可以从128比特、192比特和256比特中进行选择。当选择128比特的分组长度时，AES一次可加密128比特的明文，并生成128比特的密文。</strong></p>
+</blockquote>
+<h2 id="模式"><a href="#模式" class="headerlink" title="模式"></a>模式</h2><blockquote>
+<p><strong>分组密码算法只能加密固定长度的分组，但是我们需要加密的明文长度可能会超过分组密码的分组长度，这时就需要对分组密码算法进行迭代，以便将一段很长的明文全部加密。而迭代的方法就称为分组密码的模式（mode）</strong>。</p>
+</blockquote>
+<blockquote>
+<p>模式有很多种类，分组密码的主要模式有以下5种：</p>
+<ul>
+<li><strong>ECB模式</strong>：Electronic Code Book mode（电子密码本模式）</li>
+<li><strong>CBC模式</strong>：Cipher Block Chaining mode（密码分组链接模式）</li>
+<li><strong>CFB模式</strong>：Cipher FeedBack mode（密文反馈模式）</li>
+<li><strong>OFB模式</strong>：Output FeedBack mode（输出反馈模式）</li>
+<li><strong>CTR模式</strong>：CounTeR mode（计数器模式）</li>
+</ul>
+</blockquote>
+<h3 id="明文分组和密文分组"><a href="#明文分组和密文分组" class="headerlink" title="明文分组和密文分组"></a>明文分组和密文分组</h3><blockquote>
+<p>**明文分组: **是指分组密码算法中作为加密对象的明文。明文分组的长度与分组密码算法的分组长度是相等的。</p>
+<p>**密文分组: **是指使用分组密码算法将明文分组加密之后所生成的密文。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817105748588.png" alt="image-20210817105748588" style="zoom:67%;">
+
+<h2 id="ECB-模式"><a href="#ECB-模式" class="headerlink" title="ECB 模式"></a>ECB 模式</h2><p>ECB(Electronic Code Book, 电子密码本)模式是最简单的加密模式，<font color="red">明文消息被分成固定大小的块（分组），并且每个块被单独加密。</font>  每个块的加密和解密都是独立的，且使用相同的方法进行加密，所以可以进行并行计算，但是这种方法一旦有一个块被破解，使用相同的方法可以解密所有的明文数据，<font color="red">安全性比较差。  适用于数据较少的情形，加密前需要把明文数据填充到块大小的整倍数。</font></p>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817105913728.png" alt="image-20210817105913728 " style="zoom:67%;">
+
+<blockquote>
+<p>使用ECB模式加密时，相同的明文分组会被转换为相同的密文分组，也就是说，我们可以将其理解为是一个巨大的“明文分组–&gt;密文分组”的对应表，因此ECB模式也称为电子密码本模式<strong>当最后一个明文分组的内容小于分组长度时，需要用一特定的数据进行填充（padding），让值一个分组长度等于分组长度</strong>。</p>
+<p>ECB模式是所有模式中最简单的一种。ECB模式中，明文分组与密文分组是一一对应的关系，因此，如果明文中存在多个相同的明文分组，则这些明文分组最终都将被转换为相同的密文分组。这样一来，只要观察一下密文，就可以知道明文中存在怎样的重复组合，并可以以此为线索来破译密码，因此ECB模式是存在一定风险的。</p>
+</blockquote>
+<h2 id="CBC模式"><a href="#CBC模式" class="headerlink" title="CBC模式"></a>CBC模式</h2><h3 id="XOR"><a href="#XOR" class="headerlink" title="XOR"></a>XOR</h3><blockquote>
+<p>异或操作： </p>
+<p>1$\bigoplus$0=1  </p>
+<p>0$\bigoplus$1=1</p>
+<p>1$\bigoplus$1=0 </p>
+<p>0$\bigoplus$0=0</p>
+</blockquote>
+<center><img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110350744.png" alt="image-20210817110350744" style="zoom:80%;"><img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110416665.png" alt="image-20210817110416665" style="zoom:80%;"></center>
+
+<blockquote>
+<p>可能大家已经发现了，上面的计算和加密、解密的步骤非常相似。</p>
+<ul>
+<li><p>将明文A用密钥B进行加密，得到密文A⊕B</p>
+</li>
+<li><p>将密文A⊕B用密钥B进行解密，得到明文A</p>
+</li>
+</ul>
+<p>实际上，只要选择一个合适的B，仅仅使用XOR就可以实现一个高强度的密码。</p>
+<p>对同一个比特序列进行两次XOR之后就会回到最初的状态。</p>
+</blockquote>
+<h3 id="CBC"><a href="#CBC" class="headerlink" title="CBC"></a>CBC</h3><blockquote>
+<p>CBC(Cipher Block Chaining, 密码块链)<font color="red">模式中每一个分组要先和前一个分组加密后的数据进行XOR异或操作，然后再进行加密</font>。  这样每个密文块依赖该块之前的所有明文块，为了保持每条消息都具有唯一性，<font color="red">第一个数据块进行加密之前需要用初始化向量IV进行异或操作</font>。  <font color="red">CBC模式是一种最常用的加密模式，它主要缺点是加密是连续的，不能并行处理，并且与ECB一样消息块必须填充到块大小的整倍数。</font></p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110639241.png" alt="image-20210817110639241" style="zoom:67%;">
+
+<blockquote>
+<p> 如果将一个分组的加密过程分离出来，我们就可以很容易地比较出ECB模式和CBC模式的区别 。ECB模式只进行了加密，而CBC模式则在加密之前进行了一次XOR。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110715286.png" alt="image-20210817110715286" style="zoom:50%;">
+
+<h3 id="初始化向量"><a href="#初始化向量" class="headerlink" title="初始化向量"></a>初始化向量</h3><blockquote>
+<p><strong>当加密第一个明文分组时，由于不存在“前一个密文分组”，因此<font color="red">需要事先准备一个长度为一个分组的比特序列来代替“前一个密文分组</font>“，这个比特序列称为初始化向量（initialization vector）</strong> 通常缩写为 IV </p>
+</blockquote>
+<h2 id="CFB-模式"><a href="#CFB-模式" class="headerlink" title="CFB 模式"></a>CFB 模式</h2><blockquote>
+<p>CFB模式的全称是Cipher FeedBack模式（密文反馈模式）。在CFB模式中，<font color="red">前一个分组的密文加密后和当前分组的明文XOR异或操作生成当前分组的密文</font>。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111048158.png" alt="image-20210817111048158" style="zoom:67%;">
+
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111109864.png" alt="image-20210817111109864" style="zoom:67%;">
+
+<blockquote>
+<p>在ECB模式和CBC模式中，明文分组都是通过密码算法进行加密的，然而，在CFB模式中，明文分组并没有通过密码算法来直接进行加密。</p>
+<p>从上图可以看出，明文分组和密文分组之间并没有经过”加密”这一步骤。在CFB模式中，明文分和密文分组之间只有一个XOR。</p>
+<p>我们将CBC模式与CFB模式对比一下，就可以看出其中的差异了（如下图）。在CBC模式中，明文分组和密文分组之间有XOR和密码算法两个步骤，而在CFB模式中，明文分组和密文分组之间则只有XOR。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111235512.png" alt="image-20210817111235512" style="zoom:50%;">
+
+<h3 id="初始化向量-1"><a href="#初始化向量-1" class="headerlink" title="初始化向量"></a>初始化向量</h3><blockquote>
+<p><font color="red">在生成第一个密文分组时，由于不存在前一个输出的数据，因此需要使用初始化向量（IV）来代替</font>，这一点和CBC模式是相同的。一般来说，我们需要在每次加密时生成一个不同的随机比特序列用作初始化向量。</p>
+</blockquote>
+<h3 id="CFB模式与流密码"><a href="#CFB模式与流密码" class="headerlink" title="CFB模式与流密码"></a>CFB模式与流密码</h3><blockquote>
+<p>CFB模式是通过将“明文分组”与“密码算法的输出”进行XOR运算来生成“密文分组”的。</p>
+<p>在CFB模式中，密码算法的输出相当于一个随机比特序列。由于密码算法的输出是通过计算得到的，并不是真正的随机数，因此CFB模式不可能具各理论上不可破译的性质。</p>
+<p><font color="red">CFB模式中由加密算法所生成的比特序列称为密钥流（key stream）</font>。在CFB模式中，密码算法就相当于用来生成密钥流的伪随机数生成器，而初始化向量相当于伪随机数生成器的“种子“。</p>
+<p>在CFB模式中，<font color="red">明文数据可以被逐比特加密</font>，因此我们<font color="red">可以将CFB模式看做是一种使用分组密码来实现流密码的方式</font>。</p>
+</blockquote>
+<h2 id="OFB-模式"><a href="#OFB-模式" class="headerlink" title="OFB 模式"></a>OFB 模式</h2><blockquote>
+<p>OFB模式并不是通过密码算法对明文直接进行加密的，而是通过将 “明文分组” 和 “密码算法的输出” 进行XOR来产生 “密文分组” 的，在这一点上OFB模式和CFB模式非常相似。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111629522.png" alt="image-20210817111629522" style="zoom:67%;">
+
+<h3 id="初始化向量-2"><a href="#初始化向量-2" class="headerlink" title="初始化向量"></a>初始化向量</h3><blockquote>
+<p>和CBC模式、CFB模式一样，OFB模式中也需要使用初始化向量（IV）。</p>
+</blockquote>
+<h3 id="CFB模式和OFB模式对比"><a href="#CFB模式和OFB模式对比" class="headerlink" title="CFB模式和OFB模式对比"></a>CFB模式和OFB模式对比</h3><blockquote>
+<p>OFB模式和CFB模式的区别仅仅在于密码算法的输入。</p>
+<p>CFB式中，密码算法的输人是前一个密文分组，也就是将密文分组反馈到密算法中，因此就有了“密文反馈模式”这个名字。</p>
+<p>相对地，OFB模式中，密码算法的输入则是密码算法的前一个输出，也就是将输出反馈给密码算法，因此就有了“输出反馈模式”这个名字。</p>
+<p>如果将一个分组抽出来对CFB模式和OFB模式进行一个对比．就可以很容易看出它们之间的差异（下图）。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112004499.png" alt="image-20210817112004499" style="zoom:67%;">
+
+<blockquote>
+<p>由于CFB模式中是对密文分组进行反馈的，因此必须从第一个明文分组开始按顺序进行加密，也就是说无法跳过明文分组1而先对明文分组2进行加密。</p>
+<p>相对地，在OFB模式中，XOR所需要的比特序列（密钥流）可以事先通过密码算法生成，和明文分组无关。只要提前准备好所需的密钥流，则在实际从明文生成密文的过程中，就完全不需要动用密码算法了。只要将明文与密钥流进行XOR就可以了。和AES等密码算法相比，XOR运算的速度是非常快的。这就意味着只要提前准备好密钥流就可以快速完成加密。换个角度来看，生成密钥流的操作和进行XOR运算的操作是可以并行的。</p>
+</blockquote>
+<h2 id="CTR-模式"><a href="#CTR-模式" class="headerlink" title="CTR 模式"></a>CTR 模式</h2><blockquote>
+<p>CTR模式的全称是CounTeR模式（计数器模式）。<font color="red">CTR摸式是一种通过将逐次累加的计数器进行加密来生成密钥流的流密码</font>（下图）。</p>
+<p>CTR模式中，每个分组对应一个逐次累加的计数器，并通过对计数器进行加密来生成密钥流。也就是说，最终的密文分组是通过将计数器加密得到的比特序列，与明文分组进行XOR而得到的。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112246534.png" alt="image-20210817112246534" style="zoom:50%;">
+
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112306254.png" alt="image-20210817112306254" style="zoom:50%;">
+
+<h3 id="计数器的生成方法"><a href="#计数器的生成方法" class="headerlink" title="计数器的生成方法"></a>计数器的生成方法</h3><blockquote>
+<p>每次加密时都会生成一个不同的值（nonce）来作为计数器的初始值。当分组长度为128比特（16字节）时，计数器的初始值可能是像下面这样的形式。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112459058.png" alt="image-20210817112459058" style="zoom:80%;">
+
+<blockquote>
+<p>其中前8个字节为nonce（随机数），这个值在每次加密时必须都是不同的，后8个字节为分组序号，这个部分是会逐次累加的。在加密的过程中，计数器的值会产生如下变化：</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112557257.png" alt="image-20210817112557257" style="zoom:80%;">
+
+<blockquote>
+<p>按照上述生成方法，可以保证计数器的值每次都不同。由于计数器的值每次都不同，因此每个分组中将计数器进行加密所得到的密钥流也是不同的。也是说，这种方法就是用分组密码来模拟生成随机的比特序列。</p>
+</blockquote>
+<h3 id="OFB模式与CTR模式对比"><a href="#OFB模式与CTR模式对比" class="headerlink" title="OFB模式与CTR模式对比"></a>OFB模式与CTR模式对比</h3><blockquote>
+<p>CTR模式和OFB模式一样，都属于流密码。如果我们将单个分组的加密过程拿出来，那么OFB模式和CTR模式之间的差异还是很容易理解的（下图）。OFB模式是将加密的输出反愦到输入，而CTR模式则是将计数器的值用作输入。</p>
+</blockquote>
+<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112653539.png" alt="image-20210817112653539" style="zoom:67%;">
+
+<h3 id="CTR模式的特点"><a href="#CTR模式的特点" class="headerlink" title="CTR模式的特点"></a>CTR模式的特点</h3><blockquote>
+<p>CTR模式的加密和解密使用了完全相同的结构，因此在程序实现上比较容易。这一特点和同为流密码的OFB模式是一样的。</p>
+<p>此外，CTR模式中可以以任意顺序对分组进行加密和解密，因此在加密和解密时需要用到的“计数器”的值可以由nonce和分组序号直接计算出来。这一性质是OFB模式所不具备的。</p>
+<p>能够以任意顺序处理分组，就意味着能够实现并行计算。在支持并行计算的系统中，CTR模式的速度是非常快的。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112810129.png" alt="image-20210817112810129 " style="zoom:80%;">
+
+<ol>
+<li><p>ECB - Electronic Code Book, 电子密码本模式</p>
+<ul>
+<li>特点: 简单, 效率高, 密文有规律, 容易被破解</li>
+<li>最后一个明文分组必须要填充<ul>
+<li>des/3des -&gt; 最后一个分组填充满8字节</li>
+<li>aes -&gt; 最后一个分组填充满16字节</li>
+</ul>
+</li>
+<li>不需要初始化向量</li>
+</ul>
+</li>
+<li><p>CBC - Cipher Block Chaining, 密码块链模式</p>
+<ul>
+<li>特点: 密文没有规律, 经常使用的加密方式</li>
+<li>最后一个明文分组需要填充<ul>
+<li>des/3des -&gt; 最后一个分组填充满8字节</li>
+<li>aes -&gt; 最后一个分组填充满16字节</li>
+</ul>
+</li>
+<li>需要一个初始化向量 - 一个数组<ul>
+<li>数组的长度: 与明文分组相等</li>
+<li>数据来源: 负责加密的人的提供的</li>
+<li>加解密使用的初始化向量值必须相同</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CFB - Cipher FeedBack, 密文反馈模式</p>
+<ul>
+<li>特点: 密文没有规律,  明文分组是和一个数据流进行的按位异或操作, 最终生成了密文</li>
+<li>需要一个初始化向量 - 一个数组<ul>
+<li>数组的长度: 与明文分组相等</li>
+<li>数据来源: 负责加密的人的提供的</li>
+<li>加解密使用的初始化向量值必须相同</li>
+</ul>
+</li>
+<li>不需要填充</li>
+</ul>
+</li>
+<li><p>OFB - Output-Feedback, 输出反馈模式</p>
+<ul>
+<li>特点: 密文没有规律,  明文分组是和一个数据流进行的按位异或操作, 最终生成了密文</li>
+<li>需要一个初始化向量 - 一个数组<ul>
+<li>数组的长度: 与明文分组相等</li>
+<li>数据来源: 负责加密的人的提供的</li>
+<li>加解密使用的初始化向量值必须相同</li>
+</ul>
+</li>
+<li>不需要填充</li>
+</ul>
+</li>
+<li><p>CTR - CounTeR, 计数器模式</p>
+<ul>
+<li>特点: 密文没有规律,  明文分组是和一个数据流进行的按位异或操作, 最终生成了密文</li>
+<li>不需要初始化向量<ul>
+<li>go接口中的iv可以理解为随机数种子, iv的长度 == 明文分组的长度</li>
+</ul>
+</li>
+<li>不需要填充</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag"># 密码学</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/" rel="prev" title="对称加密">
+                  <i class="fa fa-chevron-left"></i> 对称加密
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/08/17/Go%E5%AE%9E%E7%8E%B0%E5%AF%B9%E7%A7%B0%E7%AE%97%E6%B3%95/" rel="next" title="Go实现对称算法">
+                  Go实现对称算法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
