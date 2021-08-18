@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="非对称加密1&quot;非对称加密也叫公钥密码: 使用公钥加密, 使用私钥解密&quot;  对称加密的弊端 秘钥分发困难  可以通过非对称加密完成秘钥的分发  https Alice 和 Bob通信, Alice给bob发送数据, 使用对称加密的方式  生成一个非对称的秘钥对, bob生成 bob将公钥发送给alice alice生成一个用于对称加密的秘钥 alice使用bob的公钥就对称加密的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="非对称加密">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="非对称加密1&quot;非对称加密也叫公钥密码: 使用公钥加密, 使用私钥解密&quot;  对称加密的弊端 秘钥分发困难  可以通过非对称加密完成秘钥的分发  https Alice 和 Bob通信, Alice给bob发送数据, 使用对称加密的方式  生成一个非对称的秘钥对, bob生成 bob将公钥发送给alice alice生成一个用于对称加密的秘钥 alice使用bob的公钥就对称加密的">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210818143403596.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210818143417941.png">
+<meta property="article:published_time" content="2021-08-18T06:15:44.000Z">
+<meta property="article:modified_time" content="2021-08-18T07:17:52.252Z">
+<meta property="article:author" content="zzy">
+<meta property="article:tag" content="密码学">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210818143403596.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/","path":"2021/08/18/非对称加密/","title":"非对称加密"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>非对称加密 | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">非对称加密</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E7%9A%84%E5%BC%8A%E7%AB%AF"><span class="nav-number">1.1.</span> <span class="nav-text">对称加密的弊端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E7%9A%84%E7%A7%98%E9%92%A5"><span class="nav-number">1.2.</span> <span class="nav-text">非对称加密的秘钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E5%88%86%E6%9E%90"><span class="nav-number">1.2.1.</span> <span class="nav-text">场景分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RSA"><span class="nav-number">1.3.</span> <span class="nav-text">RSA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RSA%E5%8A%A0%E5%AF%86"><span class="nav-number">1.3.1.</span> <span class="nav-text">RSA加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RSA%E8%A7%A3%E5%AF%86"><span class="nav-number">1.3.2.</span> <span class="nav-text">RSA解密</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E6%A6%82%E5%BF%B5"><span class="nav-number">1.4.</span> <span class="nav-text">一些概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go%E4%B8%AD%E7%94%9F%E6%88%90%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5"><span class="nav-number">1.5.</span> <span class="nav-text">Go中生成公钥和私钥</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go%E4%B8%AD%E4%BD%BF%E7%94%A8RSA%E5%8A%A0%E8%A7%A3%E5%AF%86"><span class="nav-number">1.6.</span> <span class="nav-text">Go中使用RSA加解密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ECC%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF"><span class="nav-number">1.7.</span> <span class="nav-text">ECC椭圆曲线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E8%A7%A3%E6%83%91"><span class="nav-number">1.8.</span> <span class="nav-text">非对称加密解惑</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          非对称加密
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-18 14:15:44 / 修改時間：15:17:52" itemprop="dateCreated datePublished" datetime="2021-08-18T14:15:44+08:00">2021-08-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h1><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;非对称加密也叫公钥密码: 使用公钥加密, 使用私钥解密&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="对称加密的弊端"><a href="#对称加密的弊端" class="headerlink" title="对称加密的弊端"></a>对称加密的弊端</h2><ul>
+<li><p>秘钥分发困难</p>
+</li>
+<li><p>可以通过非对称加密完成秘钥的分发</p>
+<blockquote>
+<p>https</p>
+<p>Alice 和 Bob通信, Alice给bob发送数据, 使用对称加密的方式</p>
+<ol>
+<li>生成一个非对称的秘钥对, bob生成</li>
+<li>bob将公钥发送给alice</li>
+<li>alice生成一个用于对称加密的秘钥</li>
+<li>alice使用bob的公钥就对称加密的秘钥进行加密, 并且发送给bob</li>
+<li>bob使用私钥就数据解密, 得到对称加密的秘钥</li>
+<li>通信的双方使用写好的秘钥进行对称加密数据加密</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<h2 id="非对称加密的秘钥"><a href="#非对称加密的秘钥" class="headerlink" title="非对称加密的秘钥"></a>非对称加密的秘钥</h2><ul>
+<li>不存在秘钥分发困难的问题</li>
+</ul>
+<h3 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h3><p>数据对谁更重要, 谁就拿私钥</p>
+<ul>
+<li>直观上看: 私钥比公钥长</li>
+<li>使用第三方工具生成密钥对: 公钥文件xxx.pub xxx </li>
+</ul>
+<blockquote>
+<ol>
+<li><p>通信流程, 信息加密  （A写数据, 发送给B, 信息只允许B读）</p>
+<p>A: 公钥</p>
+<p>B: 私钥</p>
+</li>
+<li><p>登录认证 （客户端要登录, 连接服务器, 向服务器请求个人数据）</p>
+<p>客户端:  私钥</p>
+<p>服务器:  公钥</p>
+</li>
+<li><p>数字签名（表明信息没有受到伪造，确实是信息拥有者发出来的，附在信息原文的后面）</p>
+<ul>
+<li>发送信息的人:   私钥</li>
+<li>收到信息的人:   公钥</li>
+</ul>
+</li>
+<li><p>网银U盾</p>
+<ul>
+<li>个人: 私钥</li>
+<li>银行拿公钥</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<h2 id="RSA"><a href="#RSA" class="headerlink" title="RSA"></a>RSA</h2><h3 id="RSA加密"><a href="#RSA加密" class="headerlink" title="RSA加密"></a>RSA加密</h3><blockquote>
+<p>非对称加密的代表—RSA。在RSA中，明文、密钥和密文都是数字。RSA的加密过程可以用下列公式来表达，如下:                                                                                    </p>
+</blockquote>
+<p>$$<br>密文=明文 ^ E  mod     N（RSA加密）<br>$$</p>
+<blockquote>
+<p>也就是说，RSA的密文是对代表明文的数字的E次方求modN的结果。换句话说，就是将明文自己做E次乘法，然后将其结果除以N求余数，这个余数就是密文。</p>
+<p>加密公式中出现的两个数一一一E和N，到底都是什么数呢？RSA的加密是求明文的E次方modN，因此只要知道E和N这两个数，任何人都可以完成加密的运算。所以说，E和N是RSA加密的密钥，也就是说，<strong>E和N的组合就是公钥</strong>。</p>
+<p>不过，E和N并不是随便什么数都可以的，它们是经过严密计算得出的。顺便说一句，<strong>E是加密（Encryption）的首字母，N是数字（Number)的首字母</strong>。</p>
+<p>有一个很容易引起误解的地方需要大家注意一一E和N这两个数并不是密钥对（公钥和私钥的密钥对）。E和N两个数才组成了一个公钥，因此我们一般会写成 “公钥是(E，N)” 或者 “公钥是{E, N}” 这样的形式，将E和N用括号括起来。</p>
+<p>现在大家应该已经知道，==<strong>RSA的加密就是 “求E次方的modN”</strong>==，接下来我们来看看RSA的解密。</p>
+</blockquote>
+<h3 id="RSA解密"><a href="#RSA解密" class="headerlink" title="RSA解密"></a>RSA解密</h3><blockquote>
+<p>RSA的解密和加密一样简单，可以用下面的公式来表达：</p>
+</blockquote>
+<p>$$<br>明文=密文^DmodN（RSA解密）<br>$$</p>
+<blockquote>
+<p>也就是说，对表示密文的数字的D次方求modN就可以得到明文。换句话说，将密文自己做D次乘法，再对其结果除以N求余数，就可以得到明文。</p>
+<p>这里所使用的数字N和加密时使用的数字N是相同的。<strong>数D和数N组合起来就是RSA的解密密钥，因此D和N的组合就是私钥</strong>。只有知道D和N两个数的人才能够完成解密的运算。</p>
+<p>大家应该已经注意到，<strong>在RSA中，加密和解密的形式是相同的。加密是求 “E次方的mod N”，而解密则是求 “D次方的modN”</strong>，这真是太美妙了。</p>
+<p>当然，D也并不是随便什么数都可以的，作为解密密钥的D，和数字E有着相当紧密的联系。否则，用E加密的结果可以用D来解密这样的机制是无法实现的。</p>
+<p>顺便说一句，<strong>D是解密〈Decryption）的首字母，N是数字（Number）的首字母</strong>。</p>
+<p>我们将上面讲过的内容整理一下，如下表所示。</p>
+</blockquote>
+<img src="/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210818143403596.png" alt="image-20210818143403596" style="zoom:67%;">
+
+<img src="/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210818143417941.png" alt="image-20210818143417941" style="zoom:67%;">
+
+<h2 id="一些概念"><a href="#一些概念" class="headerlink" title="一些概念"></a>一些概念</h2><ol>
+<li>x509证书规范、pem、base64<ul>
+<li>pem编码规范 - 数据加密</li>
+<li>base64 - 对数据编码, 可逆<ul>
+<li>不管原始数据是什么, 将原始数据使用64个字符来替代<ul>
+<li>a-z  A-Z 0-9 + /</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ASN.1抽象语法标记</li>
+<li>PKCS1标准</li>
+</ol>
+<h2 id="Go中生成公钥和私钥"><a href="#Go中生成公钥和私钥" class="headerlink" title="Go中生成公钥和私钥"></a>Go中生成公钥和私钥</h2><p>需要引入的包:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/rand&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line">	<span class="string">&quot;encoding/pem&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>生成私钥操作流程概述:</p>
+<blockquote>
+<ol>
+<li>使用rsa中的GenerateKey方法生成私钥</li>
+<li>通过x509标准将得到的ras私钥序列化为ASN.1 的 DER编码字符串</li>
+<li>将私钥字符串设置到pem格式块中</li>
+<li>通过pem将设置好的数据进行编码, 并写入磁盘文件中</li>
+</ol>
+</blockquote>
+<p>生成公钥操作流程:</p>
+<blockquote>
+<ol>
+<li>从得到的私钥对象中将公钥信息取出</li>
+<li>通过x509标准将得到 的rsa公钥序列化为字符串</li>
+<li>将公钥字符串设置到pem格式块中</li>
+<li>通过pem将设置好的数据进行编码, 并写入磁盘文件</li>
+</ol>
+</blockquote>
+<p>生成公钥和私钥的源代码:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 参数bits: 指定生成的秘钥的长度, 单位: bit</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RsaGenKey</span><span class="params">(bits <span class="keyword">int</span>)</span> <span class="title">error</span></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 生成私钥件</span></span><br><span class="line">	<span class="comment">// GenerateKey函数使用随机数据生成器random生成一对具有指定字位数的RSA密钥</span></span><br><span class="line">	<span class="comment">// 参数1: Reader是一个全局、共享的密码用强随机数生成器</span></span><br><span class="line">	<span class="comment">// 参数2: 秘钥的位数 - bit</span></span><br><span class="line">	privateKey, err := rsa.GenerateKey(rand.Reader, bits)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. MarshalPKCS1PrivateKey将rsa私钥序列化为ASN.1 PKCS#1 DER编码</span></span><br><span class="line">	derStream := x509.MarshalPKCS1PrivateKey(privateKey)</span><br><span class="line">	<span class="comment">// 3. Block代表PEM编码的结构, 对其进行设置</span></span><br><span class="line">	block := pem.Block&#123;</span><br><span class="line">		Type: <span class="string">&quot;RSA PRIVATE KEY&quot;</span>,<span class="comment">//&quot;RSA PRIVATE KEY&quot;,</span></span><br><span class="line">		Bytes: derStream,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 4. 创建文件</span></span><br><span class="line">	privFile, err := os.Create(<span class="string">&quot;private.pem&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 5. 使用pem编码, 并将数据写入文件中</span></span><br><span class="line">	err = pem.Encode(privFile, &amp;block)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 6. 最后的时候关闭文件</span></span><br><span class="line">	<span class="keyword">defer</span> privFile.Close()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 7. 生成公钥文件</span></span><br><span class="line">	publicKey := privateKey.PublicKey</span><br><span class="line">	derPkix, err := x509.MarshalPKIXPublicKey(&amp;publicKey)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	block = pem.Block&#123;</span><br><span class="line">		Type: <span class="string">&quot;RSA PUBLIC KEY&quot;</span>,<span class="comment">//&quot;PUBLIC KEY&quot;,</span></span><br><span class="line">		Bytes: derPkix,</span><br><span class="line">	&#125;</span><br><span class="line">	pubFile, err := os.Create(<span class="string">&quot;public.pem&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 8. 编码公钥, 写入文件</span></span><br><span class="line">	err = pem.Encode(pubFile, &amp;block)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> pubFile.Close()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重要的函数介绍:</p>
+<ol>
+<li><p>GenerateKey函数使用随机数据生成器random生成一对具有指定字位数的RSA密钥。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;crypto/rsa&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GenerateKey</span><span class="params">(random io.Reader, bits <span class="keyword">int</span>)</span> <span class="params">(priv *PrivateKey, err error)</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: io.Reader: 赋值为: rand.Reader</span><br><span class="line">        -- rand包实现了用于加解密的更安全的随机数生成器。</span><br><span class="line">        -- <span class="keyword">var</span> Reader io.Reader (rand包中的变量)</span><br><span class="line">    - 参数<span class="number">2</span>: bits: 秘钥长度</span><br><span class="line">    - 返回值<span class="number">1</span>: 代表一个RSA私钥。</span><br><span class="line">    - 返回值<span class="number">2</span>: 错误信息</span><br></pre></td></tr></table></figure></li>
+<li><p>通过x509 将rsa私钥序列化为ASN.1 PKCS#1 DER编码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;crypto/x509&quot;</span> 包中的函数 (x509包解析X<span class="number">.509</span>编码的证书和密钥)。</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MarshalPKCS1PrivateKey</span><span class="params">(key *rsa.PrivateKey)</span> []<span class="title">byte</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: 通过rsa.GenerateKey得到的私钥</span><br><span class="line">    - 返回值: 将私钥通过ASN<span class="number">.1</span>序列化之后得到的私钥编码数据</span><br></pre></td></tr></table></figure></li>
+<li><p>设置Pem编码结构</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Block代表PEM编码的结构。</span><br><span class="line"><span class="keyword">type</span> Block <span class="keyword">struct</span> &#123;</span><br><span class="line">    Type    <span class="keyword">string</span>            <span class="comment">// 得自前言的类型（如&quot;RSA PRIVATE KEY&quot;）</span></span><br><span class="line">    Headers <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> <span class="comment">// 可选的头项，Headers是可为空的多行键值对。</span></span><br><span class="line">    Bytes   []<span class="keyword">byte</span>            <span class="comment">// 内容解码后的数据，一般是DER编码的ASN.1结构</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>将得到的Pem格式私钥通过文件指针写入磁盘中</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;encoding/pem&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Encode</span><span class="params">(out io.Writer, b *Block)</span> <span class="title">error</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: 可进行写操作的IO对象, 此处需要指定一个文件指针</span><br><span class="line">    - 参数<span class="number">2</span>: 初始化完成的Pem块对象, 即Block对象</span><br></pre></td></tr></table></figure></li>
+<li><p>通过RSA私钥得到公钥</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 私钥</span></span><br><span class="line"><span class="keyword">type</span> PrivateKey <span class="keyword">struct</span> &#123;</span><br><span class="line">    PublicKey            <span class="comment">// 公钥</span></span><br><span class="line">    D         *big.Int   <span class="comment">// 私有的指数</span></span><br><span class="line">    Primes    []*big.Int <span class="comment">// N的素因子，至少有两个</span></span><br><span class="line">    <span class="comment">// 包含预先计算好的值，可在某些情况下加速私钥的操作</span></span><br><span class="line">    Precomputed PrecomputedValues</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 公钥</span></span><br><span class="line"><span class="keyword">type</span> PublicKey <span class="keyword">struct</span> &#123;</span><br><span class="line">    N   *big.Int <span class="comment">// 模</span></span><br><span class="line">    E   <span class="keyword">int</span>      <span class="comment">// 公开的指数</span></span><br><span class="line">&#125;</span><br><span class="line">通过私钥获取公钥</span><br><span class="line">publicKey := privateKey.PublicKey <span class="comment">// privateKey为私钥对象</span></span><br></pre></td></tr></table></figure></li>
+<li><p>通过x509将公钥序列化为PKIX格式DER编码。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;crypto/x509&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MarshalPKIXPublicKey</span><span class="params">(pub <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: 通过私钥对象得到的公钥</span><br><span class="line">    - 返回值<span class="number">1</span>：将公钥通过ASN<span class="number">.1</span>序列化之后得到的编码数据</span><br><span class="line">    - 返回值<span class="number">2</span>: 错误信息</span><br></pre></td></tr></table></figure></li>
+<li><p>将公钥编码之后的数据格式化为Pem结构, 参考私钥的操作</p>
+</li>
+<li><p>将得到的Pem格式公钥通过文件指针写入磁盘中</p>
+</li>
+<li><p>生成的私钥和公钥文件数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">// 私钥文件数据</span><br><span class="line">-----BEGIN RSA PRIVATE KEY-----</span><br><span class="line">MIICXgIBAAKBgQC5bm0DCEV+EFeiLUqSshziqhSB30jXy5BWbPV5SlMq4aWiEknM</span><br><span class="line">i+Mw1aXic4bEsM3YyT73eWsifqZNSc/4fRaV4qz5OL8IIe9AZoGDSLX/Ar9AQMJf</span><br><span class="line">OHbAtdIlCGQ4d80KjpDpPs2wZkTqllWCg31d7U3DVEm5kqTGtSYIu9e7JQIDAQAB</span><br><span class="line">AoGARGdn72ZtvENrEHiEufjajwMO7Zng1TpS1I79PvEcHQWAhHkaoEo6VRl7SD41</span><br><span class="line">yPkv9njGsaQo0WDHGFvSTGhYm/EWGrBWRPc5xXbSBg7ty9Iza9B1ekAj8VfWryen</span><br><span class="line">Wje3xDOCVCDUiCcYdaSfPiJPYuWMSnNMNa+0cR921zBQg0ECQQDpCMljuH7LrpbC</span><br><span class="line">NDF5q+LbUWMAE2KLDPX4WmDSdZdIO3mPux3MdwOUEfrcvSBGZNB7gyaEG7goZL8G</span><br><span class="line">BqL22MJHAkEAy7SqbVPoPbMPHuLI52VQ2FDp6xxSWLhjmv1ePCHGo28MDCaHeVzZ</span><br><span class="line">QaxyuIbnY8A6NHfu/QGwz/eB941IjYNBMwJBAI9XEEl+mr++zIz4fdZRnGE7VqId</span><br><span class="line">SmgtuL7jGNtb6YpMyyFV/6ZdLp5N0PkmfEvQh0zyBycLxeNS1Q1n16Xu/tECQQCZ</span><br><span class="line">dF42wdDgOfWYFMu31VETw9CTtuApya3vYhMNRXx4Pf1bYeMIf/OCT8CUVbwWHwc5</span><br><span class="line">42d73TwvTorvy9TuFgSVAkEA6F69THlTn5oIP8IWHcHuqS01fIR/vGfEwQ4cFZGR</span><br><span class="line">ketfieyeeF8rjn4qzwT/ugwRNjkhfKmoILnIC8UhEEJdjA==</span><br><span class="line">-----END RSA PRIVATE KEY-----</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 公钥文件数据</span></span><br><span class="line">-----BEGIN RSA PUBLIC KEY-----</span><br><span class="line">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5bm0DCEV+EFeiLUqSshziqhSB</span><br><span class="line"><span class="number">30</span>jXy5BWbPV5SlMq4aWiEknMi+Mw1aXic4bEsM3YyT73eWsifqZNSc/<span class="number">4</span>fRaV4qz5</span><br><span class="line">OL8IIe9AZoGDSLX/Ar9AQMJfOHbAtdIlCGQ4d80KjpDpPs2wZkTqllWCg31d7U3D</span><br><span class="line">VEm5kqTGtSYIu9e7JQIDAQAB</span><br><span class="line">-----END RSA PUBLIC KEY-----</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="Go中使用RSA加解密"><a href="#Go中使用RSA加解密" class="headerlink" title="Go中使用RSA加解密"></a>Go中使用RSA加解密</h2><ol>
+<li><p>操作步骤</p>
+<ul>
+<li><p>公钥加密</p>
+<blockquote>
+<ol>
+<li>将公钥文件中的公钥读出, 得到使用pem编码的字符串</li>
+<li>将得到的字符串解码</li>
+<li>使用x509将编码之后的公钥解析出来</li>
+<li>使用得到的公钥通过rsa进行数据加密</li>
+</ol>
+</blockquote>
+</li>
+<li><p>私钥解密</p>
+<blockquote>
+<ol>
+<li>将私钥文件中的私钥读出, 得到使用pem编码的字符串</li>
+<li>将得到的字符串解码</li>
+<li>使用x509将编码之后的私钥解析出来</li>
+<li>使用得到的私钥通过rsa进行数据解密</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>代码实现</p>
+<ul>
+<li>RSA公钥加密</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RSAEncrypt</span><span class="params">(src, filename []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">    <span class="comment">// 1. 根据文件名将文件内容从文件中读出</span></span><br><span class="line">    file, err := os.Open(<span class="keyword">string</span>(filename))</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 2. 读文件</span></span><br><span class="line">    info, _ := file.Stat()</span><br><span class="line">    allText := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">    file.Read(allText)</span><br><span class="line">    <span class="comment">// 3. 关闭文件</span></span><br><span class="line">    file.Close()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 从数据中查找到下一个PEM格式的块</span></span><br><span class="line">    block, _ := pem.Decode(allText)</span><br><span class="line">    <span class="keyword">if</span> block == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 5. 解析一个DER编码的公钥</span></span><br><span class="line">    pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    pubKey := pubInterface.(*rsa.PublicKey)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 6. 公钥加密</span></span><br><span class="line">    result, _ := rsa.EncryptPKCS1v15(rand.Reader, pubKey, src)</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>RSA私钥解密</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RSADecrypt</span><span class="params">(src, filename []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">  <span class="comment">// 1. 根据文件名将文件内容从文件中读出</span></span><br><span class="line">  file, err := os.Open(<span class="keyword">string</span>(filename))</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 2. 读文件</span></span><br><span class="line">  info, _ := file.Stat()</span><br><span class="line">  allText := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">  file.Read(allText)</span><br><span class="line">  <span class="comment">// 3. 关闭文件</span></span><br><span class="line">  file.Close()</span><br><span class="line">  <span class="comment">// 4. 从数据中查找到下一个PEM格式的块</span></span><br><span class="line">  block, _ := pem.Decode(allText)</span><br><span class="line">  <span class="comment">// 5. 解析一个pem格式的私钥</span></span><br><span class="line">  privateKey , err := x509.ParsePKCS1PrivateKey(block.Bytes)</span><br><span class="line">  <span class="comment">// 6. 私钥解密</span></span><br><span class="line">  result, _ := rsa.DecryptPKCS1v15(rand.Reader, privateKey, src)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>重要的函数介绍</li>
+</ul>
+<ol>
+<li>将得到的Pem格式私钥通过文件指针写入磁盘中</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;encoding/pem&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Decode</span><span class="params">(data []<span class="keyword">byte</span>)</span> <span class="params">(p *Block, rest []<span class="keyword">byte</span>)</span></span></span><br><span class="line">    - 参数 data: 需要解析的数据块</span><br><span class="line">    - 返回值<span class="number">1</span>: 从参数中解析出的PEM格式的块</span><br><span class="line">    - 返回值<span class="number">2</span>: 参数data剩余的未被解码的数据</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>解析一个DER编码的公钥 , pem中的Block结构体中的数据格式为ASN.1编码</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParsePKIXPublicKey</span><span class="params">(derBytes []<span class="keyword">byte</span>)</span> <span class="params">(pub <span class="keyword">interface</span>&#123;&#125;, err error)</span></span></span><br><span class="line">    - 参数 derBytes: 从pem的Block结构体中取的ASN<span class="number">.1</span>编码数据</span><br><span class="line">    - 返回值 pub: 接口对象, 实际是公钥数据</span><br><span class="line">    - 参数 err:   错误信息</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>解析一个DER编码的私钥 , pem中的Block结构体中的数据格式为ASN.1编码</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParsePKCS1PrivateKey</span><span class="params">(der []<span class="keyword">byte</span>)</span> <span class="params">(key *rsa.PrivateKey, err error)</span></span></span><br><span class="line">    - 参数 der: 从pem的Block结构体中取的ASN<span class="number">.1</span>编码数据</span><br><span class="line">    - 返回值 key: 解析出的私钥</span><br><span class="line">    - 返回值 err: 错误信息</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>将接口转换为公钥</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pubKey := pubInterface.(*rsa.PublicKey)</span><br><span class="line">    - pubInterface: ParsePKIXPublicKey函数返回的 <span class="keyword">interface</span>&#123;&#125; 对象</span><br><span class="line">    - pubInterface.(*rsa.PublicKey): 将pubInterface转换为公钥类型 rsa.PublicKey</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>使用公钥加密数据</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">EncryptPKCS1v15</span><span class="params">(rand io.Reader, pub *PublicKey, msg []<span class="keyword">byte</span>)</span> <span class="params">(out []<span class="keyword">byte</span>, err error)</span></span></span><br><span class="line">    - 参数 rand: 随机数生成器, 赋值为 rand.Reader</span><br><span class="line">    - 参数 pub:  非对称加密加密使用的公钥</span><br><span class="line">    - 参数 msg:  要使用公钥加密的原始数据</span><br><span class="line">    - 返回值 out: 加密之后的数据</span><br><span class="line">    - 返回值 err: 错误信息</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>使用私钥解密数据</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DecryptPKCS1v15</span><span class="params">(rand io.Reader, priv *PrivateKey, ciphertext []<span class="keyword">byte</span>)</span> <span class="params">(out []<span class="keyword">byte</span>, err error)</span></span></span><br><span class="line">    - 参数 rand: 随机数生成器, 赋值为 rand.Reader</span><br><span class="line">    - 参数 priv: 非对称加密解密使用的私钥</span><br><span class="line">    - 参数 ciphertext: 需要使用私钥解密的数据</span><br><span class="line">    - 返回值 out: 解密之后得到的数据</span><br><span class="line">    - 返回值 err: 错误信</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="ECC椭圆曲线"><a href="#ECC椭圆曲线" class="headerlink" title="ECC椭圆曲线"></a>ECC椭圆曲线</h2><blockquote>
+<ol>
+<li>概念</li>
+</ol>
+<p>椭圆曲线密码学（英语：Elliptic curve cryptography，缩写为 ECC），一种建立公开密钥加密的算法，基于椭圆曲线数学。椭圆曲线在密码学中的使用是在1985年由Neal Koblitz和Victor Miller分别独立提出的。</p>
+<p>ECC的主要优势是在某些情况下它比其他的方法使用更小的密钥——比如RSA加密算法——提供相当的或更高等级的安全。</p>
+<p>椭圆曲线密码学的许多形式有稍微的不同，所有的都依赖于被广泛承认的解决椭圆曲线离散对数问题的困难性上。与传统的基于大质数因子分解困难性的加密方法不同，ECC通过椭圆曲线方程式的性质产生密钥。</p>
+<p>ECC 164位的密钥产生的一个安全级相当于RSA 1024位密钥提供的保密强度，而且计算量较小，处理速度更快，存储空间和传输带宽占用较少。目前我国<code>居民二代身份证</code>正在使用 256 位的椭圆曲线密码，虚拟货币<code>比特币</code>也选择ECC作为加密算法。</p>
+<p>具体算法详解参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Kalafinaian/p/7392505.html">https://www.cnblogs.com/Kalafinaian/p/7392505.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/taifei/article/details/73277247">https://blog.csdn.net/taifei/article/details/73277247</a></li>
+</ul>
+<ol start="2">
+<li>数学原理</li>
+</ol>
+<p>不管是RSA还是ECC或者其它，公钥加密算法都是依赖于某个正向计算很简单（多项式时间复杂度），而逆向计算很难（指数级时间复杂度）的数学问题。</p>
+<p>椭圆曲线依赖的数学难题是:</p>
+<p><code>k为正整数，P是椭圆曲线上的点（称为基点）, k*P=Q , 已知Q和P，很难计算出k</code></p>
+</blockquote>
+<h2 id="非对称加密解惑"><a href="#非对称加密解惑" class="headerlink" title="非对称加密解惑"></a>非对称加密解惑</h2><ul>
+<li>非对称加密比对称加密机密性更高吗?</li>
+</ul>
+<blockquote>
+<p>这个问题无法回答, 以为机密性高低是根据秘钥长度而变化的</p>
+</blockquote>
+<ul>
+<li><strong>采用1024bit 秘钥长度的非对称加密, 和采用128bit秘钥长度的对称加密中, 是秘钥更长的非对称加密更安全吗?</strong></li>
+</ul>
+<blockquote>
+<p>不是。</p>
+<p>非对称加密的密钥长度不能与对称加密的密钥长度进行直接比较。下表是一张密钥长度的比较表（本表摘自《应用密码学》），根据这张表我们可以看出，1024比特的公钥密码与128比特的对称密码相比，反而是128比特的对称密码抵御暴力破解的能力更强。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">对称加密秘钥长度</th>
+<th align="center">非对称加密秘钥长度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">128 比特</td>
+<td align="center">2304 比特</td>
+</tr>
+<tr>
+<td align="center">112 比特</td>
+<td align="center">1792 比特</td>
+</tr>
+<tr>
+<td align="center">80 比特</td>
+<td align="center">768 比特</td>
+</tr>
+<tr>
+<td align="center">64 比特</td>
+<td align="center">512 比特</td>
+</tr>
+<tr>
+<td align="center">56 比特</td>
+<td align="center">384 比特</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>有了非对称加密， 以后对称加密会被替代吗？</strong></li>
+</ul>
+<blockquote>
+<p>不会</p>
+<p>一般来说，在采用具备同等机密性的密钥长度的情况下，非对称加密的处理速度只有对称加密的几百分之一。因此，非对称加密并不适合用来对很长的消息内容进行加密。根据目的的不同，还可能会配合使用对称加密和非对称加密，如，混合密码系统就是将这两种密码组合而成的。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag"># 密码学</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/17/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A802/" rel="prev" title="周易基础及其应用02">
+                  <i class="fa fa-chevron-left"></i> 周易基础及其应用02
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/08/18/%E5%8D%95%E5%90%91%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0/" rel="next" title="单向散列函数">
+                  单向散列函数 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
