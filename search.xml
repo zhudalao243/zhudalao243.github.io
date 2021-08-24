@@ -2245,4 +2245,157 @@
         <tag>密码学</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Golang协程调度器原理与GMP设计思想</title>
+    <url>/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/</url>
+    <content><![CDATA[<h1 id="一-Golang“调度器器”由来"><a href="#一-Golang“调度器器”由来" class="headerlink" title="一. Golang“调度器器”由来"></a>一. Golang“调度器器”由来</h1><p>多进程、多线程的问题？</p>
+<blockquote>
+<p>设计变得复杂，进程/线程的数量越多，切换成本就越大，也就越浪费</p>
+<p>多进程、多线程的壁垒,高内存占用，进程占用内存（虚拟内存4GB（32bit OS）），线程占用约4MB</p>
+</blockquote>
+<h2 id="线程池的缺陷"><a href="#线程池的缺陷" class="headerlink" title="线程池的缺陷"></a>线程池的缺陷</h2><p>​        在高并发应用中频繁创建线程会造成不必要的开销，所以有了线程池。线程池中预先保存一定数量的线程，而新任务将不再以创建线程的方式去执行，而是将任务发布到任务队列，线程池中的线程不断地从任务队列中取出任务并执行，可以有效的减少线程创建和销毁所带来的开销。</p>
+<p><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/m_b499f154d0135854b725ce27a6b7a009_r.png" alt="img"></p>
+<p>我们把任务队列中的每一个任务称作G，而G往往代表一个函数。线程池中的worker线程不断地从任务队列中取出任务并执行。而worker线程的调度则交给操作系统进行调度。</p>
+<p>如果worker线程执行的G任务中发生系统调用，则操作系统会将该线程置为阻塞状态，也意味着该线程在怠工，也意味着消费任务队列的worker线程变少了，也就是说线程池消费任务队列的能力变弱了。</p>
+<p>如果任务队列中的大部分任务都会进行系统调用，则会让这种状态恶化，大部分worker线程进入阻塞状态，从而任务队列中的任务产生堆积。</p>
+<p>解决这个问题的一个思路就是重新审视线程池中线程的数量，增加线程池中线程数量可以一定程度上提高消费能力，但随着线程数量增多，由于过多线程争抢CPU，消费能力会有上限，甚至出现消费能力下降。 </p>
+<p>调度器器的优化:</p>
+<blockquote>
+<p>Goroutine的优化: 内存仅占用几KB，可以大量开辟。灵活调用，切换成本低。</p>
+</blockquote>
+<p>早期的Go的调度器器：</p>
+<blockquote>
+<p>基本的全局Go队列列和⽐比较传统的轮询利利⽤用多个thread去调度。</p>
+<p>弊端：</p>
+<ol>
+<li>创建、销毁、调度G都需要每个M获取锁，这就形成了了激烈烈的锁竞争。</li>
+<li> M转移G会造成延迟和额外的系统负载。</li>
+<li>系统调用(CPU在M之间的切换)导致频繁的线程阻塞和取消阻塞操作增加了了系统开销。    </li>
+</ol>
+</blockquote>
+<h1 id="GMP模型的设计思想"><a href="#GMP模型的设计思想" class="headerlink" title="GMP模型的设计思想"></a>GMP模型的设计思想</h1><h2 id="Goroutine主要概念如下："><a href="#Goroutine主要概念如下：" class="headerlink" title="Goroutine主要概念如下："></a>Goroutine主要概念如下：</h2><ul>
+<li><p>G（Goroutine）: 即Go协程，每个go关键字都会创建一个协程。</p>
+</li>
+<li><p>M（Machine）： 工作线程，在Go中称为Machine。</p>
+</li>
+<li><p>P(Processor): 处理器（Go中定义的一个摡念，不是指CPU），包含运行Go代码的必要资源，也有调度goroutine的能力。</p>
+</li>
+</ul>
+<img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824210046445.png" alt="image-20210824210046445 " style="zoom:67%;">
+
+<p>M是交给操作系统调度的线程，M持有一个P，P将G调度进M中执行。P同时还维护着一个包含G的队列（图中灰色部分），可以按照一定的策略将G调度到M中执行。</p>
+<p>P的个数在程序启动时决定，默认情况下等同于CPU的核数，由于M必须持有一个P才可以运行Go代码，所以同时运行的M个数，也即线程数一般等同于CPU的个数，以达到尽可能的使用CPU而又不至于产生过多的线程切换开销。</p>
+<p>程序中可以使用<code>runtime.GOMAXPROCS()</code>设置P的个数，在某些IO密集型的场景下可以在一定程度上提高性能。</p>
+<blockquote>
+<p>全局队列:  存放等待运⾏行行的G</p>
+<p>P的本地队列: 存放等待运行的G, 数量限制 (不超过256G),优先将新创建的G放在P的本地队列中，如果满了会放在全局队列中。</p>
+<p>P列表：程序启动时创建， 最多有GOMAXPROCS个(可配置)</p>
+<p>M列表： 当前操作系统分配到当前Go程序的内核线程数。</p>
+<p>P的数量：</p>
+<ul>
+<li>环境变量量$GOMAXPROCS</li>
+<li>在程序中通过runtime.GOMAXPROCS() 来设置</li>
+</ul>
+<p>M的数量：</p>
+<ul>
+<li>Go语⾔言本身 是限定M的最⼤大量量是10000(忽略略)</li>
+<li>runtime/debug包中的SetMaxThreads函数来设置</li>
+<li>有一个M阻塞，会创建一个新的M</li>
+<li>如果有M空闲，那么就会回收或者睡眠</li>
+</ul>
+</blockquote>
+<h2 id="调度器的设计策略"><a href="#调度器的设计策略" class="headerlink" title="调度器的设计策略"></a>调度器的设计策略</h2><ol>
+<li><p>复用线程 避免频繁的创建、销毁线程，而是对线程的复用。</p>
+<ul>
+<li><p>work stealing机制</p>
+<p>当本线程无可运行的G时，尝试从其他线程绑定的P偷取G，而不是销毁线程。</p>
+</li>
+<li><p>hand off机制</p>
+<p>当本线程因为G进行系统调用阻塞时，线程释放绑定的P，把P转移给其他空闲的线程执行。</p>
+</li>
+</ul>
+</li>
+<li><p>利用并行 </p>
+<p>GOMAXPROCS设置P的数量，最多有GOMAXPROCS个线程分布在多个CPU上同时运行。</p>
+</li>
+<li><p>抢占</p>
+<p>在Go中，一个goroutine最多占用CPU 10ms，防止其他goroutine被饿死.</p>
+</li>
+<li><p>全局G队列列 </p>
+<p>当M执行work stealing从其他P偷不到G时，它可以从全局G队列列获取G。</p>
+</li>
+</ol>
+<p>每个P维护着一个包含G的队列，不考虑G进入系统调用或IO操作的情况下，P周期性的将G调度到M中执行，执行一小段时间，将上下文保存下来，然后将G放到队列尾部，然后从队列中重新取出一个G进行调度。</p>
+<p>除了每个P维护的G队列以外，还有一个全局的队列，每个P会周期性地查看全局队列中是否有G待运行并将其调度到M中执行，全局队列中G的来源，主要有从系统调用中恢复的G。之所以P会周期性地查看全局队列，也是为了防止全局队列中的G被饿死。</p>
+<h2 id="“go-func-”-经历了了什什么过程"><a href="#“go-func-”-经历了了什什么过程" class="headerlink" title="“go func()” 经历了了什什么过程"></a>“go func()” 经历了了什什么过程</h2><p>流程：</p>
+<blockquote>
+<ol>
+<li>我们通过 go func()来创建⼀一个goroutine</li>
+<li>有两个存储G的队列，一个是局部调度器P的本地队列、一个是全局G队列。新创建的G会先保存在P的本地队列中，如果P的本地队列已经满了就会保存在全局的队列中；</li>
+<li>G只能运行在M中，一个M必须持有一个P，M与P是1：1的关系。M会从P的本地队列弹出一个可执行状态的G来执行，如果P的本地队列为空，就会想其他的MP组合偷取一个可执行的G来执行；</li>
+<li>一个M调度G执行的过程是一个循环机制；</li>
+<li>当M执行某一个G时候如果发生了syscall或其余阻塞操作，M会阻塞，如果当前有一些G在执行，runtime会把这个线程M从P中摘除(detach)，然后再创建一个新的操作系统的线程(如果有空闲的线程可用就复用空闲线程)来服务于这个P</li>
+<li>当M系统调用结束时候，这个G会尝试获取一个空闲的P执行，并放入到这个P的本地队列。如果获取不到P，那么这个线程M变成休眠状态， 加入到空闲线程中，然后这个G会被放入全局队列列中。</li>
+</ol>
+</blockquote>
+<p>调度器器的生命周期?</p>
+<blockquote>
+<p>M0</p>
+<p>M0是启动程序后的编号为0的主线程，这个M对应的实例会在全局变量runtime.m0中，不需要在heap上分配，M0负责执行初始化操作和启动第一个G， 在之后M0就和其他的M一样了。</p>
+<p>G0</p>
+<p>G0是每次启动一个M都会第一个创建的gourtine，G0仅用于负责调度的G，G0不指向任何可执行的函数,每个M都会有一个自己的G0。在调度或系统调用时会使用G0的栈空间, 全局变量的G0是M0的G0。</p>
+</blockquote>
+<h1 id="GOMAXPROCS设置对性能的影响"><a href="#GOMAXPROCS设置对性能的影响" class="headerlink" title="GOMAXPROCS设置对性能的影响"></a>GOMAXPROCS设置对性能的影响</h1><p>一般来讲，程序运行时就将GOMAXPROCS大小设置为CPU核数，可让Go程序充分利用CPU。<br>在某些IO密集型的应用里，这个值可能并不意味着性能最好。<br>理论上当某个Goroutine进入系统调用时，会有一个新的M被启用或创建，继续占满CPU。<br>但由于Go调度器检测到M被阻塞是有一定延迟的，也即旧的M被阻塞和新的M得到运行之间是有一定间隔的，所以在IO密集型应用中不妨把GOMAXPROCS设置的大一些，或许会有好的效果。</p>
+<h1 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h1><h2 id="场景一"><a href="#场景一" class="headerlink" title="场景一"></a>场景一</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212038512.png" alt="image-20210824212038512" style="zoom:67%;">
+
+<blockquote>
+<p>P拥有G1，M1获取P后开始运行G1，G1使用go func()创建了G2，为了局部性G2优先加入到P1的本地队列。</p>
+</blockquote>
+<h2 id="场景二"><a href="#场景二" class="headerlink" title="场景二"></a>场景二</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212307079.png" alt="image-20210824212307079" style="zoom:67%;">
+
+<blockquote>
+<p>G1运行完成后(函数：goexit)，M上运行的goroutine切换为G0，G0负责调度时协程的切换（函数：schedule）。从P的本地队列取G2，从G0切换到G2，并开始运行G2(函数：execute)。实现了了线程M1的复用。</p>
+</blockquote>
+<h2 id="场景3、4、5"><a href="#场景3、4、5" class="headerlink" title="场景3、4、5"></a>场景3、4、5</h2><center><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212818637.png" alt="image-20210824212818637" style="zoom:50%;"><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212858320.png" alt="image-20210824212858320" style="zoom:50%;"><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212951443.png" alt="image-20210824212951443" style="zoom:50%;"></center>
+
+<h2 id="场景六"><a href="#场景六" class="headerlink" title="场景六"></a>场景六</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824213232136.png" alt="image-20210824213232136" style="zoom:67%;">
+
+<blockquote>
+<p>规定：在创建G时，运行的G会尝试唤醒其他空闲的P和M组合去执行。</p>
+<p>假定G2唤醒了M2，M2绑定了P2，并运行G0，但P2本地队列没有G，M2此时为<strong>自旋线程</strong>（没有G但为运行<br>状态的线程，不断寻找G）。</p>
+</blockquote>
+<h2 id="场景七"><a href="#场景七" class="headerlink" title="场景七"></a>场景七</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824213556496.png" alt="image-20210824213556496" style="zoom:67%;">
+
+<blockquote>
+<p>M2自旋线程，首先尝试从全局队列获取G。M2尝试从全局队列(简称“GQ”)取一批G放到P2的本地队列（函数：findrunnable()）。M2从全局队列取的G数量量符合下面的公式：</p>
+<p>​                            <strong>n = min(len(GQ)/GOMAXPROCS + 1, len(GQ/2))</strong></p>
+</blockquote>
+<h2 id="场景八"><a href="#场景八" class="headerlink" title="场景八"></a>场景八</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824214007571.png" alt="image-20210824214007571" style="zoom:50%;">
+
+<blockquote>
+<p>全局队列已经没有G，那m就要执行work stealing(偷取)：从其他有G的P哪里偷取一半G过来，放到自己的P本地队列。P2从P1的本地队列尾部取一半的G，本例中一半则只有1个G8，放到P2的本地队列并执行。</p>
+</blockquote>
+<h2 id="场景九"><a href="#场景九" class="headerlink" title="场景九"></a>场景九</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824214402203.png" alt="image-20210824214402203" style="zoom:50%;">
+
+<blockquote>
+<p>最多有GOMAXPROCS个自旋的线程(当前例子中的GOMAXPROCS=4，所以一共4个P)，多余的没事做线程会让他们休眠。</p>
+</blockquote>
+<h2 id="场景十"><a href="#场景十" class="headerlink" title="场景十"></a>场景十</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824214727895.png" alt="image-20210824214727895" style="zoom:67%;">
+
+<blockquote>
+<p>假定当前除了M3和M4为自旋线程，还有M5和M6为空闲的线程(没有得到P的绑定，注意我们这里最多就只能够存在4个P，所以P的数量应该永远是M&gt;=P, 大部分都是M在抢占需要运行的P)，G8进行了阻塞的系统调用，M2和P2立即解绑，P2会执行以下判断：如果P2本地队列有G、全局队列有G或有空闲的M，P2都会立马唤醒1个M和它绑定，否则P2则会加入到空闲P列表，等待M来获取可用的p。本场景中，P2本地队列有G9，可以和其他空闲的线程M5绑定。</p>
+</blockquote>
+<h2 id="场景十一"><a href="#场景十一" class="headerlink" title="场景十一"></a>场景十一</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824215013595.png" alt="image-20210824215013595" style="zoom:50%;">
+
+<blockquote>
+<p>M2和P2会解绑，但M2会记住P2，然后G8和M2进入系统调用状态。当G8和M2退出系统调用时，会尝试获取P2，如果无法获取，则获取空闲的P，如果依然没有，G8会被记为可运行状态，并加入到全局队列,M2因为没有P的绑定而变成休眠状态(长时间休眠等待GC回收销毁)。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Golang</category>
+      </categories>
+      <tags>
+        <tag>Golang</tag>
+      </tags>
+  </entry>
 </search>
