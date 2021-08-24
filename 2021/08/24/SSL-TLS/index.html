@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="SSL&#x2F;TLS   SSL：（Secure Socket Layer，安全套接字层），为Netscape所研发，用以保障在Internet上数据传输之安全，利用数据加密(Encryption)技术，可确保数据在网络上之传输过程中不会被截取。当前版本为3.0。它已被广泛地用于Web浏览器与服务器之间的身份认证和加密数据传输。SSL协议位于TCP&#x2F;IP协议与各种应用层协议之间，为数据通讯提供安全支持。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSL&#x2F;TLS and HTTPS">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/08/24/SSL-TLS/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="SSL&#x2F;TLS   SSL：（Secure Socket Layer，安全套接字层），为Netscape所研发，用以保障在Internet上数据传输之安全，利用数据加密(Encryption)技术，可确保数据在网络上之传输过程中不会被截取。当前版本为3.0。它已被广泛地用于Web浏览器与服务器之间的身份认证和加密数据传输。SSL协议位于TCP&#x2F;IP协议与各种应用层协议之间，为数据通讯提供安全支持。">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/24/SSL-TLS/1539271432019.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/24/SSL-TLS/image-20210824173412361.png">
+<meta property="og:image" content="http://zhudalao243.github.io/SSL-TLS/https1.png">
+<meta property="article:published_time" content="2021-08-24T09:20:09.000Z">
+<meta property="article:modified_time" content="2021-08-24T09:41:47.158Z">
+<meta property="article:author" content="zzy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/08/24/SSL-TLS/1539271432019.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/08/24/SSL-TLS/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/08/24/SSL-TLS/","path":"2021/08/24/SSL-TLS/","title":"SSL/TLS and HTTPS"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SSL/TLS and HTTPS | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL-TLS"><span class="nav-number">1.</span> <span class="nav-text">SSL&#x2F;TLS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#https-gt-%E5%8D%95%E5%90%91%E8%AE%A4%E8%AF%81"><span class="nav-number">2.</span> <span class="nav-text">https -&gt; 单向认证</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/SSL-TLS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SSL/TLS and HTTPS
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-24 17:20:09 / 修改時間：17:41:47" itemprop="dateCreated datePublished" datetime="2021-08-24T17:20:09+08:00">2021-08-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="SSL-TLS"><a href="#SSL-TLS" class="headerlink" title="SSL/TLS"></a>SSL/TLS</h2><p><img src="/2021/08/24/SSL-TLS/1539271432019.png" alt="1539271432019"></p>
+<blockquote>
+<ul>
+<li><strong>SSL</strong>：（Secure Socket Layer，安全套接字层），为Netscape所研发，用以保障在Internet上数据传输之安全，利用数据加密(Encryption)技术，可确保数据在网络上之传输过程中不会被截取。当前版本为3.0。它已被广泛地用于Web浏览器与服务器之间的身份认证和加密数据传输。<br>SSL协议位于TCP/IP协议与各种应用层协议之间，为数据通讯提供安全支持。SSL协议可分为两层： SSL记录协议（SSL Record Protocol）：它建立在可靠的传输协议（如TCP）之上，为高层协议提供数据封装、压缩、加密等基本功能的支持。 SSL握手协议（SSL Handshake Protocol）：它建立在SSL记录协议之上，用于在实际的数据传输开始前，通讯双方进行身份认证、协商加密算法、交换加密密钥等。</li>
+<li><strong>TLS</strong>：(Transport Layer Security，传输层安全协议)，用于两个应用程序之间提供保密性和数据完整性。<br>TLS 1.0是IETF（Internet Engineering Task Force，Internet工程任务组）制定的一种新的协议，它建立在SSL 3.0协议规范之上，是SSL 3.0的后续版本，可以理解为SSL 3.1，它是写入了 <a target="_blank" rel="noopener" href="http://tools.ietf.org/html/rfc5246">RFC</a> 的。该协议由两层组成： TLS 记录协议（TLS Record）和 TLS 握手协议（TLS Handshake）。较低的层为 TLS 记录协议，位于某个可靠的传输协议（例如 TCP）上面。</li>
+</ul>
+<p>SSL/TLS协议提供的服务主要有：</p>
+<ol>
+<li>认证用户和服务器，确保数据发送到正确的客户机和服务器；</li>
+<li>加密数据以防止数据中途被窃取；</li>
+<li>维护数据的完整性，确保数据在传输过程中不被改变。</li>
+</ol>
+</blockquote>
+<p><img src="/2021/08/24/SSL-TLS/image-20210824173412361.png" alt="image-20210824173412361"></p>
+<blockquote>
+<p>客户端与服务端需要经过一个握手的过程才能完成身份认证，建立一个安全的连接。握手的过程如下：</p>
+<ol>
+<li><p>客户端访问服务器（比如：<a target="_blank" rel="noopener" href="https://www.12306.cn/">https://www.12306.cn</a>）,发送ssl版本、客户端支持的加密算法等消息。</p>
+</li>
+<li><p>服务器向客户端发送ssl版本、加密算法、证书（证书出现了）等消息。</p>
+</li>
+<li><p>客户端收到消息后，判断证书是否可信, 若可信，则继续通信，发送消息：</p>
+<p><font color="red">客户端生成一个随机数，从证书中获取服务器端的公钥，对随机数加密；</font></p>
+<p>随后信息都将使用双方协定的加密方法和密钥发送, 客户端握手结束。</p>
+</li>
+<li><p>服务器端对数据解密得到随机数, 使用协商好的加密算法和秘钥进行通信</p>
+</li>
+</ol>
+</blockquote>
+<p>描述的是客户端和服务器刚建立连接之后做的事情:</p>
+<blockquote>
+<p>第一次</p>
+<ul>
+<li>客户端连接服务器<ul>
+<li>客户端使用的ssl版本, 客户端支持的加密算法</li>
+</ul>
+</li>
+<li>服务器<ul>
+<li>先将自己支持ssl版本和客户端的支持的版本比较<ul>
+<li>支持的不一样, 连接断开</li>
+<li>支持的一样, 继续</li>
+</ul>
+</li>
+<li>根据得到的客户端支持 的加密算法, 找一个服务器端也同样支持算法, 发送给客户端</li>
+<li>需要发送服务器的证书给客户端</li>
+</ul>
+</li>
+</ul>
+<p>第二次:</p>
+<p>客户端:</p>
+<ul>
+<li>接收服务器的证书</li>
+<li>校验证书的信息<ul>
+<li>校验证书的签发机构</li>
+<li>证书的有效期</li>
+<li>证书中支持 的域名和访问的域名是否一致</li>
+</ul>
+</li>
+<li>校验有问题, 浏览器会给提示</li>
+</ul>
+</blockquote>
+<h2 id="https-gt-单向认证"><a href="#https-gt-单向认证" class="headerlink" title="https -&gt; 单向认证"></a>https -&gt; 单向认证</h2><p><img src="/SSL-TLS/https1.png" alt="https1"></p>
+<ol>
+<li>服务器要准备的<ul>
+<li>生成密钥对</li>
+<li>将公钥发送给ca, 由ca签发证书</li>
+<li>将ca签发的证书和非对称加密的私钥部署到当前的web服务器</li>
+</ul>
+</li>
+<li>通信流程<ol>
+<li>客户端连接服务器, 通过一个域名<ul>
+<li>域名和IP地址的关系<ul>
+<li>域名要绑定IP地址<ul>
+<li>一个域名只能绑定一个IP地址</li>
+</ul>
+</li>
+<li>IP地址需要被域名绑定<ul>
+<li>一个IP地址可以被多个域名绑定</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>客户端访问的域名会解析成IP地址, 通过IP地址访问web服务器</li>
+</ul>
+</li>
+<li>服务器收到了客户端的请求<ul>
+<li>服务器将CA签发的证书发送给浏览器(客户端)</li>
+</ul>
+</li>
+<li>客户端拿到了服务器的公钥证书<ul>
+<li>读这个公钥 证书<ul>
+<li>验证域名</li>
+<li>有效期</li>
+<li>ca签发机构</li>
+<li>服务器的公钥</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>客户会生成一个随机数 (作为对称加密的秘钥来使用的)<ul>
+<li>使用服务器的公钥对这个随机数进行加密</li>
+<li>将这个加密之后 秘钥发送给服务器</li>
+</ul>
+</li>
+<li>服务器对收到的密文解密<ul>
+<li>使用服务器的是要解密, 得到对称加密的秘钥</li>
+</ul>
+</li>
+<li>数据的传输<ul>
+<li>使用对称加密的方式对数据进行加密</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/24/%E8%AF%81%E4%B9%A6/" rel="prev" title="证书">
+                  <i class="fa fa-chevron-left"></i> 证书
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

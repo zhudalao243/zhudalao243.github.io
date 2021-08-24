@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="证书 公钥证书（Public-Key Certificate，PKC)其实和驾照很相似，里面记有姓名、组织、邮箱地址等个人信息，以及属于此人的公钥, 并由认证机构（Certification Authority、Certifying Authority, CA）施加数字签名。只要看到公钥证书，我们就可以知道认证机构认定该公钥的确属于此人。公钥证书也简称为证书（certificate）。  证书的应">
+<meta property="og:type" content="article">
+<meta property="og:title" content="证书">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="证书 公钥证书（Public-Key Certificate，PKC)其实和驾照很相似，里面记有姓名、组织、邮箱地址等个人信息，以及属于此人的公钥, 并由认证机构（Certification Authority、Certifying Authority, CA）施加数字签名。只要看到公钥证书，我们就可以知道认证机构认定该公钥的确属于此人。公钥证书也简称为证书（certificate）。  证书的应">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/1539265302304.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/1539272408707.png">
+<meta property="article:published_time" content="2021-08-24T08:42:45.000Z">
+<meta property="article:modified_time" content="2021-08-24T09:19:26.246Z">
+<meta property="article:author" content="zzy">
+<meta property="article:tag" content="密码学">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/1539265302304.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/","path":"2021/08/24/证书/","title":"证书"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>证书 | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%81%E4%B9%A6"><span class="nav-number">1.</span> <span class="nav-text">证书</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%81%E4%B9%A6%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">证书的应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%81%E4%B9%A6%E8%A7%84%E8%8C%83%E5%92%8C%E6%A0%BC%E5%BC%8F-%E2%80%93-x509-%E4%BA%86%E8%A7%A3"><span class="nav-number">1.2.</span> <span class="nav-text">证书规范和格式 – x509(了解)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CA%E8%AF%81%E4%B9%A6"><span class="nav-number">1.3.</span> <span class="nav-text">CA证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AC%E9%92%A5%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD-PKI%EF%BC%88%E4%BA%86%E8%A7%A3%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">公钥基础设施 - PKI（了解）</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          证书
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-24 16:42:45 / 修改時間：17:19:26" itemprop="dateCreated datePublished" datetime="2021-08-24T16:42:45+08:00">2021-08-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="证书"><a href="#证书" class="headerlink" title="证书"></a>证书</h1><blockquote>
+<p>公钥证书（Public-Key Certificate，PKC)其实和驾照很相似，里面记有姓名、组织、邮箱地址等<font color="red">个人信息</font>，以及属于<font color="red">此人的公钥, 并由认证机构（Certification Authority、Certifying Authority, CA）施加数字签名</font>。只要看到公钥证书，我们就可以知道认证机构认定该公钥的确属于此人。公钥证书也简称为证书（certificate）。</p>
+</blockquote>
+<h2 id="证书的应用场景"><a href="#证书的应用场景" class="headerlink" title="证书的应用场景"></a>证书的应用场景</h2><img src="/2021/08/24/%E8%AF%81%E4%B9%A6/1539265302304.png" alt="1539265302304" style="zoom:130%;">
+
+<blockquote>
+<ol>
+<li><p><font color="red" size="4">Bob生成密钥对</font></p>
+<ul>
+<li><p>可以将bob看成百度, 提供是web服务器</p>
+</li>
+<li><p>生成一个密钥对</p>
+<ul>
+<li>公钥  -&gt; 分发</li>
+<li>私钥 -&gt; 百度留着</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Bob在认证机构Trent注册自己的公钥</font></p>
+<ul>
+<li>百度找了一大家都信赖的机构, 来证明这个公钥是百度的</li>
+<li>认证机构会生成一个证书, 写明了公钥属于百度<ul>
+<li>认证机构也有一个非对称加密的密钥对</li>
+<li>认证机构使用自己的私钥对百度的公钥进行签名, 生成了证书</li>
+<li>认证机构将证书发送给百度</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">认证机构Trent用自己的私钥对Bob的公钥施加数字签名并生成证书</font></p>
+</li>
+<li><p><font color="red" size="4">Alice得到带有认证机构Trent的数字签名的Bob的公钥（证书）</font></p>
+<ul>
+<li>alice可以看做一个客户 -&gt; 浏览器</li>
+<li>客户端访问的百度 -&gt; 得到了百度的证书<ul>
+<li>证书中有百度的公钥</li>
+</ul>
+</li>
+<li>客户端需要使用认证机构的公钥对证书进行验证<ul>
+<li>客户端怎么会有认证机构的公钥<ul>
+<li>window会预装, 或者用户自己安装</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Alice使用认证机构Trent的公钥验证数字签名，确认Bob的公钥的合法性</font></p>
+<ul>
+<li>使用认证机构的公钥解除百度证书中签名的数据<ul>
+<li>百度的公钥</li>
+<li>百度的域名</li>
+<li>百度证书的有效期</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Alice用Bob的公钥加密消息并发送给Bob</font></p>
+<ul>
+<li>非对称加密</li>
+<li>使用公钥加密 -&gt; 对称加密秘钥分发</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Bob用自己的私钥解密密文得到Alice的消息</font></p>
+<ul>
+<li>服务器使用私钥解密 -&gt; 得到对称加密的秘钥</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<h2 id="证书规范和格式-–-x509-了解"><a href="#证书规范和格式-–-x509-了解" class="headerlink" title="证书规范和格式 – x509(了解)"></a>证书规范和格式 – x509(了解)</h2><blockquote>
+<p><strong>X.509</strong>是一种非常通用的证书格式。所有的证书都符合ITU-T X.509国际标准，因此(理论上)为一种应用创建的证书可以用于任何其他符合X.509标准的应用。X.509证书的结构是用ASN1(Abstract Syntax Notation One)进行描述数据结构，并使用ASN.1语法进行编码。 </p>
+<p>X.509规范中一般推荐使用PEM(Privacy Enhanced Mail）格式来存储证书相关的文件。</p>
+<ul>
+<li>证书文件的文件名后缀一般为 .crt 或 .cer </li>
+<li>对应私钥文件的文件名后缀一般为 .key</li>
+<li>证书请求文件的文件名后綴为 .csr </li>
+<li>有时候也统一用pem作为文件名后缀。</li>
+</ul>
+</blockquote>
+<h2 id="CA证书"><a href="#CA证书" class="headerlink" title="CA证书"></a>CA证书</h2><blockquote>
+<p>CA证书顾名思义就是由CA（Certification Authority）机构发布的数字证书。要对CA证书完全理解及其作用，首先要理解SSL。SSL（security sockets layer，安全套接层）是为网络通信提供安全及数据完整性的一种安全协议。<strong>SSL3.0版本以后又被称为TLS。SSL位于TCP与各应用层之间，是操作系统向外提供的API。</strong>SSL如何保证网络通信的安全和数据的完整性呢？就是采用了两种手段：身份认证和数据加密。首先身份认证就需要用到CA证书了。</p>
+</blockquote>
+<ol>
+<li><p>证书的获取和身份的认证（重点）</p>
+<blockquote>
+<p>客户端与服务端需要经过一个握手的过程才能完成身份认证，建立一个安全的连接。握手的过程如下：</p>
+<ol>
+<li><p>客户端访问服务器（比如：<a target="_blank" rel="noopener" href="https://www.12306.cn/">https://www.12306.cn</a>）,发送ssl版本、客户端支持的加密算法等消息。</p>
+</li>
+<li><p>服务器向客户端发送ssl版本、加密算法、证书（证书出现了）等消息。</p>
+</li>
+<li><p>客户端收到消息后，判断证书是否可信, 若可信，则继续通信，发送消息：</p>
+<p><font color="red">客户端生成一个随机数，从证书中获取服务器端的公钥，对随机数加密；</font></p>
+<p>随后信息都将使用双方协定的加密方法和密钥发送, 客户端握手结束。</p>
+</li>
+<li><p>服务器端对数据解密得到随机数, 使用协商好的加密算法和秘钥进行通信</p>
+</li>
+</ol>
+</blockquote>
+</li>
+<li><p>客户端如何验证CA证书是可信任的?（了解）</p>
+<blockquote>
+<ol>
+<li><p>查看证书的方式:</p>
+<p>Internet选项 -&gt; 内容 -&gt; 证书, 打开证书窗口查看已经安装的证书</p>
+<p>只要电脑上安装了该证书, 就说明该证书是受信任的。使用https协议访问时，服务器发送证书向浏览器时，首先查找该证书是否已在信任列表中，然后对证书进行校验，校验成功，那么就证明证书是可信的。</p>
+<p>下图中<code>受信任的根证书颁发机构</code>下的证书都是根证书。</p>
+<p>证书验证的机制是只要根证书是受信任的，那么它的子证书都是可信的。比如说，我们使用https协议访问了需要百度证书的网站，即使我们不安装百度证书，那么网站也不会提示证书不安全，因为，生成百度证书的根证书<code>Globalsign Root CA - R1</code>证书，在受信任的证书列表中。如果一个证书的根证书是不可信的，那么这个证书肯定也是不可信任的。</p>
+<p>由以上可知，根证书在证书验证中极其重要，而且，根证书是无条件信任的，只要我们将根证书安装上，就说明我们对根证书是信任的。比如我们安装12306的根证书，是出于我们对国家的信任，对网站的信任，我们才放心安装这个根证书。对于一些不安全的网站的证书，一定要慎重安装。</p>
+<p>另外需要知道的是，【<code>受信任的根证书颁发机构</code>】中的证书是windows预先安装的一些证书，都是国际上很有权威的证书机构，他们证书的生成都有很严格的流程，因此他们的证书被认为是安全，就像我们相信银行是安全，所以把钱存入到银行</p>
+<p><img src="/2021/08/24/%E8%AF%81%E4%B9%A6/1539272408707.png" alt="1539272408707"></p>
+</li>
+<li><p>证书的颁发机构 -&gt; CA</p>
+<ul>
+<li>发布根证书</li>
+<li>中间证书</li>
+<li>个人</li>
+</ul>
+</li>
+<li><p>证书的信任链 -&gt; 证书签发机构的信任链</p>
+<p>A是一个可信赖证书签发机构, A信任B, B就有资格去签发证书</p>
+<p>从等级上A比B高一级</p>
+</li>
+</ol>
+</blockquote>
+</li>
+<li><p>有哪些CA机构?</p>
+</li>
+</ol>
+<blockquote>
+<p>世界上较早的数字认证中心是美国的verisign<code>威瑞信</code>公司，在windows的证书窗口中可以看到好多verisign公司生成的证书, 美国的<em>DigiCert</em></p>
+<p>另外还有加拿大的ENTRUST公司，也是很著名的证书机构。</p>
+<p>中国的安全认证体系分为金融CA和非金融CA。</p>
+<ul>
+<li>在金融CA方面，根证书由中国人民银行管理，</li>
+<li>非金融CA方面，由中国电信负责。<ul>
+<li>行业性CA<ul>
+<li>中国金融认证中心</li>
+<li>中国电信认证中心</li>
+</ul>
+</li>
+<li>区域性CA, 区域性CA主要是以政府为背景，以企业机制运行<ul>
+<li>广东CA中心</li>
+<li>上海CA中心</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>沃通 – <a target="_blank" rel="noopener" href="http://www.wosign.com/products/ssl.htm">www.wosign.com/products/ssl.htm</a></p>
+</blockquote>
+<h2 id="公钥基础设施-PKI（了解）"><a href="#公钥基础设施-PKI（了解）" class="headerlink" title="公钥基础设施 - PKI（了解）"></a>公钥基础设施 - PKI（了解）</h2><p>PKI组成的要素</p>
+<ul>
+<li>用户<ul>
+<li>申请证书的人 -&gt; web服务器端<ul>
+<li>申请证书<ul>
+<li>生成密钥对 , 或者委托ca生成</li>
+<li>将公钥发送给CA</li>
+<li>ca使用自己的私钥对得到公钥签名</li>
+<li>将证书发送给用户</li>
+</ul>
+</li>
+<li>发送证书<ul>
+<li>当客户端访问服务器的时候发送证书给客户端</li>
+</ul>
+</li>
+<li>注销证书<ul>
+<li>当发现私钥泄露之后</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>使用证书的人 -&gt; 客户端<ul>
+<li>接收证书</li>
+<li>验证对方的身份信息</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CA认证机构<ul>
+<li>可以生产密钥对(可选)</li>
+<li>对公钥签名</li>
+<li>吊销证书</li>
+</ul>
+</li>
+<li>仓库<ul>
+<li>存储证书 -&gt; 公钥</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="tag"># 密码学</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/24/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/" rel="prev" title="数字签名">
+                  <i class="fa fa-chevron-left"></i> 数字签名
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/08/24/SSL-TLS/" rel="next" title="SSL/TLS and HTTPS">
+                  SSL/TLS and HTTPS <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
