@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="线程 当切换进程时，需要保存 &#x2F; 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）开销很大 引入线程后，线程是CPU调度的基本单位    线程的优点和特性 进程间并发，开销很大 当切换进程时，需要保存 &#x2F; 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）   线程间并发，开销更小 同一进程内的各个线程间并发，不需要切换进程运行环境和内存地址空间，省时省力    引入线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程管理02">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="线程 当切换进程时，需要保存 &#x2F; 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）开销很大 引入线程后，线程是CPU调度的基本单位    线程的优点和特性 进程间并发，开销很大 当切换进程时，需要保存 &#x2F; 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）   线程间并发，开销更小 同一进程内的各个线程间并发，不需要切换进程运行环境和内存地址空间，省时省力    引入线程">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/202105061455388.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145558176.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210827205628248.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145612404.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145625241.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145742221.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145758880.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145815581.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145838455.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145853642.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145931264.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145942297.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145957668.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150011732.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615002451.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150036446.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150053987.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150104532.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150114745.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615013284.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828152941229.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828153416754.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150219719.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150229620.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150322912.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150344160.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150354868.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615041251.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828161614275.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828161853587.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828162029637.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828163921731.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828164332921.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094355454.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094404849.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094424713.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094434296.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094448494.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094521559.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2020092709452942.png">
+<meta property="article:published_time" content="2021-08-27T12:51:21.000Z">
+<meta property="article:modified_time" content="2021-08-28T11:14:33.425Z">
+<meta property="article:author" content="zzy">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/202105061455388.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/","path":"2021/08/27/进程管理02/","title":"进程管理02"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>进程管理02 | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">线程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%E5%92%8C%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">线程的优点和特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.2.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">线程的实现方式多线程模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">线程的实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7"><span class="nav-number">2.1.1.</span> <span class="nav-text">用户级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7"><span class="nav-number">2.1.2.</span> <span class="nav-text">内核级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">多线程模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%AF%B9%E4%B8%80"><span class="nav-number">2.2.1.</span> <span class="nav-text">一对一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E5%AF%B9%E4%B8%80"><span class="nav-number">2.2.2.</span> <span class="nav-text">多对一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E5%AF%B9%E5%A4%9A"><span class="nav-number">2.2.3.</span> <span class="nav-text">多对多</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%9C%BA%E7%9A%84%E8%B0%83%E5%BA%A6"><span class="nav-number">3.</span> <span class="nav-text">处理机的调度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%9C%BA%E8%B0%83%E5%BA%A6%E6%A6%82%E5%BF%B5%E3%80%81%E5%B1%82%E6%AC%A1"><span class="nav-number">3.1.</span> <span class="nav-text">处理机调度概念、层次</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">3.1.1.</span> <span class="nav-text">调度的基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E7%9A%84%E4%B8%89%E4%B8%AA%E5%B1%82%E6%AC%A1"><span class="nav-number">3.1.2.</span> <span class="nav-text">调度的三个层次</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E8%B0%83%E5%BA%A6"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">高级调度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%AD%E7%BA%A7%E8%B0%83%E5%BA%A6"><span class="nav-number">3.1.2.2.</span> <span class="nav-text">中级调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%E7%9F%A5%E8%AF%86%EF%BC%9A%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%8C%82%E8%B5%B7%E6%80%81%E4%B8%8E%E4%B8%83%E7%8A%B6%E6%80%81%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.1.2.2.1.</span> <span class="nav-text">补充知识：进程的挂起态与七状态模型</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%8E%E7%BA%A7%E8%B0%83%E5%BA%A6"><span class="nav-number">3.1.2.3.</span> <span class="nav-text">低级调度</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-2"><span class="nav-number">3.1.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E7%9A%84%E6%97%B6%E6%9C%BA%E5%88%87%E6%8D%A2%E4%B8%8E%E8%BF%87%E7%A8%8B%E8%B0%83%E5%BA%A6%E6%96%B9%E5%BC%8F"><span class="nav-number">3.2.</span> <span class="nav-text">进程调度的时机切换与过程调度方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E7%9A%84%E6%97%B6%E6%9C%BA"><span class="nav-number">3.2.1.</span> <span class="nav-text">进程调度的时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E8%B0%83%E5%BA%A6%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">3.2.2.</span> <span class="nav-text">进程调度的方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%88%87%E6%8D%A2%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%BB%E8%A6%81%E5%AE%8C%E6%88%90%E4%BA%86%EF%BC%9A"><span class="nav-number">3.2.3.</span> <span class="nav-text">进程切换的过程主要完成了：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95%E7%9A%84%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87"><span class="nav-number">3.3.</span> <span class="nav-text">调度算法的评价指标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU%E5%88%A9%E7%94%A8%E7%8E%87"><span class="nav-number">3.3.1.</span> <span class="nav-text">CPU利用率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%90%9E%E5%90%90%E9%87%8F"><span class="nav-number">3.3.2.</span> <span class="nav-text">系统吞吐量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%A8%E8%BD%AC%E6%97%B6%E9%97%B4"><span class="nav-number">3.3.3.</span> <span class="nav-text">周转时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%89%E5%BE%85%E6%97%B6%E9%97%B4"><span class="nav-number">3.3.4.</span> <span class="nav-text">等待时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E6%97%B6%E9%97%B4"><span class="nav-number">3.3.5.</span> <span class="nav-text">响应时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-3"><span class="nav-number">3.3.6.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95"><span class="nav-number">3.4.</span> <span class="nav-text">调度算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E6%9D%A5%E5%85%88%E6%9C%8D%E5%8A%A1%EF%BC%88FCFS-First-Come-First-Serve%EF%BC%89"><span class="nav-number">3.4.1.</span> <span class="nav-text">先来先服务（FCFS, First Come First Serve）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9F%AD%E4%BD%9C%E4%B8%9A%E4%BC%98%E5%85%88%EF%BC%88SJF-Shortest-Job-First%EF%BC%89"><span class="nav-number">3.4.2.</span> <span class="nav-text">短作业优先（SJF, Shortest Job First）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E5%93%8D%E5%BA%94%E6%AF%94%E4%BC%98%E5%85%88%EF%BC%88HRRN%EF%BC%8CHighest-Response-Ratio-Next%EF%BC%89"><span class="nav-number">3.4.3.</span> <span class="nav-text">高响应比优先（HRRN，Highest Response Ratio Next）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E7%89%87%E8%BD%AE%E8%BD%AC-RR"><span class="nav-number">3.4.4.</span> <span class="nav-text">时间片轮转(RR)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7%E8%B0%83%E5%BA%A6"><span class="nav-number">3.4.5.</span> <span class="nav-text">优先级调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BA%A7%E5%8F%8D%E9%A6%88%E9%98%9F%E5%88%97%E8%B0%83%E5%BA%A6"><span class="nav-number">3.4.6.</span> <span class="nav-text">多级反馈队列调度</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          进程管理02
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+
+      <time title="創建時間：2021-08-27 20:51:21" itemprop="dateCreated datePublished" datetime="2021-08-27T20:51:21+08:00">2021-08-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新於</span>
+        <time title="修改時間：2021-08-28 19:14:33" itemprop="dateModified" datetime="2021-08-28T19:14:33+08:00">2021-08-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><blockquote>
+<p>当切换进程时，需要保存 / 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）开销很大</p>
+<p>引入线程后，线程是CPU调度的基本单位</p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/202105061455388.png" alt="img" style="zoom:80%;">
+
+<h2 id="线程的优点和特性"><a href="#线程的优点和特性" class="headerlink" title="线程的优点和特性"></a>线程的优点和特性</h2><ul>
+<li>进程间并发，开销很大<ol>
+<li>当切换进程时，需要保存 / 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）</li>
+</ol>
+</li>
+<li>线程间并发，开销更小<ol>
+<li>同一进程内的各个线程间并发，不需要切换进程运行环境和内存地址空间，省时省力</li>
+</ol>
+</li>
+</ul>
+<p>引入线程机制后，并发带来的系统开销降低，系统并发性提升</p>
+<blockquote>
+<p><font color="red">注意：从属于不同进程的线程间通信，也必须请求操作系统服务！</font></p>
+</blockquote>
+<p>引入线程前，进程既是资源分配的基本单位，也是调度的基本单位。</p>
+<p>引入线程后，进程是资源分配的基本单位，线程是调度的基本单位。线程也有运行态、就绪态、阻塞态</p>
+<p>在多CPU环境下，各个线程也可以分派到不同的CPU上并行地执行。</p>
+<p>线程几乎不拥有资源，只拥有极少量的资源（线程控制块TCB、寄存器信息、堆栈等）</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145558176.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210827205628248.png" alt="image-20210827205628248" style="zoom:80%;">
+
+<h1 id="线程的实现方式多线程模型"><a href="#线程的实现方式多线程模型" class="headerlink" title="线程的实现方式多线程模型"></a>线程的实现方式多线程模型</h1><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145612404.png" alt="img" style="zoom:67%;">
+
+<h2 id="线程的实现方式"><a href="#线程的实现方式" class="headerlink" title="线程的实现方式"></a>线程的实现方式</h2><h3 id="用户级"><a href="#用户级" class="headerlink" title="用户级"></a>用户级</h3><p>历史背景：早期的操作系统（如：早期Unix）只支持进程，不支持线程。当时的“线程”是由线程库实现的</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145625241.png" alt="img" style="zoom:80%;">
+
+<ol>
+<li><p>线程的管理工作由谁来完成？</p>
+<blockquote>
+<p>用户级线程由应用程序通过线程库实现，所有的线程管理工作都由应用程序负责（包括线程切换）</p>
+</blockquote>
+</li>
+<li><p>线程切换是否需要CPU？</p>
+<blockquote>
+<p>用户级线程中，线程切换可以在用户态下即可完成，无需操作系统干预。</p>
+</blockquote>
+</li>
+<li><p>操作系统是否能意识到用户级线程的存在？</p>
+<blockquote>
+<p>在用户看来，是有多个线程。但是在操作系统内核看来，并意识不到线程的存在。“用户级线程”就是“从用户视角看能看到的线程”</p>
+</blockquote>
+</li>
+<li><p>这种线程的实现方式有什么优点和缺点？</p>
+</li>
+</ol>
+<blockquote>
+<p>优点：用户级线程的切换在用户空间即可完成，不需要切换到核心态，线程管理的系统<br>开销小，效率高</p>
+<p>缺点：当一个用户级线程被阻塞后，整个进程都会被阻塞，并发度不高。多个线程不可在多核处理机上并行运行。</p>
+</blockquote>
+<h3 id="内核级"><a href="#内核级" class="headerlink" title="内核级"></a>内核级</h3><p>内核级线程（Kernel-Level Thread, KLT, 又称“内核支持的线程”） 由操作系统支持的线程</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145742221.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>现代操作系统都实现了内核级线程，如Windows、Linux</p>
+</blockquote>
+<ol>
+<li><p>线程的管理工作由谁来完成？</p>
+<blockquote>
+<p>内核级线程的管理工作由操作系统内核完成。</p>
+</blockquote>
+</li>
+<li><p>线程切换是否需要CPU？</p>
+<blockquote>
+<p>线程调度、切换等工作都由内核负责，因此内核级线程的切换必然需要在核心态下才能完成</p>
+</blockquote>
+</li>
+<li><p>操作系统是否能意识到内核级线程的存在？</p>
+<blockquote>
+<p>操作系统会为每个内核级线程建立相应的TCB（Thread Control Block，线程控制块），通过TCB对线程进行管理。“内核级线程”就是“从操作系统内核视角看能看到的线程”</p>
+</blockquote>
+</li>
+<li><p>这种线程的实现方式有什么优点和缺点？</p>
+<blockquote>
+<p>优点：当一个线程被阻塞后，别的线程还可以继续执行，并发能力强。多线程可在多核处理机上并行执行。</p>
+<p>缺点：一个用户进程会占用多个内核级线程，线程切换由操作系统内核完成，需要切换到核心态，因此线程管理的成本高，开销大。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="多线程模型"><a href="#多线程模型" class="headerlink" title="多线程模型"></a>多线程模型</h2><p>在支持内核级线程的系统中，根据用户级线程和内核级线程的映射关系，可以划分为几种多线程模型</p>
+<h3 id="一对一"><a href="#一对一" class="headerlink" title="一对一"></a>一对一</h3><p>一对一模型：一个用户级线程映射到一个内核级线程。每个用户进程有与用户级线程同数量的内核级线程。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145758880.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>优点：当一个线程被阻塞后，别的线程还可以继续执行，并发能力强。多线程可在多核处理机上并行执行。</p>
+<p>缺点：一个用户进程会占用多个内核级线程，线程切换由操作系统内核完成，需要切换到核心态，因此线程管理的成本高，开销大。</p>
+</blockquote>
+<h3 id="多对一"><a href="#多对一" class="headerlink" title="多对一"></a>多对一</h3><p>多对一模型：多个用户级线程映射到一个内核级线程。且一个进程只被分配一个内核级线程。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145815581.png" alt="img " style="zoom:80%;">
+
+<p>优点：用户级线程的切换在用户空间即可完成，不需要切换到核心态，线程管理的系统开销小，效率高</p>
+<p>缺点：当一个用户级线程被阻塞后，整个进程都会被阻塞，并发度不高。多个线程不可在多核处理机上并行运行</p>
+<blockquote>
+<p>操作系统只“看得见”内核级线程，因此只有内核级线程才是处理机分配的单位</p>
+</blockquote>
+<h3 id="多对多"><a href="#多对多" class="headerlink" title="多对多"></a>多对多</h3><p>多对多模型：n 用户及线程映射到m 个内核级线程（n &gt;= m）。</p>
+<p>克服了多对一模型并发度不高的缺点（一个阻塞全体阻塞），又克服了一对一模型中一个用户进程占用太多内核级线程，开销太大的缺点。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145838455.png" alt="img" style="zoom:80%;">
+
+<p>内核级线程中可以运行任意一个有映射关系的用户级线程代码，只有两个内核级线程中正在运行的代码逻辑都阻塞时，这个进程才会阻塞</p>
+<h2 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145853642.png" alt="在这里插入图片描述" style="zoom:80%;">
+
+<h1 id="处理机的调度"><a href="#处理机的调度" class="headerlink" title="处理机的调度"></a>处理机的调度</h1><h2 id="处理机调度概念、层次"><a href="#处理机调度概念、层次" class="headerlink" title="处理机调度概念、层次"></a>处理机调度概念、层次</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145931264.png" alt="在这里插入图片描述" style="zoom:80%;">
+
+<h3 id="调度的基本概念"><a href="#调度的基本概念" class="headerlink" title="调度的基本概念"></a>调度的基本概念</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145942297.png" alt="img" style="zoom:67%;">
+
+<p>当有一堆任务要处理，但由于资源有限，这些事情没法同时处理。这就需要确定某种规则来决定处理这些任务的顺序，这就是“调度”研究的问题。</p>
+<p>在多道程序系统中，进程的数量往往是多于处理机的个数的，这样不可能同时并行地处理各个进程。处理机调度，就是从就绪队列中按照一定的算法选择一个进程并将处理机分配给它运行，以实现进程的并发执行</p>
+<h3 id="调度的三个层次"><a href="#调度的三个层次" class="headerlink" title="调度的三个层次"></a>调度的三个层次</h3><h4 id="高级调度"><a href="#高级调度" class="headerlink" title="高级调度"></a>高级调度</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145957668.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>由于内存空间有限，有时无法将用户提交的作业全部放入内存，因此就需要确定某种规则来决定将作业调入内存的顺序。</p>
+<p>高级调度（作业调度）。按一定的原则从外存上处于后备队列的作业中挑选一个（或多个）作业，给他们分配内存等必要资源，并建立相应的进程（建立PCB），以使它（们）获得竞争处理机的权利。</p>
+<p>高级调度是辅存（外存）与内存之间的调度。每个作业只调入一次，调出一次。作业调入时会建立相应的PCB，作业调出时才撤销PCB。高级调度主要是指调入的问题，因为只有调入的时机需要操作系统来确定，但调出的时机必然是作业运行结束才调出。</p>
+</blockquote>
+<h4 id="中级调度"><a href="#中级调度" class="headerlink" title="中级调度"></a>中级调度</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150011732.png" alt="img" style="zoom:67%;">
+
+<blockquote>
+<p>引入了虚拟存储技术之后，可将暂时不能运行的进程调至外存等待。等它重新具备了运行条件且内存又稍有空闲时，再重新调入内存。</p>
+<p>这么做的目的是为了<font color="red">提高内存利用率和系统吞吐量</font>。</p>
+<p>暂时调到外存等待的进程状态为<font color="red">挂起状态</font>。值得注意的是，<font color="red">PCB并不会一起调到外存，而是会常驻内存</font>。PCB中会记录进程数据在外存中的存放位置，进程状态等信息，操作系统通过内存中的PCB来保持对各个进程的监控、管理。<font color="red">被挂起的进程PCB会被放到的挂起队列中</font>。</p>
+<p><font color="red">中级调度（内存调度</font>），就是要决定将哪个处于挂起状态的进程重新调入内存。</p>
+<p>一个进程可能会被多次调出、调入内存，因此<font color="red">中级调度发生的频率要比高级调度更高</font>。</p>
+</blockquote>
+<h5 id="补充知识：进程的挂起态与七状态模型"><a href="#补充知识：进程的挂起态与七状态模型" class="headerlink" title="补充知识：进程的挂起态与七状态模型"></a>补充知识：进程的挂起态与七状态模型</h5><p>暂时调到外存等待的进程状态为挂起状态（挂起态，suspend） 挂起态又可以进一步细分为就绪挂起、阻塞挂起两种状态<br>五状态模型 —–&gt; 七状态模型</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615002451.png" alt="img" style="zoom:80%;">
+
+<p>注意“挂起”和“阻塞”的区别，两种就绪挂起 状态都是暂时不能获得CPU的服务，但挂起态是将进程映像调到外存去了，而阻塞态下进程映像还在内存中。</p>
+<p>有的操作系统会把就绪挂起、阻塞挂起分为两个挂起队列，甚至会根据阻塞原因不同再把阻塞挂起进程进一步细分为阻塞挂起 多个队列。</p>
+<h4 id="低级调度"><a href="#低级调度" class="headerlink" title="低级调度"></a>低级调度</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150036446.png" alt="img" style="zoom:80%;">
+
+<p>低级调度（进程调度），其主要任务是按照某种方法和策略从就绪队列中选取一个进程，将处理机分配给它。</p>
+<p>进程调度是操作系统中最基本的一种调度，在一般的操作系统中都必须配置进程调度。进程调度的频率很高，一般几十毫秒一次。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150053987.png" alt="img" style="zoom:80%;">
+
+<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150104532.png" alt="img" style="zoom:80%;">
+
+<h2 id="进程调度的时机切换与过程调度方式"><a href="#进程调度的时机切换与过程调度方式" class="headerlink" title="进程调度的时机切换与过程调度方式"></a>进程调度的时机切换与过程调度方式</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150114745.png" alt="img" style="zoom:80%;">
+
+<h3 id="进程调度的时机"><a href="#进程调度的时机" class="headerlink" title="进程调度的时机"></a>进程调度的时机</h3><p>进程调度（低级调度），就是按照某种算法从就绪队列中选择一个进程为其分配处理机。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615013284.png" alt="img" style="zoom:80%;">
+
+<p>临界资源：一个时间段内只允许一个进程使用的资源。各进程需要互斥地访问临界资源。<br>临界区：访问临界资源的那段代码。</p>
+<p><font color="red">内核程序临界区一般是用来访问某种内核数据结构的，比如进程的就绪队列（由各就绪进程的PCB组成）</font></p>
+<blockquote>
+<p>有的系统中，只允许进程主动放弃处理机有的系统中，进程可以主动放弃处理机，当有更紧急的任务需要处理时，也会强行剥夺处理机（被动放弃）</p>
+</blockquote>
+<p>进程在普通临界区中是可以进行调度、切换的。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828152941229.png" alt="image-20210828152941229" style="zoom:80%;">
+
+<blockquote>
+<p>正在运行的进程如果正在访问就绪队列，会对其进行上锁，如果还没有退出临界区（解锁），就进行进程调度，但是进程调度相关的程序也需要访问就绪队列，但此时就绪队列被锁住了，因此又无法顺利进行调度。</p>
+<p><font color="red">内核程序临界区访问的临界资源如果不尽快释放的话，极有可能影响到操作系统内核的其他管理工作。因此在访问内核程序临界区期间不能进行调度与切换。</font></p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828153416754.png" alt="image-20210828153416754" style="zoom:80%;">
+
+<blockquote>
+<p>进程使用打印机时，会对打印机这一临界资源进行上锁，进程一直处于临界区内，临界资源不会解锁。但是打印机又是慢速设备，此时如果一直不允许进程调度的话就会导致CPU一直空闲。</p>
+<p><font color="red">普通临界区访问的临界资源不会直接影响操作心痛内核的管理工作。因此在访问普通临界区时可以进行调度与切换。</font></p>
+</blockquote>
+<h3 id="进程调度的方式"><a href="#进程调度的方式" class="headerlink" title="进程调度的方式"></a>进程调度的方式</h3><p><font color="red">剥夺调度方式，又称非抢占方式</font>。即，只允许进程主动放弃处理机。在运行过程中即便有更紧迫的任务到达，当前进程依然会继续使用处理机，直到该进程终止或主动要求进入阻塞态。</p>
+<blockquote>
+<p># 实现简单，系统开销小但是无法及时处理紧急任务，适合于早期的批处理系统</p>
+</blockquote>
+<p><font color="red">剥夺调度方式，又称抢占方式</font>。当一个进程正在处理机上执行时，如果有一个更重要或更紧迫的进程需要使用处理机，则立即暂停正在执行的进程，将处理机分配给更重要紧迫的那个进程。</p>
+<blockquote>
+<p># 可以优先处理更紧急的进程，也可实现让各进程按时间片轮流执行的功能（通过时钟中断）。适合于分时操作系统、实时操作系统</p>
+</blockquote>
+<h3 id="进程切换的过程主要完成了："><a href="#进程切换的过程主要完成了：" class="headerlink" title="进程切换的过程主要完成了："></a>进程切换的过程主要完成了：</h3><p>对原来运行进程各种数据的保存</p>
+<p>对新的进程各种数据的恢复<br>（如：程序计数器、程序状态字、各种数据寄存器等处理机现场信息，这些信息一般保存在进程控制块）</p>
+<p>注意：进程切换是有代价的，因此如果过于频繁的进行进程调度、切换，必然会使整个系统的效率降低，使系统大部分时间都花在了进程切换上，而真正用于执行进程的时间减少。</p>
+<h2 id="调度算法的评价指标"><a href="#调度算法的评价指标" class="headerlink" title="调度算法的评价指标"></a>调度算法的评价指标</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150219719.png" alt="img" style="zoom:80%;">
+
+<h3 id="CPU利用率"><a href="#CPU利用率" class="headerlink" title="CPU利用率"></a>CPU利用率</h3><p>CPU利用率：指CPU “忙碌”的时间占总时间的比例。</p>
+<blockquote>
+<p>利 用 率 = 忙 碌 的 时 间 / 总 时 间</p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150229620.png" alt="img" style="zoom:70%;">
+
+<h3 id="系统吞吐量"><a href="#系统吞吐量" class="headerlink" title="系统吞吐量"></a>系统吞吐量</h3><p>对于计算机来说，希望能用尽可能少的时间处理完尽可能多的作业</p>
+<p>系统吞吐量：单位时间内完成作业的数量</p>
+<blockquote>
+<p>系统吞吐量=总共完成了多少道作业/总共花了多少时间</p>
+</blockquote>
+<p>Eg：某计算机系统处理完10道作业，共花费100秒，则系统吞吐量为？ 10/100 = 0.1 道 / 秒</p>
+<h3 id="周转时间"><a href="#周转时间" class="headerlink" title="周转时间"></a>周转时间</h3><p>对于计算机的用户来说，他很关心自己的作业从提交到完成花了多少时间。</p>
+<p>周转时间，是指从作业被提交给系统开始，到作业完成为止的这段时间间隔。</p>
+<p>它包括四个部分：</p>
+<ul>
+<li>作业在外存后备队列上等待作业调度（高级调度）的时间、</li>
+<li>进程在就绪队列上等待进程调度（低级调度）的时间、</li>
+<li>进程在CPU上执行的时间、</li>
+<li>进程等待I/O操作完成的时间。</li>
+</ul>
+<p>后三项在一个作业的整个处理过程中，可能发生多次。对于用户来说，更关心自己的单个作业的周转时间</p>
+<blockquote>
+<p>(作业）周转时间=作业完成时间–作业提交时间</p>
+</blockquote>
+<p>对于操作系统来说，更关心系统的整体表现， 因此更关心所有作业周转时间的平均值</p>
+<blockquote>
+<p>平均周转时间=各作业周转时间之和/作业数</p>
+</blockquote>
+<h3 id="等待时间"><a href="#等待时间" class="headerlink" title="等待时间"></a>等待时间</h3><p>计算机的用户希望自己的作业尽可能少的等待处理机</p>
+<p>等待时间，指进程 / 作业处于等待处理机状态时间之和，等待时间越长，用户满意度越低。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150322912.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>对于进程来说，等待时间就是指进程建立后等待被服务的时间之和，在等待I/O完成的期间其实进程也是在被服务的，所以不计入等待时间。</p>
+<p>对于作业来说，不仅要考虑建立进程后的等待时间，还要加上作业在外存后备队列中等待的时间。</p>
+<p>一个作业总共需要被CPU服务多久，被I/O设备服务多久一般是确定不变的，因此调度算法其实只会影响作业 / 进程的等待时间。当然，与前面指标类似，也有“平均等待时间”来评价整体性能。</p>
+</blockquote>
+<h3 id="响应时间"><a href="#响应时间" class="headerlink" title="响应时间"></a>响应时间</h3><p>对于计算机用户来说，会希望自己的提交的请求（比如通过键盘输入了一个调试命令）尽早地开始被系统服务、回应。</p>
+<p>响应时间，指从用户提交请求到首次产生响应所用的时间。</p>
+<h3 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150344160.png" alt="img" style="zoom:100%;">
+
+<h2 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150354868.png" alt="img " style="zoom:80%;">
+
+<blockquote>
+<p>Tips：各种调度算法的学习思路</p>
+<ol>
+<li>算法思想</li>
+<li>算法规则</li>
+<li>这种调度算法是用于作业调度还是进程调度？</li>
+<li>抢占式？非抢占式？</li>
+<li>优点和缺点</li>
+<li>是否会导致饥饿</li>
+</ol>
+<p>饥饿:某进程 / 作业长期得不到服务.</p>
+</blockquote>
+<h3 id="先来先服务（FCFS-First-Come-First-Serve）"><a href="#先来先服务（FCFS-First-Come-First-Serve）" class="headerlink" title="先来先服务（FCFS, First Come First Serve）"></a>先来先服务（FCFS, First Come First Serve）</h3><p>按照作业 / 进程到达的先后顺序进行服务</p>
+<p>用于作业 / 进程调度: 用于作业调度时，考虑的是哪个作业先到达后备队列；用于进程调度时，考虑的是哪个进程先到达就绪队列。</p>
+<p>非抢占式的算法</p>
+<p>优点：公平、算法实现简单<br>缺点：排在长作业（进程）后面的短作业需要等待很长时间，带权周转时间很大，对短作业来说用户体验不好。即，FCFS算法对长作业有利，对短作业不利（Eg ：排队买奶茶…）</p>
+<p>不会产生饥饿现象</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615041251.png" alt="img" style="zoom:80%;">
+
+<h3 id="短作业优先（SJF-Shortest-Job-First）"><a href="#短作业优先（SJF-Shortest-Job-First）" class="headerlink" title="短作业优先（SJF, Shortest Job First）"></a>短作业优先（SJF, Shortest Job First）</h3><p>算法思想：追求最少的平均等待时间，最少的平均周转时间、最少的平均平均带权周转时间</p>
+<p>算法规则： 最短的作业 / 进程优先得到服务（所谓“最短”，是指要求服务时间最短）</p>
+<p>即可用于作业调度，也可用于进程调度。用于进程调度时称为“短进程优先（SPF, Shortest Process First）算法”</p>
+<p><font color="red">SJF和SPF是非抢占式的算法。但是也有抢占式的版本——最短剩余时间优先算法（SRTN, Shortest Remaining Time Next）</font></p>
+<p>优缺点：</p>
+<blockquote>
+<p>优点：“最短的”平均等待时间、平均周转时间</p>
+<p>缺点：不公平。对短作业有利，对长作业不利。可能产生饥饿现象。另外，作业/进程的运行时间是由用户提供的，并不一定真实，不一定能做到真正的短作业优先。</p>
+</blockquote>
+<p>是否会产生饥饿？</p>
+<blockquote>
+<p>会。如果源源不断的有短作业/进程到来，可能使长作业/进程长时间得不到服务，产生“饥饿”现象。如果一直得不到服务，则称为“饿死”。</p>
+</blockquote>
+<p>非抢占式：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828161614275.png" alt="image-20210828161614275" style="zoom:80%;">
+
+<p>抢占式：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828161853587.png" alt="image-20210828161853587 " style="zoom:80%;">
+
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828162029637.png" alt="image-20210828162029637" style="zoom:80%;">
+
+<p>先来先服务（FCFS） 和 短作业优先（SJF） 的思考？</p>
+<blockquote>
+<p><font color="red">FCFS算法是在每次调度的时候选择一个等待时间最长的作业（进程）为其服务。但是没有考虑到作业的运行时间，因此对短作业不友好。</font></p>
+<p><font color="red">SJF算法是选择一个执行时间最短的作业为其服务。但是又完全不考虑哥哥作业的等待时间，因此导致对长作业不友好的问题，甚至会产生饥饿问题</font></p>
+</blockquote>
+<p>设计一个算法，既考虑各个作业的等待时间，也能兼顾运行时间？ </p>
+<h3 id="高响应比优先（HRRN，Highest-Response-Ratio-Next）"><a href="#高响应比优先（HRRN，Highest-Response-Ratio-Next）" class="headerlink" title="高响应比优先（HRRN，Highest Response Ratio Next）"></a>高响应比优先（HRRN，Highest Response Ratio Next）</h3><p>算法思想：综合考虑作业/进程的等待时间和要求服务的时间。</p>
+<p>算法规则： 在每次调度时先计算各个作业/进程的响应比，选择相应比最高的作业/进程为其服务。</p>
+<blockquote>
+<p>响应比=（等待时间+要求服务时间）/ 要求服务时间</p>
+</blockquote>
+<p>是否可抢占？</p>
+<blockquote>
+<p>非抢占式的算法。因此只有当前运行的作业/进程主动放弃处理机时，才需要调度，才需要计算响应比</p>
+</blockquote>
+<p>优缺点：</p>
+<blockquote>
+<p>综合考虑了等待时间和运行时间（要求服务时间）等待时间相同时，要求服务时间短的优先。要求服务时间相同时，等待时间长的优先。对于长作业来说，随着等待时间越来越久，其响应比也会越来越大，从而避免了长作业饿死的问题。</p>
+</blockquote>
+<p>不会导致饥饿。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828163921731.png" alt="image-20210828163921731" style="zoom:80%;">
+
+
+
+
+
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828164332921.png" alt="image-20210828164332921" style="zoom:80%;">
+
+<h3 id="时间片轮转-RR"><a href="#时间片轮转-RR" class="headerlink" title="时间片轮转(RR)"></a>时间片轮转(RR)</h3><p>轮流让就绪队列中的进程依次执行一个时间片 (当前的进程会被抢占)</p>
+<p>注意：<br>(1) 每次选择的上处理机的进程都是排在就绪队列队头的进程<br>(2) 一个进程执行完会移动到就绪队列的尾部<br>(3) 一个进程时间片到，刚下处理机要移至就绪队列的尾部的同时有一个新进程到达就绪队 列，则新进程先到达就绪队列的尾部<br>时间片轮转算法过程详解(假设时间片大小为2)，如图：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094355454.png" alt="img " style="zoom:80%;">
+
+<blockquote>
+<p>(1) 0时刻，只有P1，P1运行2时间片<br>(2) 2时刻，P1下处理机(P1剩3)，同时P2到达，P2先进入就绪队列(P2 → P1)，P2运行2时间片<br>(3) 4时刻，P2下处理机(P2剩2)，同时P3到达，P3比P2先到达就绪队列(P1 → P3 → P2)，P1运行2时间片<br>(4) 5时刻，P4到达，此时的就绪队列(P1 → P3 → P2 → P4)<br>(5) 6时刻，P1下处理机(P1剩1)，P3运行1时间片，此时的就绪队列(P3 → P2 → P4 → P1)<br>(6) 7时刻，P3下处理机(P3运行结束)，P2运行2时间片<br>(7) 9时刻，P2下处理机(P2运行结束)，P4运行2时间片，就绪队列(P4 → P1)<br>(8) 11时刻，P4下处理机(P4剩4)，P1运行1时间片<br>(9) 12时刻，P1下处理机(P1运行结束)，此后一直运行P4，16时刻所有进程结束</p>
+</blockquote>
+<p>注意：<br>(1) 若时间片太大，使得每个进程都可以在一个时间片完成，此算法会退化为先来先服务算 法，因此时间片不能太大<br>(2) 若时间片太小，进程切换过于频繁，因此时间片不能太小</p>
+<p>总结如下：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094404849.png" alt="img" style="zoom:80%;">
+
+<h3 id="优先级调度"><a href="#优先级调度" class="headerlink" title="优先级调度"></a>优先级调度</h3><p>(1) 非抢占式的优先级调度算法<br>每次调度时选择当前已到达且优先级最高的进程 (执行完当前的进程才会执行下一个进 程，不会被抢占)，如图：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094424713.png" alt="img" style="zoom:80%;">
+
+<p> P2与P4优先级相同，先到达的先执行</p>
+<p>(2) 抢占式的优先级调度算法<br>每次调度时选择当前已到达且优先级最高的进程，当前进程主动放弃处理机时会发生调度， 就绪队列发生改变时会发生抢占 (当前的进程会被抢占)，如图</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094434296.png" alt="img" style="zoom:80%;">
+
+<p><font color="red">应当适当提升I/O型进程的优先级</font></p>
+<p>总结如下：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094448494.png" alt="img" style="zoom:80%;">
+
+<h3 id="多级反馈队列调度"><a href="#多级反馈队列调度" class="headerlink" title="多级反馈队列调度"></a>多级反馈队列调度</h3><p>(1) 设置多级就绪队列，各级队列优先级从高到低，时间片从小到大<br>(2) 新进程到达时先进入第一级队列，按FCFS原则排队等待被分配时间片，若用完时间片进程 还未结束，则进程进入下一级队列队尾，如果此时已经在最下级的队列，则重新放回最下级 队列的队尾<br>(3) 只有第K级队列为空时，才会为第K + 1级队列队头的进程分配时间片<br>(4) 被抢占处理机的进程重新放回原队列队尾<br>执行过程详解，如图</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094521559.png" alt="img" style="zoom:80%;">
+
+<p>P1运行1个时间片(P1剩7)，P1进入第二级队列，P2到达第一级队列，P2运行1个时间片(P2剩3)，P2进入第二级队列，第一级队列为空，执行第二级队列的P1，P1运行2时间片(P1剩5)，P1进入第三级队列，执行第二级队列的P2，P2运行1个时间片(P2被抢占，P2剩2)，P3到达第一级队列，执行P3，P3运行1个时间片(P3运行结束)，执行第二级队列的P2，P2运行2个时间片(P2运行结束)，剩余时间执行P1直至结束<br>总结如下：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2020092709452942.png" alt="img" style="zoom:80%;">
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/" rel="prev" title="进程管理01">
+                  <i class="fa fa-chevron-left"></i> 进程管理01
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/" rel="next" title="进程管理03">
+                  进程管理03 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

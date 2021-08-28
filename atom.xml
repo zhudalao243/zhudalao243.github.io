@@ -6,7 +6,7 @@
   <link href="http://zhudalao243.github.io/atom.xml" rel="self"/>
   
   <link href="http://zhudalao243.github.io/"/>
-  <updated>2021-08-24T15:32:04.798Z</updated>
+  <updated>2021-08-28T15:28:34.935Z</updated>
   <id>http://zhudalao243.github.io/</id>
   
   <author>
@@ -15,6 +15,132 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>内存管理的概念</title>
+    <link href="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/"/>
+    <id>http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/</id>
+    <published>2021-08-28T15:27:51.000Z</published>
+    <updated>2021-08-28T15:28:34.935Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;img src=&quot;/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210828232818560.png&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>死锁</title>
+    <link href="http://zhudalao243.github.io/2021/08/28/%E6%AD%BB%E9%94%81/"/>
+    <id>http://zhudalao243.github.io/2021/08/28/%E6%AD%BB%E9%94%81/</id>
+    <published>2021-08-28T14:12:37.000Z</published>
+    <updated>2021-08-28T15:06:19.899Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;一、死锁的概念&quot;&gt;&lt;a href=&quot;#一、死锁的概念&quot; class=&quot;headerlink&quot; title=&quot;一、死锁的概念&quot;&gt;&lt;/a&gt;一、死锁的概念&lt;/h2&gt;&lt;h3 id=&quot;1-死锁、饥饿、死循环的区别&quot;&gt;&lt;a href=&quot;#1-死锁、饥饿、死循环的区别&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>进程管理03</title>
+    <link href="http://zhudalao243.github.io/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/"/>
+    <id>http://zhudalao243.github.io/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/</id>
+    <published>2021-08-28T11:15:52.000Z</published>
+    <updated>2021-08-28T12:41:18.003Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;一、进程同步、互斥&quot;&gt;&lt;a href=&quot;#一、进程同步、互斥&quot; class=&quot;headerlink&quot; title=&quot;一、进程同步、互斥&quot;&gt;&lt;/a&gt;一、进程同步、互斥&lt;/h2&gt;&lt;h3 id=&quot;1-进程同步的概念&quot;&gt;&lt;a href=&quot;#1-进程同步的概念&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>进程管理02</title>
+    <link href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/"/>
+    <id>http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/</id>
+    <published>2021-08-27T12:51:21.000Z</published>
+    <updated>2021-08-28T11:14:33.425Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;线程&quot;&gt;&lt;a href=&quot;#线程&quot; class=&quot;headerlink&quot; title=&quot;线程&quot;&gt;&lt;/a&gt;线程&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;当切换进程时，需要保存 /</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>进程管理01</title>
+    <link href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/"/>
+    <id>http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/</id>
+    <published>2021-08-27T10:16:50.000Z</published>
+    <updated>2021-08-27T12:50:39.665Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;进程&quot;&gt;&lt;a href=&quot;#进程&quot; class=&quot;headerlink&quot; title=&quot;进程&quot;&gt;&lt;/a&gt;进程&lt;/h1&gt;&lt;h2 id=&quot;进程的概念&quot;&gt;&lt;a href=&quot;#进程的概念&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
   
   <entry>
     <title>逃逸分析</title>
@@ -394,32 +520,6 @@
     
     
     <category term="Golang" scheme="http://zhudalao243.github.io/categories/Golang/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>周易基础及其应用01</title>
-    <link href="http://zhudalao243.github.io/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/"/>
-    <id>http://zhudalao243.github.io/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/</id>
-    <published>2021-08-15T06:59:26.000Z</published>
-    <updated>2021-08-17T16:08:52.901Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;周易基础及应用&quot;&gt;&lt;a href=&quot;#周易基础及应用&quot; class=&quot;headerlink&quot; title=&quot;周易基础及应用&quot;&gt;&lt;/a&gt;周易基础及应用&lt;/h1&gt;&lt;p&gt;千古奇书《周易》&lt;/p&gt;
-&lt;p&gt;人更三圣：伏羲    周文王   </summary>
-        
-      
-    
-    
-    
-    <category term="哲学" scheme="http://zhudalao243.github.io/categories/%E5%93%B2%E5%AD%A6/"/>
-    
-    <category term="周易基础及其应用" scheme="http://zhudalao243.github.io/categories/%E5%93%B2%E5%AD%A6/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/"/>
     
     
   </entry>
