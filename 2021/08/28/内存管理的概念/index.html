@@ -20,14 +20,50 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="一、内存管理的概念    二、覆盖与交换1. 覆盖技术将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存 2. 交换技术内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成  应该在外存（磁盘）的什么位置保存被换出的进程？   1.具有对换功能的操作系统中，通常把磁盘空间分为文件区和对换区两部分">
 <meta property="og:type" content="article">
 <meta property="og:title" content="内存管理的概念">
 <meta property="og:url" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/index.html">
 <meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="一、内存管理的概念    二、覆盖与交换1. 覆盖技术将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存 2. 交换技术内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成  应该在外存（磁盘）的什么位置保存被换出的进程？   1.具有对换功能的操作系统中，通常把磁盘空间分为文件区和对换区两部分">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210828232818560.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227131925434.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713194229.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829110339431.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713195680.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132006159.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132009447.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132015603.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132020810.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132026498.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132028740.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132031463.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132041224.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132046314.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132051978.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132059944.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132110832.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132118893.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132142593.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132138965.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132147655.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132158205.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132204229.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132218741.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150011013.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150345182.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151013541.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151227125.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713222756.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132249865.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132253814.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132308534.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132314153.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132322294.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132328319.png">
 <meta property="article:published_time" content="2021-08-28T15:27:51.000Z">
-<meta property="article:modified_time" content="2021-08-28T15:28:34.935Z">
+<meta property="article:modified_time" content="2021-08-29T09:02:53.753Z">
 <meta property="article:author" content="zzy">
 <meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
@@ -136,7 +172,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目錄
@@ -149,6 +185,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">一、内存管理的概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%A6%86%E7%9B%96%E4%B8%8E%E4%BA%A4%E6%8D%A2"><span class="nav-number">2.</span> <span class="nav-text">二、覆盖与交换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%A6%86%E7%9B%96%E6%8A%80%E6%9C%AF"><span class="nav-number">2.1.</span> <span class="nav-text">1. 覆盖技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BA%A4%E6%8D%A2%E6%8A%80%E6%9C%AF"><span class="nav-number">2.2.</span> <span class="nav-text">2. 交换技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE"><span class="nav-number">2.3.</span> <span class="nav-text">3. 知识回顾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%BF%9E%E7%BB%AD%E5%88%86%E9%85%8D%E7%AE%A1%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">三、连续分配管理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8D%95%E4%B8%80%E8%BF%9E%E7%BB%AD%E5%88%86%E9%85%8D"><span class="nav-number">3.1.</span> <span class="nav-text">1. 单一连续分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%9B%BA%E5%AE%9A%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D"><span class="nav-number">3.2.</span> <span class="nav-text">2. 固定分区分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D"><span class="nav-number">3.3.</span> <span class="nav-text">3. 动态分区分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE"><span class="nav-number">3.4.</span> <span class="nav-text">4. 知识回顾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D%E7%AE%97%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">四、动态分区分配算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%A6%96%E6%AC%A1%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="nav-number">4.1.</span> <span class="nav-text">1. 首次适应算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%9C%80%E4%BD%B3%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">2. 最佳适应算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9C%80%E5%9D%8F%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="nav-number">4.3.</span> <span class="nav-text">3. 最坏适应算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%82%BB%E8%BF%91%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><span class="nav-number">4.4.</span> <span class="nav-text">4. 邻近适应算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE"><span class="nav-number">4.5.</span> <span class="nav-text">知识回顾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%9F%BA%E6%9C%AC%E5%88%86%E9%A1%B5%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86"><span class="nav-number">5.</span> <span class="nav-text">五、基本分页存储管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%A1%B5%E6%A1%86"><span class="nav-number">5.1.</span> <span class="nav-text">1. 页框</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%A1%B5%E9%9D%A2"><span class="nav-number">5.2.</span> <span class="nav-text">2. 页面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%88%86%E9%A1%B5%E5%AD%98%E5%82%A8"><span class="nav-number">5.3.</span> <span class="nav-text">3. 分页存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%A1%B5%E8%A1%A8"><span class="nav-number">5.4.</span> <span class="nav-text">4. 页表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E9%A1%B5%E5%8F%B7%E3%80%81%E9%A1%B5%E5%86%85%E5%81%8F%E7%A7%BB%E9%87%8F%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-number">5.5.</span> <span class="nav-text">5. 页号、页内偏移量的计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E7%BB%93%E6%9E%84"><span class="nav-number">5.6.</span> <span class="nav-text">6. 逻辑地址结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%9C%B0%E5%9D%80%E5%8F%98%E6%8D%A2%E6%9C%BA%E6%9E%84"><span class="nav-number">5.7.</span> <span class="nav-text">基本地址变换机构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E6%9C%89%E5%BF%AB%E8%A1%A8%E7%9A%84%E5%9C%B0%E5%9D%80%E5%8F%98%E6%8D%A2%E6%9C%BA%E6%9E%84"><span class="nav-number">5.8.</span> <span class="nav-text">具有快表的地址变换机构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E6%80%A7%E5%8E%9F%E7%90%86"><span class="nav-number">5.8.1.</span> <span class="nav-text">局部性原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BF%AB%E8%A1%A8%EF%BC%9F"><span class="nav-number">5.8.2.</span> <span class="nav-text">什么是快表？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%9F%BA%E6%9C%AC%E5%88%86%E6%AE%B5%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">六、基本分段存储管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">6.1.</span> <span class="nav-text">1. 基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E7%BB%93%E6%9E%84"><span class="nav-number">6.2.</span> <span class="nav-text">2. 逻辑地址结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%AE%B5%E8%A1%A8"><span class="nav-number">6.3.</span> <span class="nav-text">3. 段表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE-1"><span class="nav-number">6.4.</span> <span class="nav-text">4. 知识回顾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E6%AE%B5%E9%A1%B5%E5%BC%8F%E7%AE%A1%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-number">7.</span> <span class="nav-text">七、段页式管理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-1"><span class="nav-number">7.1.</span> <span class="nav-text">1. 基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%AE%B5%E8%A1%A8%E3%80%81%E9%A1%B5%E8%A1%A8"><span class="nav-number">7.2.</span> <span class="nav-text">2. 段表、页表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E7%BB%93%E6%9E%84"><span class="nav-number">7.3.</span> <span class="nav-text">3. 逻辑地址结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE-2"><span class="nav-number">7.4.</span> <span class="nav-text">4. 知识回顾</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -164,7 +201,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -238,10 +275,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">發表於</span>
-      
 
-      <time title="創建時間：2021-08-28 23:27:51 / 修改時間：23:28:34" itemprop="dateCreated datePublished" datetime="2021-08-28T23:27:51+08:00">2021-08-28</time>
+      <time title="創建時間：2021-08-28 23:27:51" itemprop="dateCreated datePublished" datetime="2021-08-28T23:27:51+08:00">2021-08-28</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新於</span>
+        <time title="修改時間：2021-08-29 17:02:53" itemprop="dateModified" datetime="2021-08-29T17:02:53+08:00">2021-08-29</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -262,9 +305,168 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210828232818560.png" alt="image-20210828232818560" style="zoom:80%;">
+        <h2 id="一、内存管理的概念"><a href="#一、内存管理的概念" class="headerlink" title="一、内存管理的概念"></a>一、内存管理的概念</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210828232818560.png" alt="image-20210828232818560" style="zoom:80%;">
 
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227131925434.png" alt="img " style="zoom:100%;">
 
+<h2 id="二、覆盖与交换"><a href="#二、覆盖与交换" class="headerlink" title="二、覆盖与交换"></a>二、覆盖与交换</h2><h3 id="1-覆盖技术"><a href="#1-覆盖技术" class="headerlink" title="1. 覆盖技术"></a>1. 覆盖技术</h3><p>将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存</p>
+<h3 id="2-交换技术"><a href="#2-交换技术" class="headerlink" title="2. 交换技术"></a>2. 交换技术</h3><p>内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成</p>
+<ul>
+<li>应该在外存（磁盘）的什么位置保存被换出的进程？</li>
+</ul>
+<blockquote>
+<p>1.具有对换功能的操作系统中，通常把磁盘空间分为文件区和对换区两部分。文件区主要用于存放文件，主要追求存储空间的利用率，因此对文件区空间的管理采用离散分配方式;对换区空间只占磁盘空间的小部分，被换出的进程数据就存放在对换区。由于对换的速度直接影响到系统的整体速度，因此对换区空间的管理主要追求换入换出速度，因此通常对换区采用连续分配方式(学过文件管理章节后即可理解)。总之，对换区的/0速度比文件区的更快。</p>
+</blockquote>
+<ul>
+<li>什么时候应该交换?</li>
+</ul>
+<blockquote>
+<p> 交换通常在许多进程运行且内存吃紧时进行，而系统负荷降低就暂停。例如:在发现许多进程运行时经常发生缺页，就说明内存紧张，此时可以换出–些进程;.如果缺页率明显下降，就可以暂停换出。</p>
+</blockquote>
+<ul>
+<li>应该换出哪些进程?</li>
+</ul>
+<blockquote>
+<p>3.可优先换出阻塞进程;可换出优先级低的进程;为了防止优先级低的进程在被调入内存后很快又被换出，有的系统还会考虑进程在内存的驻留时间…</p>
+</blockquote>
+<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713194229.png" alt="img " style="zoom:150%;">
+
+<h2 id="三、连续分配管理方式"><a href="#三、连续分配管理方式" class="headerlink" title="三、连续分配管理方式"></a>三、连续分配管理方式</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829110339431.png" alt="image-20210829110339431 " style="zoom:80%;">
+
+<p>连续分配指为进程分配的必须是一个连续的内存空间</p>
+<p>内部碎片指分配给某进程的内存区域中，有些部分没有用上</p>
+<p>外部碎片指内存中的某些空闲分区由于太小而难以利用</p>
+<h3 id="1-单一连续分配"><a href="#1-单一连续分配" class="headerlink" title="1. 单一连续分配"></a>1. 单一连续分配</h3><ul>
+<li><p>介绍</p>
+<p>内存被分为系统区和用户区；系统区用于存放操作系统相关数据，用户区用于存放用户进 程相关数据</p>
+</li>
+<li><p>图示</p>
+</li>
+</ul>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713195680.png" alt="img" style="zoom:100%;">
+
+<ul>
+<li>特点：内存中只能有一道用户程序，用户程序独占整个用户区</li>
+<li>优点：实现简单，无外部碎片</li>
+<li>缺点：只能用于单用户、单系统的操作系统中，有内部碎片</li>
+</ul>
+<h3 id="2-固定分区分配"><a href="#2-固定分区分配" class="headerlink" title="2. 固定分区分配"></a>2. 固定分区分配</h3><p>(1) 介绍</p>
+<p>i. 将整个用户区划分成若干个固定大小的分区，在每个分区中只装入一道作业，某个作业 独占一个固定分区</p>
+<p>ii. 固定分区分配分为分区大小相等和分区大小不相等</p>
+<p>(2) 图示</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132006159.png" alt="img" style="zoom:80%;">
+
+<p>(3) 特点：无外部碎片，有内部碎片</p>
+<p>(4) 需要使用分区说明表实现各个分区的分配与回收</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132009447.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-动态分区分配"><a href="#3-动态分区分配" class="headerlink" title="3. 动态分区分配"></a>3. 动态分区分配</h3><p>(1) 介绍</p>
+<p>不会预先划分内存分区，而是在进程装入内存时，根据进程的大小动态地建立分区，并使 分区的大小正好适合进程的需要，因此系统分区的大小和数目是可变的</p>
+<p>(2) 系统使用空闲分区表和空闲分区链记录内存的使用情况</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132015603.png" alt="img" style="zoom:80%;">
+
+<p>(3) 当一个作业装入内存时，按照动态分区分配算法，从空闲分区表/链中选出一个分区分配给 该作业</p>
+<p>(4) 根据动态分区分配算法算得进程5(4MB)应将分区1分配给该进程</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132020810.png" alt="img" style="zoom:80%;">
+
+<p>(5) 其余几种情况</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132026498.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132028740.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132031463.png" alt="img" style="zoom:80%;">
+
+<p>(6) 特点：无内部碎片，有外部碎片</p>
+<p>(7) 拼凑技术：将原本不相邻的空闲分区合并成一个更大的空闲分区，用于解决碎片分区不满 足进程的需求的问题</p>
+<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132041224.png" alt="img" style="zoom:80%;">
+
+<h2 id="四、动态分区分配算法"><a href="#四、动态分区分配算法" class="headerlink" title="四、动态分区分配算法"></a>四、动态分区分配算法</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132046314.png" alt="img" style="zoom:80%;">
+
+<h3 id="1-首次适应算法"><a href="#1-首次适应算法" class="headerlink" title="1. 首次适应算法"></a>1. 首次适应算法</h3><p>思想：空闲分区以地址递增的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132051978.png" alt="img" style="zoom:80%;">
+
+<p>注意：链表中的结点即使大小发生变化后，结点顺序依旧不变，因为结点只按照地址排序</p>
+<h3 id="2-最佳适应算法"><a href="#2-最佳适应算法" class="headerlink" title="2. 最佳适应算法"></a>2. 最佳适应算法</h3><p>思想：空闲分区以容量递增的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132059944.png" alt="img" style="zoom:80%;">
+
+<p>注意：链表中的结点当大小发生变化之后，需要调整结点顺序</p>
+<h3 id="3-最坏适应算法"><a href="#3-最坏适应算法" class="headerlink" title="3. 最坏适应算法"></a>3. 最坏适应算法</h3><p>思想：空闲分区以容量递减的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
+<p>缺点：每次都选择最大的分区进行分配，会导致较大的连续空间被迅速用完，当之后有大进程 到达时，无内存空间可分配</p>
+<h3 id="4-邻近适应算法"><a href="#4-邻近适应算法" class="headerlink" title="4. 邻近适应算法"></a>4. 邻近适应算法</h3><p>思想：空闲分区以地址递增的次序排列，每次分配内存空间时从上次查找结束的位置开始查找 空闲分区表/链，找到大小能满足要求的第一个空闲分区</p>
+<h3 id="知识回顾"><a href="#知识回顾" class="headerlink" title="知识回顾"></a>知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132110832.png" alt="img" style="zoom:80%;">
+
+<h2 id="五、基本分页存储管理"><a href="#五、基本分页存储管理" class="headerlink" title="五、基本分页存储管理"></a>五、基本分页存储管理</h2><p>连续分配：为进程分配的是连续的内存空间<br>非连续分配：为进程分配的是分散的内存空间，可以将进程分成几个部分，分散的放入空闲区</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132118893.png" alt="img" style="zoom:80%;">
+
+<h3 id="1-页框"><a href="#1-页框" class="headerlink" title="1. 页框"></a>1. 页框</h3><p>将内存空间分为一个个大小相等的分区，每个分区就是一个页框，<br>每个页框有一个编号，即页框号，页框号从0开始</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132142593.png" alt="img" style="zoom:80%;">
+
+<h3 id="2-页面"><a href="#2-页面" class="headerlink" title="2. 页面"></a>2. 页面</h3><p>将进程的逻辑地址空间分为与页框大小相等的一个个部分，<br>每个部分称为一个页或页面，每个页面都有一个编号，即页号，页号从0开始</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132138965.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-分页存储"><a href="#3-分页存储" class="headerlink" title="3. 分页存储"></a>3. 分页存储</h3><p>(1) 操作系统以页框为单位为各个进程分配内存空间，进程的每个页面分别放入一个页框中， 即进程的页面与内存的页框有一一对应的关系</p>
+<p>(2) 各个页面无需连续存放，可以放到不相邻的各个页框中</p>
+<p>(3) 页框不能太大，否则可能会产生过大的内部碎片造成浪费</p>
+<h3 id="4-页表"><a href="#4-页表" class="headerlink" title="4. 页表"></a>4. 页表</h3><p>为了能知道进程的每个页面在内存中存放的位置，需要为每个进程建立一张页表<br>(页表通常存在于进程控制块PCB中)</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132147655.png" alt="img" style="zoom:80%;">
+
+<p>(1) 页表项连续存放，因此页号可以是隐藏的，不占用存储空间 (类比数组)</p>
+<p>(2) 页表记录的只是内存块号，而不是内存块的物理起始地址</p>
+<p>n号内存块的物理起始地址 = n * 内存块大小</p>
+<h3 id="5-页号、页内偏移量的计算"><a href="#5-页号、页内偏移量的计算" class="headerlink" title="5. 页号、页内偏移量的计算"></a>5. 页号、页内偏移量的计算</h3><p>(1) 问题描述：在某计算机系统中，页面大小是50B；某进程逻辑地址空间大小为200B，则逻 辑地址110对应的页号、页内偏移量是多少？</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132158205.png" alt="img" style="zoom:80%;">
+
+<p>(2) 计算方法：</p>
+<p>页号 = 逻辑地址 / 页面长度</p>
+<p>页内偏移量 = 逻辑地址 % 页面长度</p>
+<p>物理地址 = 页号对应页框的起始地址 + 页内偏移量</p>
+<p>页号对应页框的起始地址 = 根据页号查页表得到的页框号 * 页框大小</p>
+<p>(3) 计算结果：</p>
+<p>页号 = 110 / 50 = 2</p>
+<p>页内偏移量 = 110 % 50 = 10</p>
+<h3 id="6-逻辑地址结构"><a href="#6-逻辑地址结构" class="headerlink" title="6. 逻辑地址结构"></a>6. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132204229.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132218741.png" alt="img" style="zoom:80%;">
+
+<h3 id="基本地址变换机构"><a href="#基本地址变换机构" class="headerlink" title="基本地址变换机构"></a>基本地址变换机构</h3><p>基本地址变换机构可以借助进程的页表将逻辑地址转换为物理地址。</p>
+<p>通常会在系统中设置一个页表寄存器(PTR) ，存放页表在内存中的起始地址F和页表长度M。</p>
+<p>进程未执行时，页表的始址和页表长度放在进程控制块(PCB)中，当进程被调度时，操作系统内核会把它们放到页表寄存器中。</p>
+<p>注意:页面大小是2的整数幂</p>
+<p>例子：</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150011013.png" alt="image-20210829150011013" style="zoom:80%;">
+
+<h3 id="具有快表的地址变换机构"><a href="#具有快表的地址变换机构" class="headerlink" title="具有快表的地址变换机构"></a>具有快表的地址变换机构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150345182.png" alt="image-20210829150345182" style="zoom:80%;">
+
+<h4 id="局部性原理"><a href="#局部性原理" class="headerlink" title="局部性原理"></a>局部性原理</h4><p>时间局部性:如果执行了程序中的某条指令，那么不久后这条指令很有可能再次执行;如果某个数据被访问过，不久之后该数据很可能再次被访问。( 因为程序中存在大量的循环)</p>
+<p>空间局部性:一旦程序访问了某个存储单元，在不久之后，其附近的存储单元也很有可能被访问。( 因为很多数据在内存中都是连续存放的)</p>
+<p>上小节介绍的基本地址变换机构中，每次要访问一个逻辑地址，都需要查询内存中的页表。由于局部性原理，可能连续很多次查到的都是同一个页表项。既然如此，能否利用这个特性减少访问页表的次数呢?</p>
+<h4 id="什么是快表？"><a href="#什么是快表？" class="headerlink" title="什么是快表？"></a>什么是快表？</h4><p>快表，又称联想寄存器(TLB) ，是一种访问速度比内存快很多的高速缓冲存储器，用来存放当前访问的若干页表项，以加速地址变换的过程。与此对应，内存中的页表常称为慢表。</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151013541.png" alt="image-20210829151013541" style="zoom:80%;">
+
+<p>小结：</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151227125.png" alt="image-20210829151227125" style="zoom:80%;">
+
+<h2 id="六、基本分段存储管理"><a href="#六、基本分段存储管理" class="headerlink" title="六、基本分段存储管理"></a>六、基本分段存储管理</h2><p>与分页最大的区别：进程所划分的基本单位不同 (各段的大小可以不同)</p>
+<h3 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p>(1) 进程按照自身的逻辑关系划分为若干个段，每段都有一个段名，每段从0开始编址</p>
+<p>(2) 以段为单位进行分配，每个段在内存中占据连续空间，但各段之间可以不相邻</p>
+<h3 id="2-逻辑地址结构"><a href="#2-逻辑地址结构" class="headerlink" title="2. 逻辑地址结构"></a>2. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713222756.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-段表"><a href="#3-段表" class="headerlink" title="3. 段表"></a>3. 段表</h3><p>记录各个逻辑段与实际的物理位置存放地址的对应关系</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132249865.png" alt="img" style="zoom:80%;">
+
+<h3 id="4-知识回顾-1"><a href="#4-知识回顾-1" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132253814.png" alt="img" style="zoom:150%;">
+
+<h2 id="七、段页式管理方式"><a href="#七、段页式管理方式" class="headerlink" title="七、段页式管理方式"></a>七、段页式管理方式</h2><p>段页式管理 = 分段 + 分页</p>
+<h3 id="1-基本概念-1"><a href="#1-基本概念-1" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p>(1) 将进程按照逻辑模块分段，再将各段分页 (如每个页面4KB)</p>
+<p>(2) 将内存空间按照4KB划分成多个页框</p>
+<p>(3) 将进程的各页面分别装入对应的页框中</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132308534.png" alt="img" style="zoom:80%;">
+
+<h3 id="2-段表、页表"><a href="#2-段表、页表" class="headerlink" title="2. 段表、页表"></a>2. 段表、页表</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132314153.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-逻辑地址结构"><a href="#3-逻辑地址结构" class="headerlink" title="3. 逻辑地址结构"></a>3. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132322294.png" alt="img" style="zoom:80%;">
+
+<h3 id="4-知识回顾-2"><a href="#4-知识回顾-2" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132328319.png" alt="img" style="zoom:80%;">
     </div>
 
     
@@ -285,6 +487,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2021/08/29/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E3%80%81%E9%A1%B5%E9%9D%A2%E7%BD%AE%E6%8D%A2%E7%AE%97%E6%B3%95/" rel="next" title="虚拟内存管理、页面置换算法">
+                  虚拟内存管理、页面置换算法 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
     </footer>

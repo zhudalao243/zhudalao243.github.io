@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -200,6 +200,241 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">Golang中的GC垃圾回收机制</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+
+      <time title="創建時間：2021-08-15 20:14:56" itemprop="dateCreated datePublished" datetime="2021-08-15T20:14:56+08:00">2021-08-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新於</span>
+        <time title="修改時間：2021-08-29 23:33:15" itemprop="dateModified" datetime="2021-08-29T23:33:15+08:00">2021-08-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Golang中的GC垃圾回收机制"><a href="#Golang中的GC垃圾回收机制" class="headerlink" title="Golang中的GC垃圾回收机制"></a>Golang中的GC垃圾回收机制</h1><h2 id="Go-1-3-标记清除-mark-and-sweep"><a href="#Go-1-3-标记清除-mark-and-sweep" class="headerlink" title="Go 1.3 标记清除(mark and sweep)"></a>Go 1.3 标记清除(mark and sweep)</h2><blockquote>
+<p>流程：</p>
+<ol>
+<li>暂停程序业务逻辑, 找出不不可达的对象，和可达对象。</li>
+<li>开始标记，程序找出它所有可达的对象，并做上标记。</li>
+<li>标记完了了之后，然后开始清除未标记的对象.</li>
+<li>停⽌止暂停，让程序继续跑。然后循环重复这个过程，直到process程序⽣生命周期结束。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>STW，stop the world；让程序暂停，程序出现卡顿 (重要问题)。将第四步和第三步换位置， 缩短STW的范围</li>
+<li>标记需要扫描整个heap</li>
+<li>清除数据会产⽣生heap碎⽚。</li>
+</ol>
+</blockquote>
+<h2 id="Go-1-5-三色标记法"><a href="#Go-1-5-三色标记法" class="headerlink" title="Go 1.5 三色标记法"></a>Go 1.5 三色标记法</h2><p>流程：</p>
+<ol>
+<li>只要是新创建的对象,默认的颜⾊色都是标记为“⽩白⾊色”.</li>
+</ol>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815202056508.png" alt="image-20210815202056508" style="zoom:40%;">
+
+<ol start="2">
+<li><p>每次GC回收开始, 然后从根节点开始遍历所有对象，把遍历到的对象从白色集合放入“灰色”集合。</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815202153446.png" alt="image-20210815202153446" style="zoom:40%;"></li>
+<li><p>遍历灰色集合，将灰色对象引用的对象从白色集合放入灰色集合，之后将此灰色对象放入黑色集合。</p>
+</li>
+</ol>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815202305099.png" alt="image-20210815202305099" style="zoom:40%;">
+
+<ol start="4">
+<li><p>重复第三步, 直到灰⾊色中⽆无任何对象.</p>
+<center><img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815202348203.png" alt="image-20210815202348203" style="zoom:30%;"><img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815202439107.png" alt="image-20210815202439107" style="zoom:30%;"></center></li>
+<li><p>回收所有的白色标记表的对象. 也就是回收垃圾.</p>
+</li>
+</ol>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815202557320.png" alt="image-20210815202557320" style="zoom:40%;">
+
+<h2 id="如果三色标记法不被STW保护"><a href="#如果三色标记法不被STW保护" class="headerlink" title="如果三色标记法不被STW保护"></a>如果三色标记法不被STW保护</h2><p><em>条件1: 一个白色对象被黑色对象引用(白色被挂在黑色下).</em></p>
+<p><em>条件2: 灰色对象与它之间的可达关系的白色对象遭到破坏(灰色同时丢了该白色)</em></p>
+<p><em>两个条件同时满足，那么就会出现对象丢失的现象</em></p>
+<p>样例：</p>
+<p>如果不开启STW：</p>
+<center><img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815203317889.png" alt="image-20210815203317889" style="zoom:25%;"><img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815203356122.png" alt="image-20210815203356122" style="zoom:25%;"><img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815203423861.png" alt="image-20210815203423861" style="zoom:25%;"></center>
+
+
+
+<h2 id="强弱三色不变式"><a href="#强弱三色不变式" class="headerlink" title="强弱三色不变式"></a>强弱三色不变式</h2><h3 id="强三色不不变式"><a href="#强三色不不变式" class="headerlink" title="强三色不不变式"></a>强三色不不变式</h3><p>破坏条件1</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815213638805.png" alt="image-20210815213638805" style="zoom:33%;">
+
+<h3 id="弱三色不不变式"><a href="#弱三色不不变式" class="headerlink" title="弱三色不不变式"></a>弱三色不不变式</h3><p>破坏条件2</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815213703432.png" alt="image-20210815213703432" style="zoom:40%;">
+
+<p>如果三色标记满足强弱不变式之一，即可保证不丢失对象.</p>
+<h2 id="屏障机制"><a href="#屏障机制" class="headerlink" title="屏障机制"></a>屏障机制</h2><p>屏障？程序运行过程中额外添加的判断机制。</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815213927896.png" alt="image-20210815213927896" style="zoom:50%;">
+
+<h3 id="插入屏障"><a href="#插入屏障" class="headerlink" title="插入屏障"></a>插入屏障</h3><p>插入屏障： 对象被引用时，触发的机制。</p>
+<p>具体操作： 在A对象引用B对象的时候，B对象被标记为灰色。(将B挂在A下游，B必须被标记为灰色)</p>
+<p>满足: 强三色不不变式. (不存在黑色对象引用白色对象的情况了， 因为白色会强制变成灰色)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">//伪码</span><br><span class="line">添加下游对象(当前下游对象slot, 新下游对象ptr) &#123;</span><br><span class="line">	//1</span><br><span class="line">	标记灰⾊色(新下游对象ptr)</span><br><span class="line">	//2</span><br><span class="line">	当前下游对象slot = 新下游对象ptr</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>场景：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A.添加下游对象(B, nil)  //A对象，删除B对象的引⽤。 B被A删除，被标记为灰(如果B之前为⽩)</span><br><span class="line">A.添加下游对象(B, C) //A对象，更更换下游B变成C。 B被A删除，被标记为灰(如果B之前为⽩)</span><br></pre></td></tr></table></figure>
+
+<p>样例：</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815214828157.png" alt="image-20210815214828157" style="zoom:50%;">
+
+<p>插入写屏障只在堆上触发，在栈上不触发。</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815214950520.png" alt="image-20210815214950520" style="zoom:26%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815215043176.png" alt="image-20210815215043176" style="zoom:30%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815215126841.png" alt="image-20210815215126841" style="zoom:33%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815215308921.png" alt="image-20210815215308921" style="zoom:33%;">
+
+<p>由于栈上不触发插入写屏障，所以在准备回收白色前，需要加STW暂停保护重新扫描一遍栈空间。</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815215334937.png" alt="image-20210815215334937" style="zoom:33%;">
+
+<p>不足：结束时需要STW来重新扫描栈，⼤大约需要10~100ms</p>
+<h3 id="删除屏障"><a href="#删除屏障" class="headerlink" title="删除屏障"></a>删除屏障</h3><p>删除屏障：对象被删除时 触发的机制。</p>
+<p>具体操作: 被删除的对象，如果自身为灰色或者白色，那么被标记为灰色。</p>
+<p>满足: 弱三色不变式. (保护灰色对象到白色对象的路径不会断)。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//伪码</span><br><span class="line">添加下游对象(当前下游对象slot， 新下游对象ptr) &#123;</span><br><span class="line">	//1</span><br><span class="line">	<span class="keyword">if</span> (当前下游对象slot是灰⾊色 || 当前下游对象slot是⽩白⾊色) &#123;</span><br><span class="line">		标记灰⾊色(当前下游对象slot) //slot为被删除对象， 标记为灰⾊色</span><br><span class="line">	&#125;</span><br><span class="line">	//2</span><br><span class="line">	当前下游对象slot = 新下游对象ptr</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>场景：</p>
+<p>​    A.添加下游对象(B, nil) //A对象，删除B对象的引用。 B被A删除，被标记为灰(如果B之前为白)<br>​    A.添加下游对象(B, C) //A对象，更换下游B变成C。 B被A删除，被标记为灰(如果B之前为白)</p>
+<p>样例：</p>
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815220252392.png" alt="image-20210815220252392" style="zoom:30%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815220332343.png" alt="image-20210815220332343" style="zoom:33%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815220413361.png" alt="image-20210815220413361" style="zoom:40%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815220435567.png" alt="image-20210815220435567" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815220500445.png" alt="image-20210815220500445" style="zoom:40%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815220533566.png" alt="image-20210815220533566" style="zoom:30%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815220552303.png" alt="image-20210815220552303" style="zoom:40%;">
+
+<p>不足： 回收精度低，一个对象即使被删除了最后一个指向它的指针也依旧可以活过这一轮，在下一轮GC中被清理理掉。</p>
+<h2 id="Go-1-8-混合写屏障机制"><a href="#Go-1-8-混合写屏障机制" class="headerlink" title="Go 1.8 混合写屏障机制"></a>Go 1.8 混合写屏障机制</h2><blockquote>
+<p>具体操作:</p>
+<ol>
+<li>GC开始将栈上的对象全部扫描并标记为黑色(之后不再进行第二次重复扫描，无需STW)</li>
+<li>GC期间，任何在栈上创建的新对象，均为黑色。</li>
+<li>被删除的对象标记为灰色。</li>
+<li>被添加的对象标记为灰色。</li>
+</ol>
+<p>满足: 变形的弱三色不变式. (结合了插入、删除写屏障两者的优点)</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//伪码</span><br><span class="line">添加下游对象(当前下游对象slot, 新下游对象ptr) &#123;</span><br><span class="line">    //1</span><br><span class="line">    标记灰⾊色(当前下游对象slot) //只要当前下游对象被移⾛走，就标记灰⾊色</span><br><span class="line">    //2</span><br><span class="line">    标记灰⾊色(新下游对象ptr)</span><br><span class="line">    //3</span><br><span class="line">    当前下游对象slot = 新下游对象ptr</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815221417608.png" alt="image-20210815221417608" style="zoom:25%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815221437818.png" alt="image-20210815221437818" style="zoom:50%;">
+
+<h3 id="场景一"><a href="#场景一" class="headerlink" title="场景一"></a>场景一</h3><p>对象被一个堆对象删除引用，成为栈对象的下游。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//伪码</span><br><span class="line">//前提：堆对象4-&gt;对象7 = 对象7； //对象7 被 对象4引⽤用</span><br><span class="line">栈对象1-&gt;对象7 = 堆对象7； //将堆对象7 挂在 栈对象1 下游</span><br><span class="line">堆对象4-&gt;对象7 = null； //对象4 删除引⽤用 对象7</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222017066.png" alt="image-20210815222017066" style="zoom:33%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222032431.png" alt="image-20210815222032431" style="zoom:33%;">
+
+<h3 id="场景二"><a href="#场景二" class="headerlink" title="场景二"></a>场景二</h3><p>对象被一个栈对象删除引用，成为另一个栈对象的下游。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">new 栈对象9；</span><br><span class="line">对象9-&gt;对象3 = 对象3； //将栈对象3 挂在 栈对象9 下游</span><br><span class="line">对象2-&gt;对象3 = null； //对象2 删除引⽤用 对象3</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222315895-1629105238588.png" alt="image-20210815222315895" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222346906-1629105238588.png" alt="image-20210815222346906" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222407645-1629105238589.png" alt="image-20210815222407645" style="zoom:50%;">
+
+<h3 id="场景三"><a href="#场景三" class="headerlink" title="场景三"></a>场景三</h3><p>对象被一个堆对象删除引用，成为另一个堆对象的下游。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">堆对象10-&gt;对象7 = 堆对象7； //将堆对象7 挂在 堆对象10 下游</span><br><span class="line">堆对象4-&gt;对象7 = null； //对象4 删除引⽤用 对象7</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222602561-1629105297759.png" alt="image-20210815222602561" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222619017-1629105297759.png" alt="image-20210815222619017" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222633300-1629105297758.png" alt="image-20210815222633300" style="zoom:50%;">
+
+<h3 id="场景四"><a href="#场景四" class="headerlink" title="场景四"></a>场景四</h3><p>对象从一个栈对象删除引用，成为另一个堆对象的下游。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">栈对象1-&gt;对象2 = null； //对象1 删除引⽤用 对象2</span><br><span class="line">堆对象4-&gt;对象7 = null; //对象4 删除引⽤用 对象7</span><br><span class="line">堆对象4-&gt;对象2 = 栈对象2； //对象4 添加 下游 栈对象2</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222835930.png" alt="image-20210815222835930" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222852740.png" alt="image-20210815222852740" style="zoom:50%;">
+
+<img src="/2021/08/15/Golang%E4%B8%AD%E7%9A%84GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/image-20210815222910678.png" alt="image-20210815222910678" style="zoom:50%;">
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Go V1.3 普通的标记清除法， 整体过程需要STW，效率极低</p>
+<p>Go V1.5 三⾊色标记法， 堆空间启动写屏障，栈空间不启动， 全部扫描之后，需要重新扫描⼀一次栈(需要STW)， 效率普通</p>
+<p>Go V1.8 三⾊色标记法，混合写屏障机制， 栈空间不不启动，堆空间启动， 整体过程⼏几乎不不需要STW， 效率较高</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
