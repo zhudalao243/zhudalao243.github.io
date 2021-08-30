@@ -6,7 +6,7 @@
   <link href="http://zhudalao243.github.io/atom.xml" rel="self"/>
   
   <link href="http://zhudalao243.github.io/"/>
-  <updated>2021-08-29T09:06:34.081Z</updated>
+  <updated>2021-08-30T12:43:30.368Z</updated>
   <id>http://zhudalao243.github.io/</id>
   
   <author>
@@ -15,6 +15,52 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>布隆过滤器</title>
+    <link href="http://zhudalao243.github.io/2021/08/30/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/"/>
+    <id>http://zhudalao243.github.io/2021/08/30/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/</id>
+    <published>2021-08-30T12:11:22.000Z</published>
+    <updated>2021-08-30T12:43:30.368Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;布隆过滤器的理解&quot;&gt;&lt;a href=&quot;#布隆过滤器的理解&quot; class=&quot;headerlink&quot; title=&quot;布隆过滤器的理解&quot;&gt;&lt;/a&gt;布隆过滤器的理解&lt;/h1&gt;&lt;h2 id=&quot;场景分析：&quot;&gt;&lt;a href=&quot;#场景分析：&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="布隆过滤器" scheme="http://zhudalao243.github.io/tags/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>一致性哈希</title>
+    <link href="http://zhudalao243.github.io/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/"/>
+    <id>http://zhudalao243.github.io/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/</id>
+    <published>2021-08-30T11:38:37.000Z</published>
+    <updated>2021-08-30T12:11:52.950Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;一致性哈希&quot;&gt;&lt;a href=&quot;#一致性哈希&quot; class=&quot;headerlink&quot; title=&quot;一致性哈希&quot;&gt;&lt;/a&gt;一致性哈希&lt;/h1&gt;&lt;h2 id=&quot;场景分析&quot;&gt;&lt;a href=&quot;#场景分析&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="一致性哈希" scheme="http://zhudalao243.github.io/tags/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/"/>
+    
+  </entry>
   
   <entry>
     <title>虚拟内存管理、页面置换算法</title>
@@ -461,56 +507,6 @@
     <category term="密码学" scheme="http://zhudalao243.github.io/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
     
     <category term="Golang" scheme="http://zhudalao243.github.io/tags/Golang/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>分组密码的模式</title>
-    <link href="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/"/>
-    <id>http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/</id>
-    <published>2021-08-17T02:45:08.000Z</published>
-    <updated>2021-08-17T03:38:12.421Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;figure class=&quot;highlight go&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span</summary>
-        
-      
-    
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>对称加密</title>
-    <link href="http://zhudalao243.github.io/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/"/>
-    <id>http://zhudalao243.github.io/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/</id>
-    <published>2021-08-16T14:33:06.000Z</published>
-    <updated>2021-08-17T02:50:01.725Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;对称加密&quot;&gt;&lt;a href=&quot;#对称加密&quot; class=&quot;headerlink&quot; title=&quot;对称加密&quot;&gt;&lt;/a&gt;对称加密&lt;/h1&gt;&lt;h2 id=&quot;基础知识&quot;&gt;&lt;a href=&quot;#基础知识&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
     
   </entry>
   
