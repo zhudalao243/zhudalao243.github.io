@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="一、多生产者 - 多消费者问题1、问题描述 桌子上有一只盘子，每次只能向其中放入一个水果。爸爸专向盘子中放苹果，妈妈专向盘子中放橘子，儿子专等着吃盘子中的橘子，女儿专等着吃盘子中的苹果。只有盘子空时，爸爸或妈妈才可向盘子中放一个水果。仅当盘子中有自己需要的水果时，儿子或女儿可以从盘子中取出水果。   2 问题分析 关系分析。找出题目中描述的各个进程，分析它们之间的同步、互斥关系。多生产者-多消费者">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PV操作--经典问题分析">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="一、多生产者 - 多消费者问题1、问题描述 桌子上有一只盘子，每次只能向其中放入一个水果。爸爸专向盘子中放苹果，妈妈专向盘子中放橘子，儿子专等着吃盘子中的橘子，女儿专等着吃盘子中的苹果。只有盘子空时，爸爸或妈妈才可向盘子中放一个水果。仅当盘子中有自己需要的水果时，儿子或女儿可以从盘子中取出水果。   2 问题分析 关系分析。找出题目中描述的各个进程，分析它们之间的同步、互斥关系。多生产者-多消费者">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610154557852.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610155007683.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610155634180.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610161040503.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610161420106.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319181813857.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319183414832.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319183610850.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319185437858.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320135112282.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320182746487.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320182822669.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320182907776.png">
+<meta property="article:published_time" content="2021-08-31T11:43:52.000Z">
+<meta property="article:modified_time" content="2021-08-31T12:10:57.374Z">
+<meta property="article:author" content="zzy">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610154557852.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/","path":"2021/08/31/PV操作-经典问题分析/","title":"PV操作--经典问题分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PV操作--经典问题分析 | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%A4%9A%E7%94%9F%E4%BA%A7%E8%80%85-%E5%A4%9A%E6%B6%88%E8%B4%B9%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">一、多生产者 - 多消费者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">1、问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">2 问题分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">3 代码实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%90%B8%E7%83%9F%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">二、吸烟者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0-1"><span class="nav-number">2.1.</span> <span class="nav-text">1、问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">2、问题分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%85%B3%E7%B3%BB%E5%88%86%E6%9E%90%E3%80%82"><span class="nav-number">2.2.1.</span> <span class="nav-text">1、关系分析。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%95%B4%E7%90%86%E6%80%9D%E8%B7%AF%E3%80%82"><span class="nav-number">2.2.2.</span> <span class="nav-text">2、整理思路。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E4%BF%A1%E5%8F%B7%E9%87%8F%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.2.3.</span> <span class="nav-text">3、信号量设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.3.</span> <span class="nav-text">3、实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%AF%BB%E8%80%85-%E5%86%99%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">二、读者-写者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0-2"><span class="nav-number">3.1.</span> <span class="nav-text">1、问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90-1"><span class="nav-number">3.2.</span> <span class="nav-text">2、问题分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E5%AE%9E%E7%8E%B0-1"><span class="nav-number">3.3.</span> <span class="nav-text">3、实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%93%B2%E5%AD%A6%E5%AE%B6%E8%BF%9B%E9%A4%90%E9%97%AE%E9%A2%98"><span class="nav-number">4.</span> <span class="nav-text">哲学家进餐问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">4.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">4.2.</span> <span class="nav-text">问题分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E6%8F%8F%E8%BF%B0"><span class="nav-number">4.3.</span> <span class="nav-text">代码描述</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PV操作--经典问题分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-31 19:43:52 / 修改時間：20:10:57" itemprop="dateCreated datePublished" datetime="2021-08-31T19:43:52+08:00">2021-08-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="一、多生产者-多消费者问题"><a href="#一、多生产者-多消费者问题" class="headerlink" title="一、多生产者 - 多消费者问题"></a>一、多生产者 - 多消费者问题</h1><h2 id="1、问题描述"><a href="#1、问题描述" class="headerlink" title="1、问题描述"></a>1、问题描述</h2><blockquote>
+<p>桌子上有一只盘子，每次只能向其中放入一个水果。爸爸专向盘子中放苹果，妈妈专向盘子中放橘子，儿子专等着吃盘子中的橘子，女儿专等着吃盘子中的苹果。只有盘子空时，爸爸或妈妈才可向盘子中放一个水果。仅当盘子中有自己需要的水果时，儿子或女儿可以从盘子中取出水果。</p>
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610154557852.png" alt="img" style="zoom:80%;">
+</blockquote>
+<h2 id="2-问题分析"><a href="#2-问题分析" class="headerlink" title="2 问题分析"></a>2 问题分析</h2><ol>
+<li><p>关系分析。找出题目中描述的各个进程，分析它们之间的同步、互斥关系。<br>多生产者-多消费者问题关系分析如下：</p>
+<blockquote>
+<p>互斥关系： 对缓冲区（盘子）的访问要互斥地进行<br>同步关系（一前一后）：</p>
+<ol>
+<li>父亲将苹果放入盘子后，女儿才能取苹果</li>
+<li>母亲将橘子放入盘子后，儿子才能取橘子</li>
+<li>只有盘子为空时，父亲或母亲才能放入水果</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+<p>注意：“盘子为空”这个事件可以由儿子或女儿触发，事件发生后才允许父亲或母亲放水果</p>
+<ol start="2">
+<li><p>整理思路。根据各进程的操作流程确定P、V操作的大致顺序。</p>
+<blockquote>
+<p>由以上的同步、互斥关系分析，将多生产者-多消费者问题描绘出图形：</p>
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610155007683.png" alt="img" style="zoom:80%;"></blockquote>
+</li>
+<li><p>设置信号量。设置需要的信号量，并根据题目条件确定信号量初值。<br>（互斥信号量初值一般为 1，同步信号量的初始值要看对应资源的初始值是多少）<br><strong>本问题中信号量设置如下：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">semaphore mutex = 1;    //实现互斥访问盘子（缓冲区）</span><br><span class="line">semaphore apple = 0;    //盘子中有几个苹果 </span><br><span class="line">semaphore orange = 0;   //盘子中有几个橘子</span><br><span class="line">semaphore plate = 1;    //盘子中还可以放多少个水果</span><br></pre></td></tr></table></figure></li>
+<li><p>模型实现：</p>
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610155634180.png" alt="img" style="zoom:80%;"></li>
+</ol>
+<blockquote>
+<p>dad：先准备一个苹果，放苹果之前，先判断盘子里是否为空（P一下盘子，检查盘子中还可以放多少个水果），然后再将苹果放入进去（V一下苹果，数量+1）<br>mom：先准备一个橘子，放橘子之前，先判断盘子里是否为空（P一下盘子，检查盘子中还可以放多少个水果），然后再将橘子放入进去（V一下橘子，数量+1）<br>daughter：拿苹果之前，先判断盘子里有没有苹果（P一下苹果，若没有苹果，自己被阻塞），然后告诉父母，盘子为空了（V一下盘子）<br>son：拿橘子之前，先判断盘子里有没有橘子（P一下橘子，若没有橘子，自己被阻塞），然后告诉父母，盘子为空了（V一下盘子）</p>
+</blockquote>
+<blockquote>
+<p><strong>以下实现了所有进程之间的同步关系：</strong></p>
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610161040503.png" alt="img" style="zoom:80%;">
+
+<p>还需要实现各个进程对盘子（缓冲区）的互斥访问：<br>就是所有进程对盘子进行PV操作，即加锁和解锁的过程</p>
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20200610161420106.png" alt="img" style="zoom:80%;">
+</blockquote>
+<h2 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3 代码实现"></a>3 代码实现</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"> semaphore mutex = 1;    //实现互斥访问盘子（缓冲区）</span><br><span class="line">  semaphore apple = 0;    //盘子中有几个苹果 </span><br><span class="line">  semaphore orange = 0;   //盘子中有几个橘子</span><br><span class="line">  semaphore plate = 1;    //盘子中还可以放多少个水果</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">dad</span></span> ()&#123;</span><br><span class="line">	<span class="keyword">while</span>(1)&#123;</span><br><span class="line">           准备一个苹果;</span><br><span class="line">           P(plate);</span><br><span class="line">           P(mutex);</span><br><span class="line">           向盘子中放苹果;</span><br><span class="line">           V(mutex);</span><br><span class="line">           V(apple);       //允许女儿进程取苹果</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="title">mom</span></span> ()&#123;</span><br><span class="line">	<span class="keyword">while</span>(1)&#123;</span><br><span class="line">           准备一个橘子;</span><br><span class="line">           P(plate);</span><br><span class="line">           P(mutex);</span><br><span class="line">           向盘子中放橘子;</span><br><span class="line">           V(mutex);</span><br><span class="line">           V(orange);        //允许儿子进程取橘子</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="title">daughter</span></span> ()&#123;</span><br><span class="line">	<span class="keyword">while</span>(1)&#123;</span><br><span class="line">           P(apple);</span><br><span class="line">           P(mutex);</span><br><span class="line">          从盘子中取出苹果;</span><br><span class="line">           V(mutex);</span><br><span class="line">           V(plate);           //允许父母进程进程向盘子中取放水果</span><br><span class="line">           吃苹果;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="title">son</span></span> ()&#123;</span><br><span class="line">	<span class="keyword">while</span>(1)&#123;</span><br><span class="line">           P(orange);</span><br><span class="line">           P(mutex);</span><br><span class="line">           从盘子中取出橘子;</span><br><span class="line">           V(mutex);</span><br><span class="line">           V(plate);           //允许父母进程进程向盘子中取放水果</span><br><span class="line">           吃橘子;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="二、吸烟者问题"><a href="#二、吸烟者问题" class="headerlink" title="二、吸烟者问题"></a>二、吸烟者问题</h1><h2 id="1、问题描述-1"><a href="#1、问题描述-1" class="headerlink" title="1、问题描述"></a>1、问题描述</h2><p>假设一个系统有三个抽烟者进程和一个供应者进程。每个抽烟者不停地卷烟并抽掉，但是要卷起并抽掉一支烟，需要三种材料：烟草、纸、胶水。三个抽烟者中，每一个第一个拥有烟草，第二个拥有纸，第三个拥有胶水。供应者无限提供三种材料，供应者每次将两种材料放桌子上，拥有剩下材料的抽烟者卷一支烟并抽掉它，并给供应者一个信号完成了，供应者就会把另外两种材料再放桌子上，这个过程一直重复（三个抽烟者轮流抽烟）<br><img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319181813857.png" alt="img" style="zoom:80%;"></p>
+<h2 id="2、问题分析"><a href="#2、问题分析" class="headerlink" title="2、问题分析"></a>2、问题分析</h2><h3 id="1、关系分析。"><a href="#1、关系分析。" class="headerlink" title="1、关系分析。"></a>1、关系分析。</h3><p>供应者与三个抽烟者分别是同步关系。由于抽烟者无法同时满足两个或以上的抽烟者，三个抽烟者对抽烟这个动作互斥（或由三个抽烟者轮流抽烟得知）</p>
+<h3 id="2、整理思路。"><a href="#2、整理思路。" class="headerlink" title="2、整理思路。"></a>2、整理思路。</h3><p>四个进程，供应者作为生产者向三个抽烟者提供材料</p>
+<h3 id="3、信号量设置"><a href="#3、信号量设置" class="headerlink" title="3、信号量设置"></a>3、信号量设置</h3><p>信号量offer1、offer2、offer3分别表示烟草和纸组合，烟草和胶水组合，胶水和纸组合。信号量finish表示抽烟完成信号</p>
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319183414832.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319183610850.png" alt="img" style="zoom:80%;">
+
+<h2 id="3、实现"><a href="#3、实现" class="headerlink" title="3、实现"></a>3、实现</h2><img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190319185437858.png" alt="img" style="zoom:80%;">
+
+<h1 id="二、读者-写者问题"><a href="#二、读者-写者问题" class="headerlink" title="二、读者-写者问题"></a>二、读者-写者问题</h1><h2 id="1、问题描述-2"><a href="#1、问题描述-2" class="headerlink" title="1、问题描述"></a>1、问题描述</h2><p>有读者和写者两组并发进程，共享一个文件，当两个或两个以上的读进程同时访问共享数据时不会产生副作用，但若某个写进程 和其他进程（写进程或读进程）同时访问共享数据时则可能导致数据不一致的错误。因此要求：</p>
+<ul>
+<li>允许多个读者可以同时对文件执行读操作；</li>
+<li>只允许一个写者往文件中写信息；</li>
+<li>任一写者再完成写操作之前不允许其他读者或写者工作；</li>
+<li>写者执行写操作前，应让已有的读者和写者全部退出。</li>
+</ul>
+<img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320135112282.png" alt="img" style="zoom:80%;">
+
+<h2 id="2、问题分析-1"><a href="#2、问题分析-1" class="headerlink" title="2、问题分析"></a>2、问题分析</h2><img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320182746487.png" alt="img" style="zoom:80%;">
+
+<h2 id="3、实现-1"><a href="#3、实现-1" class="headerlink" title="3、实现"></a>3、实现</h2><img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320182822669.png" alt="img" style="zoom:80%;">
+
+<p>写优先：</p>
+<p><img src="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/20190320182907776.png" alt="img"></p>
+<h1 id="哲学家进餐问题"><a href="#哲学家进餐问题" class="headerlink" title="哲学家进餐问题"></a>哲学家进餐问题</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>由Dijkstra提出并解决的哲学家进餐问题（The Dinning Philosophers Problems）是典型的同步问题。五个哲学家共用一张圆桌，分别坐在周围的五把椅子上，在圆桌上有五个碗和五只筷子，他们的生活方式是交替地进行思考和进餐。平时，一个哲学家进行思考，饥饿时便试图取用其左右最靠近他的筷子，只有当他拿到两只筷子时，才能进餐，进餐完毕，放下筷子，继续思考。</p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>利用记录型信号量解决哲学家进餐问题，经分析，筷子是邻接资源，在一段时间内只允许一位哲学家使用，可以用一个互斥型信号量表示一只筷子，由这个五个信号量构成信号量数组。<br>semaphore chopstick[5] = {1, 1, 1, 1, 1};<br>所有信号量初始为1，第i位哲学家的活动可描述为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">do</span> &#123;</span><br><span class="line"> 	p(chopstick[i]);  // 申请左边的一只筷子</span><br><span class="line"> 	p(chopstick[(i+1)%5]];  // 申请右边筷子</span><br><span class="line"> 	...</span><br><span class="line"> 	eat</span><br><span class="line"> 	...</span><br><span class="line"> 	v(chopstick[i]);  // 释放左边的一只筷子</span><br><span class="line"> 	v(chopstick[(i+1)%5];  // 释放右边的筷子</span><br><span class="line"> 	...</span><br><span class="line"> 	think</span><br><span class="line"> 	...</span><br><span class="line">&#125; <span class="keyword">while</span> (True);</span><br></pre></td></tr></table></figure>
+
+<p><font color="red"><strong>问题</strong>：<br> 哲学家饥饿时总是先拿起左边的筷子，之后拿起右边的筷子，成功后便可进餐。进餐后又放下左边的筷子，再放下右边的筷子。显然不会有两个相邻的哲学家同时进餐，有可能引起<strong>死锁</strong>：即每一个哲学家都拿起左边的筷子，当他们拿右边筷子，便会无限等待。</font></p>
+<p><strong>共有三种解决办法：</strong></p>
+<h2 id="代码描述"><a href="#代码描述" class="headerlink" title="代码描述"></a>代码描述</h2><ul>
+<li><p><strong>利用and型信号量机制</strong>：仅当哲学家左右两只筷子均可用时，才允许他拿起筷子进餐。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">semaphore chopstick[5] = &#123;1, 1, 1, 1, 1&#125;; </span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	think</span><br><span class="line">	...</span><br><span class="line">	p(chopstick[i], chopstick[(i+1)%5]);</span><br><span class="line">	...</span><br><span class="line">	eat</span><br><span class="line">	...</span><br><span class="line">	v(chopstick[i], chopstick[(i+1)%5]);</span><br><span class="line">&#125; <span class="keyword">while</span>(True);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>另一种方式：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">semaphore chopstick[5] = &#123;1, 1, 1, 1, 1&#125;, mutex = 1; </span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	think</span><br><span class="line">	...</span><br><span class="line">	p(mutex);  // 申请临界资源</span><br><span class="line">	p(chopstick[i]);  // 拿左</span><br><span class="line">	p(chopstick[(i+1)%5]);  // 拿右</span><br><span class="line">	v(mutex);  // 释放临界资源</span><br><span class="line">	...</span><br><span class="line">	eat</span><br><span class="line">	...</span><br><span class="line">	v(chopstick[i]);</span><br><span class="line">	v(chopstick[(i+1)%5]);</span><br><span class="line">&#125; <span class="keyword">while</span>(True);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>至多允许有<strong>四位哲学家</strong>同时去拿左边筷子，最终能保证至少有一位哲学家能够进餐，并在用毕时能释放他的两只筷子，从而使更多的哲学家能够进餐。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">semaphore chopstick[5] = &#123;1, 1, 1, 1, 1&#125;, L = 4; </span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	think</span><br><span class="line">	...</span><br><span class="line">	p(L);</span><br><span class="line">	p(chopstick[i]);</span><br><span class="line">	p(chopstick[(i+1)%5]);</span><br><span class="line">	...</span><br><span class="line">	eat</span><br><span class="line">	...</span><br><span class="line">	v(L);</span><br><span class="line">	v(chopstick[i]);</span><br><span class="line">	v(chopstick[(i+1)%5]);</span><br><span class="line">&#125; <span class="keyword">while</span>(True);</span><br></pre></td></tr></table></figure></li>
+<li><p>规定奇数号哲学家先拿起左边筷子，然后在去拿右边筷子，偶数号相反。按此规定，将是1,2号哲学家竞争1号筷子，3,4竞争3号筷子。即五位哲学家都先竞争奇数号筷子，获得后才去竞争偶数号筷子，最后总有人获得两只筷子。</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">semaphore chopstick[5] = &#123;1, 1, 1, 1, 1&#125;; </span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	think</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">if</span> (i % 2 == 0):</span><br><span class="line">		p(chopstick[i]);</span><br><span class="line">		p(chopstick[(i+1)%5]);</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		p(chopstick[(i+1)%5]);</span><br><span class="line">		p(chopstick[i]);</span><br><span class="line">	...</span><br><span class="line">	eat</span><br><span class="line">	...</span><br><span class="line">	v(chopstick[i]);</span><br><span class="line">	v(chopstick[(i+1)%5]);</span><br><span class="line">&#125; <span class="keyword">while</span>(True);</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/30/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/" rel="prev" title="布隆过滤器">
+                  <i class="fa fa-chevron-left"></i> 布隆过滤器
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
