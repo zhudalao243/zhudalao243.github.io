@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="TCP协议TCP协议的特点 TCP是面向连接(虚连接)的传输层协议。  每一条TCP连接只能有两个端点，每一条TCP连接 只能是点对点的。  TCP提供可靠交付的服务，无差错、不丢失、不重复、按序到达。可靠有序，不丢不重  4.TCP提供全双工通信。  发送缓存准备发送的数据&amp;已发送但尚未收到确认的数据 接收缓存按序到达但尚未被接受应用程序读取的数据&amp;不按序到达的数据   TCP面">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈TCP">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="TCP协议TCP协议的特点 TCP是面向连接(虚连接)的传输层协议。  每一条TCP连接只能有两个端点，每一条TCP连接 只能是点对点的。  TCP提供可靠交付的服务，无差错、不丢失、不重复、按序到达。可靠有序，不丢不重  4.TCP提供全双工通信。  发送缓存准备发送的数据&amp;已发送但尚未收到确认的数据 接收缓存按序到达但尚未被接受应用程序读取的数据&amp;不按序到达的数据   TCP面">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/2020063020421472.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630210441410.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630212601599.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630213814996.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630214925395.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630215522825.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630220542461.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630221424853.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630221636424.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630222205619.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/202006302226272.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630223616929.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630224242515.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630232411944.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630232910475.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630233701386.png">
+<meta property="article:published_time" content="2021-09-01T06:12:13.000Z">
+<meta property="article:modified_time" content="2021-09-01T07:38:05.864Z">
+<meta property="article:author" content="zzy">
+<meta property="article:tag" content="计算机网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/2020063020421472.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/","path":"2021/09/01/浅谈TCP/","title":"浅谈TCP"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>浅谈TCP | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">TCP协议</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP%E5%8D%8F%E8%AE%AE%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">TCP协议的特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP%E6%8A%A5%E6%96%87%E6%AE%B5%E7%9A%84%E9%A6%96%E9%83%A8"><span class="nav-number">1.2.</span> <span class="nav-text">TCP报文段的首部</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E7%9A%84%E5%85%AD%E4%B8%AA%E6%8E%A7%E5%88%B6%E4%BD%8D"><span class="nav-number">1.2.1.</span> <span class="nav-text">TCP的六个控制位</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">TCP连接管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">1.3.1.</span> <span class="nav-text">TCP三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E7%89%B9%E5%AE%9A%E5%AF%BC%E8%87%B4%E7%9A%84SYN%E6%B4%AA%E6%B3%9B%E6%94%BB%E5%87%BB"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">TCP三次握手特定导致的SYN洪泛攻击</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">1.3.2.</span> <span class="nav-text">TCP四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E6%98%AF%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%8C%E8%80%8C%E5%85%B3%E9%97%AD%E8%BF%9E%E6%8E%A5%E5%8D%B4%E6%98%AF%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E5%91%A2%EF%BC%9F"><span class="nav-number">1.3.3.</span> <span class="nav-text">为什么建立连接是三次握手，而关闭连接却是四次挥手呢？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93"><span class="nav-number">1.4.</span> <span class="nav-text">TCP可靠传输</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%8F%E5%8F%B7"><span class="nav-number">1.4.1.</span> <span class="nav-text">序号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AE%E8%AE%A4"><span class="nav-number">1.4.2.</span> <span class="nav-text">确认</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E4%BC%A0"><span class="nav-number">1.4.3.</span> <span class="nav-text">重传</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6"><span class="nav-number">1.5.</span> <span class="nav-text">TCP流量控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E6%97%B6%E5%99%A8"><span class="nav-number">1.5.1.</span> <span class="nav-text">计时器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6"><span class="nav-number">1.6.</span> <span class="nav-text">TCP拥塞控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E5%9B%9B%E7%A7%8D%E7%AE%97%E6%B3%95"><span class="nav-number">1.6.1.</span> <span class="nav-text">拥塞控制四种算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%85%A2%E5%BC%80%E5%A7%8B%E5%92%8C%E6%8B%A5%E5%A1%9E%E9%81%BF%E5%85%8D"><span class="nav-number">1.6.2.</span> <span class="nav-text">慢开始和拥塞避免</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%AB%E9%87%8D%E4%BC%A0%E5%92%8C%E5%BF%AB%E6%81%A2%E5%A4%8D"><span class="nav-number">1.6.3.</span> <span class="nav-text">快重传和快恢复</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/01/%E6%B5%85%E8%B0%88TCP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          浅谈TCP
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-09-01 14:12:13 / 修改時間：15:38:05" itemprop="dateCreated datePublished" datetime="2021-09-01T14:12:13+08:00">2021-09-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="TCP协议"><a href="#TCP协议" class="headerlink" title="TCP协议"></a>TCP协议</h1><h2 id="TCP协议的特点"><a href="#TCP协议的特点" class="headerlink" title="TCP协议的特点"></a>TCP协议的特点</h2><ol>
+<li><p>TCP是面向连接(虚连接)的传输层协议。</p>
+</li>
+<li><p>每一条TCP连接只能有两个端点，每一条TCP连接 只能是点对点的。</p>
+</li>
+<li><p>TCP提供可靠交付的服务，无差错、不丢失、不重复、按序到达。可靠有序，不丢不重</p>
+</li>
+<li><p>4.TCP提供全双工通信。</p>
+<ul>
+<li>发送缓存准备发送的数据&amp;已发送但尚未收到确认的数据</li>
+<li>接收缓存按序到达但尚未被接受应用程序读取的数据&amp;不按序到达的数据</li>
+</ul>
+</li>
+<li><p>TCP面向字节流口。TCP把应用程序交下来的数据看成仅仅是一连串的无结构的字节流。</p>
+<p>流:流入到进程或从进程流出的字节序列。.</p>
+</li>
+</ol>
+<p>TCP传输数据是随机切割数据的</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/2020063020421472.png" alt="img " style="zoom:70%;">
+
+<h2 id="TCP报文段的首部"><a href="#TCP报文段的首部" class="headerlink" title="TCP报文段的首部"></a>TCP报文段的首部</h2><p>注释：见上图，可以看到TCP是将数据随机分割后加上TCP头传输的，所以序号就是为了标记这些随机分割之后的数据，这里把第一个字节的编号当成序号<br>确认号就是收到之后做一下标记，代表这之前的都收到了，希望收到的下一个编号的数据就是确认号打头的那个数据<br>偏移量就是为了标记一下距离TCP开始多少字节是数据，这里的单位是4B，这个偏移量就是TCP首部长度<br><img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630210441410.png" alt="img" style="zoom:80%;"></p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630212601599.png" alt="img" style="zoom:80%;">
+
+<p>窗口就是接收方告诉发送方，还有多少地方（缓存）可以放数据<br>紧急指针就是告诉TCP从哪里到哪里是紧急数据</p>
+<h3 id="TCP的六个控制位"><a href="#TCP的六个控制位" class="headerlink" title="TCP的六个控制位"></a>TCP的六个控制位</h3><p>紧急位URG: URG=1时， 标明此报文段中有紧急数据，是高优先级的数据，应尽快传送，不用在缓存里排队，配合紧急指针字段使用。</p>
+<p>确认位ACK: ACK=1时确认号有效，在连接建立后所有传送的报文段都必须把ACK置为1。</p>
+<p>推送位PSH: 就是接收端的URG，将PSH=1的数据尽快接收。注意一下，如果没有PSH，一般都是接收方缓存满了之后再将数据发送到主机</p>
+<p>复位RST: RST=1时，表明TCP连接中出现严重差错，必须释放连接，然后再重新建立传输链接。</p>
+<p>同步位SYN： A和B主机要建立连接，就A先发一个报文，其中SYN=1；B收到之后也回复一个SYN=1的报文，代表接受连接；表明此报文段是一个连接请求/连接接受报文。</p>
+<p>终止位FIN; FIN=1时， 表明此报文段发送方数据己发完，要求释放连接。</p>
+<h2 id="TCP连接管理"><a href="#TCP连接管理" class="headerlink" title="TCP连接管理"></a>TCP连接管理</h2><h3 id="TCP三次握手"><a href="#TCP三次握手" class="headerlink" title="TCP三次握手"></a>TCP三次握手</h3><p>SYN=1：(A)要建立连接了！<br>seq=x（随机）：因为还没有数据，所以写什么都无所谓第<br><a href="%E6%B3%A8%E9%87%8A%EF%BC%9A%E7%AC%AC%E4%B8%80%E6%AE%B5%E7%9A%84%E6%84%8F%E6%80%9D%E6%98%AF">comment</a>:二段的意思是<br>SYN=1：我(B)同意你(A)建立连接！<br>ACK=1：连接建立了，之后的ACK必须都置为1<br>seq=y（随机）：因为还没有数据，所以写什么都无所谓<br>ack=x+1：之前发送方(A)说发送的是第x位数据（虽然发送方是瞎说的），所以我(B)要的是x+1位数据第三<br><a href="%E6%B3%A8%E9%87%8A%EF%BC%9A%E7%AC%AC%E4%B8%80%E6%AE%B5%E7%9A%84%E6%84%8F%E6%80%9D%E6%98%AF">comment</a>:三段的意思是<br>SYN=0：SYN只有在建立连接时才为1，其他时候均设为0<br>ACK=1：连接建立了，之后的ACK必须都置为1<br>seq=x+1：我(A)发送的报文段的第一个字节就是x+1<br>ack=y+1：之前接收方(B)说发送的是第y位数据（虽然接收方是瞎说的），所以我(A)要的是y+1位数据</p>
+<p>注意一下，TCP是双向的，所以不存在绝对不变的发送方接收方，这里的两台主机都同时是发送方和接收方<br><img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630213814996.png" alt="img" style="zoom:80%;"></p>
+<h4 id="TCP三次握手特定导致的SYN洪泛攻击"><a href="#TCP三次握手特定导致的SYN洪泛攻击" class="headerlink" title="TCP三次握手特定导致的SYN洪泛攻击"></a>TCP三次握手特定导致的SYN洪泛攻击</h4><img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630214925395.png" alt="img" style="zoom:80%;">
+
+<p><font color="red">SYN洪泛攻击，解决方式通过SYN cookie，//TODO</font></p>
+<h3 id="TCP四次挥手"><a href="#TCP四次挥手" class="headerlink" title="TCP四次挥手"></a>TCP四次挥手</h3><p>seq=u：发了好多数据，这里只是用u指代一下，这里u是有确定值的<br><a href="%E6%B3%A8%E9%87%8A%EF%BC%9A%E7%AC%AC%E4%B8%80%E6%AE%B5%E7%9A%84%E6%84%8F%E6%80%9D%E6%98%AF">comment</a>:第二段的意思是:ACK=1：连接建立了，之后的ACK必须都置为1<br>seq=v：发了好多数据，这里只是用v指代一下，这里v是有确定值的<br>ack=u+1：之前发送方(A)说发送的是第u位数据，所以我(B)要的是u+1位数据（尽管此时A已经决定释放连接了）<br><a href="%E6%B3%A8%E9%87%8A%EF%BC%9A%E7%AC%AC%E4%B8%80%E6%AE%B5%E7%9A%84%E6%84%8F%E6%80%9D%E6%98%AF">comment</a>:第三段的意思是:FIN=1：(B)要释放连接了！<br>ACK=1：连接建立了，之后的ACK必须都置为1<br>seq=w：发了好多数据，这里只是用w指代一下，这里w是有确定值的<br>ack=u+1：之前发送方(A)说发送的是第u位数据，所以我(B)要的是u+1位数据（因为A直接不发数据了，所以第二段第三段的ack都是u+1）<br><a href="%E6%B3%A8%E9%87%8A%EF%BC%9A%E7%AC%AC%E4%B8%80%E6%AE%B5%E7%9A%84%E6%84%8F%E6%80%9D%E6%98%AF">comment</a>:第四段的意思是:ACK=1：连接建立了，之后的ACK必须都置为1<br>seq=u+1：之前发的数据时第u位数据，B也要第u+1位数据，所以我发第u+1位数据<br>ack=w+1：之前发送方(B)说发送的是第w位数据，所以我(A)要的是w+1位数据<br><font color="red">为什么需要等待计时2MSL？</font><br>因为这样可以保证B可以收到A的终止报文段进而进入关闭状态<br>比如说如果A的第四段报文丢失，那么等待一个MSL之后B就会重传第三段报文，花费小于1MSL之后A就会再收到第三段报文，之后就可以再次向B发送第四段报文提示B关闭连接</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630215522825.png" alt="img" style="zoom:80%;">
+
+<h3 id="为什么建立连接是三次握手，而关闭连接却是四次挥手呢？"><a href="#为什么建立连接是三次握手，而关闭连接却是四次挥手呢？" class="headerlink" title="为什么建立连接是三次握手，而关闭连接却是四次挥手呢？"></a>为什么建立连接是三次握手，而关闭连接却是四次挥手呢？</h3><blockquote>
+<p>这是因为服务端在LISTEN状态下，收到建立连接请求的SYN报文后，把ACK和SYN放在一个报文里发送给客户端。而关闭连接时，当收到对方的FIN报文时，仅仅表示对方不再发送数据了但是还能接收数据，己方也未必全部数据都发送给对方了，所以己方可以立即close，也可以发送一些数据给对方后，再发送FIN报文给对方来表示同意现在关闭连接，因此，己方ACK和FIN一般都会分开发送。</p>
+</blockquote>
+<h2 id="TCP可靠传输"><a href="#TCP可靠传输" class="headerlink" title="TCP可靠传输"></a>TCP可靠传输</h2><p>CP是提供可靠传输，UDP这种本身还是不可靠传输的就再靠应用层解决了</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630220542461.png" alt="img" style="zoom:75%;">
+
+<h3 id="序号"><a href="#序号" class="headerlink" title="序号"></a>序号</h3><p>就是TCP根据下方数据链路层的MTU（最大传输单元）来随即将数据切割成好几端并且进行编号</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630221424853.png" alt="img" style="zoom:80%;">
+
+<h3 id="确认"><a href="#确认" class="headerlink" title="确认"></a>确认</h3><p>发送方每一次发送数据之后都需要接收方进行确认。<br>TCP使用的是累计确认机制，就是从第一个丢失的字节开始请求丢失的报文段。如图中4、5、6丢失，7、8到达，但仍然请求发送的数据序号是4。</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630221636424.png" alt="img" style="zoom:75%;">
+
+<h3 id="重传"><a href="#重传" class="headerlink" title="重传"></a>重传</h3><p>为什么要使用自适应算法？网络环境太复杂，路径又长又短，RTT设置短了照顾不了距离远的，RTT设置长了又导致网络利用率降低，所以使用RTTs。</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630222205619.png" alt="img" style="zoom:75%;">
+
+<h2 id="TCP流量控制"><a href="#TCP流量控制" class="headerlink" title="TCP流量控制"></a>TCP流量控制</h2><p>简单来说就是接收方可以动态的发送信息告诉发送方发送窗口的大小。<br>接收方接受不过来了就让发送方发送窗口小点，这样发送方发送的速率就慢下来了，接收方就有时间处理它的数据了<br>接受方处理完了也可以发送请求让发送方发送窗口大点，这样发送方发送的速率就快起来了，接收方就可以处理更多数据而不是空闲等着收数据了<br><img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/202006302226272.png" alt="img" style="zoom:80%;"></p>
+<h3 id="计时器"><a href="#计时器" class="headerlink" title="计时器"></a>计时器</h3><p>在本例子中，使用的累计确认机制（一次回复收到ack=201）和三次流量控制机制。<br>但是有一个情况就是，如果最后B不允许A再发送数据了，B在处理完数据之后想要恢复窗口大小时发送的有rwnd大小的数据报丢了怎么办？此时A有B的指令在前，发送窗口为0无法发送数据，B也在等待A回复，造成了类似死锁的现象<br>解决方法：使用计时器<br><img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630223616929.png" alt="img" style="zoom:75%;"></p>
+<h2 id="TCP拥塞控制"><a href="#TCP拥塞控制" class="headerlink" title="TCP拥塞控制"></a>TCP拥塞控制</h2><p>流量控制是对单独一个来说的，拥塞控制是一群</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630224242515.png" alt="img" style="zoom:75%;">
+
+<h3 id="拥塞控制四种算法"><a href="#拥塞控制四种算法" class="headerlink" title="拥塞控制四种算法"></a>拥塞控制四种算法</h3><p>这里虽然是四种算法，但是通常是两两结合进行使用</p>
+<img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630232411944.png" alt="img" style="zoom:75%;">
+
+<h3 id="慢开始和拥塞避免"><a href="#慢开始和拥塞避免" class="headerlink" title="慢开始和拥塞避免"></a>慢开始和拥塞避免</h3><p>这里开始时以指数形式增长，ssthresh的意思是慢开始门限，代表从这个地方注入的报文段就比较多了，需要开始慢速增加了。<br>之后一段都是线性增长，每次增加1，直至达到网络拥塞状态<br>瞬间将cwnd设置为1，同时调整原来的ssthresh的值到之前达到网络拥塞状态的1/2,（这里是24降到12）<br>重复以上步骤，但是注意此时ssthresh变了之后线性增长的转折点也变了<br><img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630232910475.png" alt="img" style="zoom:75%;"></p>
+<h3 id="快重传和快恢复"><a href="#快重传和快恢复" class="headerlink" title="快重传和快恢复"></a>快重传和快恢复</h3><p>这里和上面的慢开始和拥塞避免的一开始步骤差不多，都是先指数增长再转变为线性增长。<br>不同的点是快重传和快恢复算法是在收到连续的ack确认之后执行，这里的ack就是冗余ack，冗余ack的特点是如果多次对某一段请求的数据没有被收到，达到一定数目之后就会立即执行重传。但是此时只是降到现在cwnd的一半，再重新线性增长。而不是像慢开始和拥塞避免的从头开始<br><img src="/2021/09/01/%E6%B5%85%E8%B0%88TCP/20200630233701386.png" alt="img " style="zoom:75%;"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="tag"># 计算机网络</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/31/PV%E6%93%8D%E4%BD%9C-%E7%BB%8F%E5%85%B8%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/" rel="prev" title="PV操作--经典问题分析">
+                  <i class="fa fa-chevron-left"></i> PV操作--经典问题分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
