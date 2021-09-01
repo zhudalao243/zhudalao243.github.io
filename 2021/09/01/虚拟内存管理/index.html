@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="虚拟内存的基本概念1. 传统存储管理方式的缺点连续分配与非连续分配都属于传统存储管理方式 (1) 一次性 作业必须一次性全部装入内存后才能开始运行 (2) 驻留性 一旦作业被装入内存，就会一直驻留在内存中直至作业运行结束；但事实上，一个时间段内，只需要作业的一小部分数据即可正常运行 2. 虚拟内存的定义(1) 程序装入内存时，可以将程序中很快会用到的部分装入内存，暂时用不到的部分留在外存 (2)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟内存管理">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="上善若水">
+<meta property="og:description" content="虚拟内存的基本概念1. 传统存储管理方式的缺点连续分配与非连续分配都属于传统存储管理方式 (1) 一次性 作业必须一次性全部装入内存后才能开始运行 (2) 驻留性 一旦作业被装入内存，就会一直驻留在内存中直至作业运行结束；但事实上，一个时间段内，只需要作业的一小部分数据即可正常运行 2. 虚拟内存的定义(1) 程序装入内存时，可以将程序中很快会用到的部分装入内存，暂时用不到的部分留在外存 (2)">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132643299.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132658444.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132707611.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132717866.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132724177.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132730300.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132735208.png">
+<meta property="article:published_time" content="2021-09-01T08:56:22.000Z">
+<meta property="article:modified_time" content="2021-09-01T09:03:26.742Z">
+<meta property="article:author" content="zzy">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132643299.png">
+
+
+<link rel="canonical" href="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/","path":"2021/09/01/虚拟内存管理/","title":"虚拟内存管理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>虚拟内存管理 | 上善若水</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="上善若水" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">上善若水</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">成为一个有智慧的人</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>歸檔</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜尋
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜尋..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">虚拟内存的基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BC%A0%E7%BB%9F%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">1. 传统存储管理方式的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">2. 虚拟内存的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E7%89%B9%E5%BE%81"><span class="nav-number">1.3.</span> <span class="nav-text">3. 虚拟内存的特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE"><span class="nav-number">1.4.</span> <span class="nav-text">4.  知识回顾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E5%88%86%E9%A1%B5%E7%AE%A1%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">请求分页管理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%A1%B5%E8%A1%A8%E6%9C%BA%E5%88%B6"><span class="nav-number">2.1.</span> <span class="nav-text">1. 页表机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BC%BA%E9%A1%B5%E4%B8%AD%E6%96%AD%E6%9C%BA%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">2. 缺页中断机构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE"><span class="nav-number">2.3.</span> <span class="nav-text">3. 知识回顾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E9%A1%B5%E9%9D%A2%E7%BD%AE%E6%8D%A2%E7%AE%97%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">三、页面置换算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9C%80%E4%BD%B3%E7%BD%AE%E6%8D%A2%E7%AE%97%E6%B3%95-OPT"><span class="nav-number">3.1.</span> <span class="nav-text">1. 最佳置换算法(OPT)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%85%88%E8%BF%9B%E5%85%88%E5%87%BA%E7%BD%AE%E6%8D%A2%E7%AE%97%E6%B3%95-FIFO"><span class="nav-number">3.2.</span> <span class="nav-text">2. 先进先出置换算法(FIFO)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9C%80%E8%BF%91%E6%9C%80%E4%B9%85%E6%9C%AA%E4%BD%BF%E7%94%A8%E7%BD%AE%E6%8D%A2%E7%AE%97%E6%B3%95-LRU"><span class="nav-number">3.3.</span> <span class="nav-text">3. 最近最久未使用置换算法(LRU)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%9C%80%E4%B8%8D%E5%B8%B8%E7%94%A8%E7%AE%97%E6%B3%95%EF%BC%88LFU%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">4.最不常用算法（LFU）</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="zzy"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">zzy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="回到頂端">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          虚拟内存管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-09-01 16:56:22 / 修改時間：17:03:26" itemprop="dateCreated datePublished" datetime="2021-09-01T16:56:22+08:00">2021-09-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="虚拟内存的基本概念"><a href="#虚拟内存的基本概念" class="headerlink" title="虚拟内存的基本概念"></a>虚拟内存的基本概念</h2><h3 id="1-传统存储管理方式的缺点"><a href="#1-传统存储管理方式的缺点" class="headerlink" title="1. 传统存储管理方式的缺点"></a>1. 传统存储管理方式的缺点</h3><p>连续分配与非连续分配都属于传统存储管理方式</p>
+<p>(1) 一次性</p>
+<p>作业必须一次性全部装入内存后才能开始运行</p>
+<p>(2) 驻留性</p>
+<p>一旦作业被装入内存，就会一直驻留在内存中直至作业运行结束；但事实上，一个时间段内，只需要作业的一小部分数据即可正常运行</p>
+<h3 id="2-虚拟内存的定义"><a href="#2-虚拟内存的定义" class="headerlink" title="2. 虚拟内存的定义"></a>2. 虚拟内存的定义</h3><p>(1) 程序装入内存时，可以将程序中很快会用到的部分装入内存，暂时用不到的部分留在外存</p>
+<p>(2) 程序运行过程中，所要访问的信息不在内存时，由操作系统负责将所需信息从外存调入内存，然后继续执行程序</p>
+<p>(3) 若内存空间不够，由操作系统负责将内存中暂时用不到的信息换出到外存</p>
+<p>(4) 使得用户感觉有一个比实际内存大得多的内存，实际上物理内存大小并未改变，只是在逻 辑上进行了扩充，这就是虚拟内存</p>
+<h3 id="3-虚拟内存的特征"><a href="#3-虚拟内存的特征" class="headerlink" title="3. 虚拟内存的特征"></a>3. 虚拟内存的特征</h3><p>(1) 多次性 ：作业被分成多次调入内存</p>
+<p>(2) 对换性：作业在运行过程中，可以将作业换入、换出</p>
+<p>(3) 虚拟性：从逻辑上扩充了内存的容量，使用户感觉有一个更大的内存</p>
+<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4.  知识回顾"></a>4.  知识回顾</h3><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132643299.png" alt="img" style="zoom:67%;">
+
+<h2 id="请求分页管理方式"><a href="#请求分页管理方式" class="headerlink" title="请求分页管理方式"></a>请求分页管理方式</h2><p>请求分页管理方式与基本分页管理的主要区别在于增加了请求调页和页面置换两个功能</p>
+<h3 id="1-页表机制"><a href="#1-页表机制" class="headerlink" title="1. 页表机制"></a>1. 页表机制</h3><p>(1) 为了实现请求调页，操作系统需要通过状态位知道每个页面是否已经调入内存；如果还没 有调入，也需要知道该页面在外存中存放的位置</p>
+<p>(2) 为了实现页面置换，操作系统需要决定将哪个页面换出到外存：有的页面没有被修改过， 就不必浪费时间写回外存；有的页面被修改过，就需要将外存中的旧数据覆盖；因此，操 作系统还需要记录每个页面是否被修改过的信息<br><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132658444.png" alt="img" style="zoom:110%;"></p>
+<h3 id="2-缺页中断机构"><a href="#2-缺页中断机构" class="headerlink" title="2. 缺页中断机构"></a>2. 缺页中断机构</h3><p>(1) 在请求分页系统中，每当要访问的页面不在内存时，便产生一个缺页中断，然后由操作系 统的缺页中断处理程序处理中断；此时缺页的进程阻塞，放入阻塞队列中，调页完成后再 将其唤醒，放回就绪队列</p>
+<p>(2) 如果内存中有空闲块，则为进程分配一个空闲块，将所缺页面装入该块，并修改页表中相 应的页表项</p>
+<p>(3) 如果内存中没有空闲块，则由页面置换算法选择一个页面淘汰，若该页面在内存期间被修 改过，则要将其写回外存；未修改过的页面不用写回外存</p>
+<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132707611.png" alt="img" style="zoom:80%;">
+
+<h2 id="三、页面置换算法"><a href="#三、页面置换算法" class="headerlink" title="三、页面置换算法"></a>三、页面置换算法</h2><p>使用页面置换算法决定将哪个页面换出，好的页面置换算法应当追求更少的缺页率，即换入、换出 的次数尽可能的少</p>
+<h3 id="1-最佳置换算法-OPT"><a href="#1-最佳置换算法-OPT" class="headerlink" title="1. 最佳置换算法(OPT)"></a>1. 最佳置换算法(OPT)</h3><p>每次选择淘汰的页面是以后永不使用或者最长时间内不再被访问的页面，以保证最低的缺页率</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132717866.png" alt="img" style="zoom:67%;">
+
+<p>操作系统无法预判页面访问顺序，故最佳置换算法无法实现</p>
+<h3 id="2-先进先出置换算法-FIFO"><a href="#2-先进先出置换算法-FIFO" class="headerlink" title="2. 先进先出置换算法(FIFO)"></a>2. 先进先出置换算法(FIFO)</h3><p>每次选择淘汰的页面是最早进入内存的页面</p>
+<p>实现方法：每次向内存中调入页面时，将页面添加到一个队列的队尾，需要换出页面时换出队 头的页面即可，队列的最大长度取决于内存块的个数</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132724177.png" alt="img" style="zoom:80%;">
+
+<p>注意：FIFO算法会产生Belady异常，即为进程分配的内存块增多时，缺页次数不减反增的现象，因此，FIFO算法性能较差</p>
+<h3 id="3-最近最久未使用置换算法-LRU"><a href="#3-最近最久未使用置换算法-LRU" class="headerlink" title="3. 最近最久未使用置换算法(LRU)"></a>3. 最近最久未使用置换算法(LRU)</h3><p>每次选择淘汰的页面是最近最久未使用的页面</p>
+<p>实现方法：赋予每个页面对应的页表项中，用访问字段记录该页面自上次被访问以来所经历的 时间t，当需要淘汰一个页面时，选择现有页面中t值最大的</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132730300.png" alt="img" style="zoom:150%;">
+
+<h3 id="4-最不常用算法（LFU）"><a href="#4-最不常用算法（LFU）" class="headerlink" title="4.最不常用算法（LFU）"></a>4.最不常用算法（LFU）</h3><p>当缺页中断时，选择访问次数最少的那个页面，淘汰之<br>这样新页很吃亏啊<br>取决于程序访问特征</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132735208.png" alt="img" style="zoom:150%;">
+
+
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag"># 操作系统</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/01/%E6%B5%85%E8%B0%88TCP/" rel="prev" title="浅谈TCP">
+                  <i class="fa fa-chevron-left"></i> 浅谈TCP
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zzy</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 強力驅動
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
