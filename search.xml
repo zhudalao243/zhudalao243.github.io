@@ -3935,4 +3935,40 @@
         <tag>哲学</tag>
       </tags>
   </entry>
+  <entry>
+    <title>const修饰指针and引用</title>
+    <url>/2021/09/08/const%E4%BF%AE%E9%A5%B0%E6%8C%87%E9%92%88and%E5%BC%95%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="const修饰指针"><a href="#const修饰指针" class="headerlink" title="const修饰指针"></a>const修饰指针</h2><p>const修饰指针有三种情况</p>
+<ol>
+<li>const修饰指针   — 常量指针</li>
+<li>const修饰常量   — 指针常量</li>
+<li>const即修饰指针，又修饰常量</li>
+</ol>
+<p>举例：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">	<span class="keyword">int</span> b = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//const修饰的是指针，指针指向可以改，指针指向的值不可以更改</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">int</span> * p1 = &amp;a; </span><br><span class="line">	p1 = &amp;b; <span class="comment">//正确</span></span><br><span class="line">	<span class="comment">//*p1 = 100;  报错</span></span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="comment">//const修饰的是常量，指针指向不可以改，指针指向的值可以更改</span></span><br><span class="line">	<span class="keyword">int</span> * <span class="keyword">const</span> p2 = &amp;a;</span><br><span class="line">	<span class="comment">//p2 = &amp;b; //错误</span></span><br><span class="line">	*p2 = <span class="number">100</span>; <span class="comment">//正确</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//const既修饰指针又修饰常量</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">int</span> * <span class="keyword">const</span> p3 = &amp;a;</span><br><span class="line">	<span class="comment">//p3 = &amp;b; //错误</span></span><br><span class="line">	<span class="comment">//*p3 = 100; //错误</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>技巧：看const右侧紧跟着的是指针还是常量, 是指针就是常量指针，是常量就是指针常量</p>
+</blockquote>
+<h2 id="引用的本质"><a href="#引用的本质" class="headerlink" title="引用的本质"></a>引用的本质</h2><p>本质：<strong>引用的本质在c++内部实现是一个指针常量.</strong></p>
+<p>讲解示例：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//const修饰的是常量，指针指向不可以改，指针指向的值可以更改</span></span><br><span class="line"><span class="keyword">int</span> * <span class="keyword">const</span> p2 = &amp;a;</span><br><span class="line"><span class="comment">//p2 = &amp;b; //错误</span></span><br><span class="line">*p2 = <span class="number">100</span>; <span class="comment">//正确</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//发现是引用，转换为 int* const ref = &amp;a;</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">(<span class="keyword">int</span>&amp; ref)</span></span>&#123;</span><br><span class="line">	ref = <span class="number">100</span>; <span class="comment">// ref是引用，转换为*ref = 100</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//自动转换为 int* const ref = &amp;a; 指针常量是指针指向不可改，也说明为什么引用不可更改</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref = a; </span><br><span class="line">	ref = <span class="number">20</span>; <span class="comment">//内部发现ref是引用，自动帮我们转换为: *ref = 20;</span></span><br><span class="line">    </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;a:&quot;</span> &lt;&lt; a &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref:&quot;</span> &lt;&lt; ref &lt;&lt; endl;</span><br><span class="line">    </span><br><span class="line">	<span class="built_in">func</span>(a);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结论：C++推荐用引用技术，因为语法方便，引用本质是指针常量，但是所有的指针操作编译器都帮我们做了</p>
+<h2 id="常量引用"><a href="#常量引用" class="headerlink" title="常量引用"></a>常量引用</h2><p><strong>作用：</strong>常量引用主要用来修饰形参，防止误操作</p>
+<p>在函数形参列表中，可以加==const修饰形参==，防止形参改变实参</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//引用使用的场景，通常用来修饰形参</span></span><br><span class="line"><span class="comment">// int&amp; v = int* const v</span></span><br><span class="line"><span class="comment">// const int&amp; v =  const int * const v </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">showValue</span><span class="params">(<span class="keyword">const</span> <span class="keyword">int</span>&amp; v)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//v += 10;</span></span><br><span class="line">	cout &lt;&lt; v &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//int&amp; ref = 10;  引用本身需要一个合法的内存空间，因此这行错误</span></span><br><span class="line">	<span class="comment">//加入const就可以了，编译器优化代码，int temp = 10; const int&amp; ref = temp;</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">int</span>&amp; ref = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//ref = 100;  //加入const后不可以修改变量</span></span><br><span class="line">	cout &lt;&lt; ref &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//函数中利用常量引用防止误操作修改实参</span></span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">	<span class="built_in">showValue</span>(a);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
 </search>

@@ -6,7 +6,7 @@
   <link href="http://zhudalao243.github.io/atom.xml" rel="self"/>
   
   <link href="http://zhudalao243.github.io/"/>
-  <updated>2021-09-03T15:17:51.002Z</updated>
+  <updated>2021-09-08T08:43:35.134Z</updated>
   <id>http://zhudalao243.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>const修饰指针and引用</title>
+    <link href="http://zhudalao243.github.io/2021/09/08/const%E4%BF%AE%E9%A5%B0%E6%8C%87%E9%92%88and%E5%BC%95%E7%94%A8/"/>
+    <id>http://zhudalao243.github.io/2021/09/08/const%E4%BF%AE%E9%A5%B0%E6%8C%87%E9%92%88and%E5%BC%95%E7%94%A8/</id>
+    <published>2021-09-08T08:35:28.000Z</published>
+    <updated>2021-09-08T08:43:35.134Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;const修饰指针&quot;&gt;&lt;a href=&quot;#const修饰指针&quot; class=&quot;headerlink&quot; title=&quot;const修饰指针&quot;&gt;&lt;/a&gt;const修饰指针&lt;/h2&gt;&lt;p&gt;const修饰指针有三种情况&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;const修饰指针   —</summary>
+        
+      
+    
+    
+    
+    <category term="C++" scheme="http://zhudalao243.github.io/categories/C/"/>
+    
+    
+    <category term="C++" scheme="http://zhudalao243.github.io/tags/C/"/>
+    
+  </entry>
   
   <entry>
     <title>04长生掌决</title>
@@ -490,31 +517,6 @@
     <summary type="html">&lt;p&gt;Go语言中的 map 在并发情况下，只读是线程安全的，同时读写是线程不安全的。&lt;/p&gt;
 &lt;p&gt;样例如下：&lt;/p&gt;
 &lt;figure class=&quot;highlight go&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span</summary>
-        
-      
-    
-    
-    
-    <category term="Golang" scheme="http://zhudalao243.github.io/categories/Golang/"/>
-    
-    
-    <category term="Golang" scheme="http://zhudalao243.github.io/tags/Golang/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Golang中map的基本使用和底层理解</title>
-    <link href="http://zhudalao243.github.io/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/"/>
-    <id>http://zhudalao243.github.io/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/</id>
-    <published>2021-08-18T08:44:00.000Z</published>
-    <updated>2021-08-18T11:53:38.296Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;map的基本使用&quot;&gt;&lt;a href=&quot;#map的基本使用&quot; class=&quot;headerlink&quot; title=&quot;map的基本使用&quot;&gt;&lt;/a&gt;map的基本使用&lt;/h1&gt;&lt;h2 id=&quot;key与value的限制&quot;&gt;&lt;a href=&quot;#key与value的限制&quot;</summary>
         
       
     

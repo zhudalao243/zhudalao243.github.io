@@ -159,18 +159,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">分類</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">標籤</span></a>
       </div>
   </nav>
@@ -200,6 +200,213 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/" class="post-title-link" itemprop="url">Golang中map的基本使用和底层理解</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-18 16:44:00 / 修改時間：19:53:38" itemprop="dateCreated datePublished" datetime="2021-08-18T16:44:00+08:00">2021-08-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="map的基本使用"><a href="#map的基本使用" class="headerlink" title="map的基本使用"></a>map的基本使用</h1><h2 id="key与value的限制"><a href="#key与value的限制" class="headerlink" title="key与value的限制"></a>key与value的限制</h2><p>key一定要是<strong>可比较</strong>的类型（可以理解为支持==的操作）：</p>
+<table>
+<thead>
+<tr>
+<th align="center">可比教类型</th>
+<th align="center">不可比较类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">boolean</td>
+<td align="center">slice</td>
+</tr>
+<tr>
+<td align="center">numeric</td>
+<td align="center">map</td>
+</tr>
+<tr>
+<td align="center">string</td>
+<td align="center">func</td>
+</tr>
+<tr>
+<td align="center">pointer</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">channel</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">interface</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">array和struct</td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>如果是非法的key类型，会报错：invalid map key type xxx</p>
+<blockquote>
+<p>golang为uint32、uint64、string提供了fast access，使用这些类型作为key可以提高map访问速度。[runtime/hashmap_fast.go]</p>
+</blockquote>
+<p>value可以是<strong>任意类型</strong>。</p>
+<h2 id="新增-amp-删除-amp-更新-amp-查询"><a href="#新增-amp-删除-amp-更新-amp-查询" class="headerlink" title="新增 &amp; 删除 &amp; 更新 &amp; 查询"></a>新增 &amp; 删除 &amp; 更新 &amp; 查询</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 新增</span></span><br><span class="line">m[<span class="string">&quot;name&quot;</span>] = <span class="string">&quot;咖啡色的羊驼&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除，key不存在则啥也不干</span></span><br><span class="line"><span class="built_in">delete</span>(m, <span class="string">&quot;name&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更新</span></span><br><span class="line">m[<span class="string">&quot;name&quot;</span>] = <span class="string">&quot;咖啡色的羊驼2&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询，key不存在返回value类型的零值</span></span><br><span class="line">i := m[<span class="string">&quot;name&quot;</span>] <span class="comment">// 三种查询方式，</span></span><br><span class="line">i, ok := m[<span class="string">&quot;name&quot;</span>]</span><br><span class="line">_, ok := m[<span class="string">&quot;name&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h2><p>需要强调的是map本身是<strong>无序的</strong>，在遍历的时候并不会按照你传入的顺序，进行传出</p>
+<p>正常遍历:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> k, v := <span class="keyword">range</span> m &#123; </span><br><span class="line">    fmt.Println(k, v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有序遍历:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;sort&quot;</span></span><br><span class="line"><span class="keyword">var</span> keys []<span class="keyword">string</span></span><br><span class="line"><span class="comment">// 把key单独抽取出来，放在数组中</span></span><br><span class="line"><span class="keyword">for</span> k, _ := <span class="keyword">range</span> m &#123;</span><br><span class="line">    keys = <span class="built_in">append</span>(keys, k)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 进行数组的排序</span></span><br><span class="line">sort.Strings(keys)</span><br><span class="line"><span class="comment">// 遍历数组就是有序的了</span></span><br><span class="line"><span class="keyword">for</span> _, k := <span class="keyword">range</span> keys &#123;</span><br><span class="line">    fmt.Println(k, m[k])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="函数传参"><a href="#函数传参" class="headerlink" title="函数传参"></a>函数传参</h2><p>Golang中是没有引用传递的，均为值传递。这意味着传递的是数据的拷贝。<br>那么map本身是<strong>引用类型</strong>，作为形参或返回参数的时候，传递的是<strong>值的拷贝，而值是地址</strong>，<strong>扩容</strong>时也<strong>不会改变</strong>这个地址</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">changeM</span><span class="params">(m <span class="keyword">map</span>[<span class="keyword">int64</span>]<span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 函数开始时地址是： %p\n&quot;</span>, m)</span><br><span class="line">	<span class="keyword">var</span> max = <span class="number">5</span></span><br><span class="line">	<span class="keyword">for</span> i:=<span class="number">0</span>; i&lt;max; i++&#123;</span><br><span class="line">		m[<span class="keyword">int64</span>(i)] = <span class="number">2</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 在函数返回前地址是：%p\n&quot;</span>, m)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> m <span class="keyword">map</span>[<span class="keyword">int64</span>]<span class="keyword">int64</span></span><br><span class="line">	m = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">int64</span>]<span class="keyword">int64</span>, <span class="number">1</span>)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 的原始地址：%p\n&quot;</span>, m)</span><br><span class="line">	changeM(m)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 改变后地址：%p\n&quot;</span>, m)</span><br><span class="line">	fmt.Println(<span class="string">&quot;m 长度是：&quot;</span>, <span class="built_in">len</span>(m))</span><br><span class="line">	fmt.Println(<span class="string">&quot;m 参数是：&quot;</span>, m)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">m 的原始地址：<span class="number">0xc00006a360</span></span><br><span class="line">m 函数开始时地址是： <span class="number">0xc00006a360</span></span><br><span class="line">m 在函数返回前地址是：<span class="number">0xc00006a360</span></span><br><span class="line">m 改变后地址：<span class="number">0xc00006a360</span></span><br><span class="line">m 长度是： <span class="number">5</span></span><br><span class="line">m 参数是： <span class="keyword">map</span>[<span class="number">0</span>:<span class="number">2</span> <span class="number">1</span>:<span class="number">2</span> <span class="number">2</span>:<span class="number">2</span> <span class="number">3</span>:<span class="number">2</span> <span class="number">4</span>:<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<h1 id="map的深入理解"><a href="#map的深入理解" class="headerlink" title="map的深入理解"></a>map的深入理解</h1><h2 id="map数据结构"><a href="#map数据结构" class="headerlink" title="map数据结构"></a>map数据结构</h2><p>Golang的map使用哈希表作为底层实现，一个哈希表里可以有多个哈希表节点，也即bucket，而每个bucket就保存了map中的一个或一组键值对。</p>
+<p>map数据结构由<code>runtime/map.go:hmap</code>定义:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> hmap <span class="keyword">struct</span> &#123;</span><br><span class="line">    count     <span class="keyword">int</span> <span class="comment">// 当前保存的元素个数</span></span><br><span class="line">    ...</span><br><span class="line">    B         <span class="keyword">uint8</span></span><br><span class="line">    ...</span><br><span class="line">    buckets    unsafe.Pointer <span class="comment">// bucket数组指针，数组的大小为2^B</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下图展示一个拥有4个bucket的map：</p>
+<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_897a05f6373f7f966d00d1bfea6274d2_r.png" alt="img " style="zoom:80%;">
+
+<p>本例中, <code>hmap.B=2</code>， 而hmap.buckets长度是2^B为4. 元素经过哈希运算后会落到某个bucket中进行存储。查找过程类似。</p>
+<p><code>bucket</code>很多时候被翻译为桶，所谓的<code>哈希桶</code>实际上就是bucket</p>
+<h2 id="bucket数据结构"><a href="#bucket数据结构" class="headerlink" title="bucket数据结构"></a>bucket数据结构</h2><p>bucket数据结构由<code>runtime/map.go:bmap</code>定义</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> bmap <span class="keyword">struct</span> &#123;</span><br><span class="line">    tophash [<span class="number">8</span>]<span class="keyword">uint8</span> <span class="comment">//存储哈希值的高8位</span></span><br><span class="line">    data    <span class="keyword">byte</span>[<span class="number">1</span>]  <span class="comment">//key value数据:key/key/key/.../value/value/value...</span></span><br><span class="line">    overflow *bmap   <span class="comment">//溢出bucket的地址</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每个bucket可以存储8个键值对。</p>
+<ul>
+<li>tophash是个长度为8的数组，哈希值相同的键（准确的说是哈希值低位相同的键）存入当前bucket时会将哈希值的高位存储在该数组中，以方便后续匹配。</li>
+<li>data区存放的是key-value数据，存放顺序是key/key/key/…value/value/value，如此存放是为了节省字节对齐带来的空间浪费。</li>
+<li>overflow 指针指向的是下一个bucket，据此将所有冲突的键连接起来。</li>
+</ul>
+<p>注意：上述中data和overflow并不是在结构体中显示定义的，而是直接通过指针运算进行访问的。</p>
+<p>下图展示bucket存放8个key-value对：</p>
+<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_7f0ba5a124641b1413279892581513c4_r.png" alt="img" style="zoom:80%;">
+
+<h2 id="哈希冲突"><a href="#哈希冲突" class="headerlink" title="哈希冲突"></a>哈希冲突</h2><p>当有两个或以上数量的键被哈希到了同一个bucket时，我们称这些键发生了冲突。Go使用链地址法来解决键冲突。由于每个bucket可以存放8个键值对，所以同一个bucket存放超过8个键值对时就会再创建一个键值对，用类似链表的方式将bucket连接起来。</p>
+<p>下图展示产生冲突后的map：</p>
+<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_a8b9e5919d9951a71c1c36445dd68521_r.png" alt="img" style="zoom:80%;">
+
+<p>bucket数据结构指示下一个bucket的指针称为overflow bucket，意为当前bucket盛不下而溢出的部分。事实上哈希冲突并不是好事情，它降低了存取效率，好的哈希算法可以保证哈希值的随机性，但冲突过多也是要控制的，后面会再详细介绍</p>
+<h2 id="负载因子"><a href="#负载因子" class="headerlink" title="负载因子"></a>负载因子</h2><p>负载因子用于衡量一个哈希表冲突情况，公式为：</p>
+<blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">负载因子 = 键数量/bucket数量</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>例如，对于一个bucket数量为4，包含4个键值对的哈希表来说，这个哈希表的负载因子为1.</p>
+<p>哈希表需要将负载因子控制在合适的大小，超过其阀值需要进行rehash，也即键值对重新组织：</p>
+<ul>
+<li>哈希因子过小，说明空间利用率低</li>
+<li>哈希因子过大，说明冲突严重，存取效率低</li>
+</ul>
+<p>每个哈希表的实现对负载因子容忍程度不同，比如Redis实现中负载因子大于1时就会触发rehash，而Go则在在负载因子达到6.5时才会触发rehash，因为Redis的每个bucket只能存1个键值对，而Go的bucket可能存8个键值对，所以Go可以容忍更高的负载因子。</p>
+<h2 id="渐进式扩容"><a href="#渐进式扩容" class="headerlink" title="渐进式扩容"></a>渐进式扩容</h2><h3 id="扩容的前提条件"><a href="#扩容的前提条件" class="headerlink" title="扩容的前提条件"></a>扩容的前提条件</h3><p>为了保证访问效率，当新元素将要添加进map时，都会检查是否需要扩容，扩容实际上是以空间换时间的手段。<br>触发扩容的条件有二个：</p>
+<ol>
+<li>负载因子 &gt; 6.5时，也即平均每个bucket存储的键值对达到6.5个。</li>
+<li>overflow数量 &gt; 2^15时，也即overflow数量超过32768时。</li>
+</ol>
+<h3 id="增量扩容"><a href="#增量扩容" class="headerlink" title="增量扩容"></a>增量扩容</h3><p>当负载因子过大时，就新建一个bucket，新的bucket长度是原来的2倍，然后旧bucket数据搬迁到新的bucket。<br>考虑到如果map存储了数以亿计的key-value，一次性搬迁将会造成比较大的延时，Go采用逐步搬迁策略，即每次访问map时都会触发一次搬迁，每次搬迁2个键值对。</p>
+<p>下图展示了包含一个bucket满载的map(为了描述方便，图中bucket省略了value区域):</p>
+<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_2d622a6bc19ca1b5bcb225f77869f9c2_r.png" alt="img" style="zoom:100%;">
+
+<p>当前map存储了7个键值对，只有1个bucket。此地负载因子为7。再次插入数据时将会触发扩容操作，扩容之后再将新插入键写入新的bucket。</p>
+<p>当第8个键值对插入时，将会触发扩容，扩容后示意图如下：</p>
+<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_2f0122f26e5d66ca91e6820ace6b379b_r.png" alt="img" style="zoom:100%;">
+
+<p>hmap数据结构中oldbuckets成员指身原bucket，而buckets指向了新申请的bucket。新的键值对被插入新的bucket中。<br>后续对map的访问操作会触发迁移，将oldbuckets中的键值对逐步的搬迁过来。当oldbuckets中的键值对全部搬迁完毕后，删除oldbuckets。</p>
+<p>搬迁完成后的示意图如下：</p>
+<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_b1178e0a3cea02c9386e5f5eaa6f99a6_r.png" alt="img" style="zoom:80%;">
+
+<p>数据搬迁过程中原bucket中的键值对将存在于新bucket的前面，新插入的键值对将存在于新bucket的后面。</p>
+<h3 id="等量扩容"><a href="#等量扩容" class="headerlink" title="等量扩容"></a>等量扩容</h3><p>所谓等量扩容，实际上并不是扩大容量，buckets数量不变，重新做一遍类似增量扩容的搬迁动作，而是把松散的键值对重新排列一次，以使bucket的使用率更高，进而保证更快的存取。<br>在极端场景下，比如不断地增删，而键值对正好集中在一小部分的bucket，这样会造成overflow的bucket数量增多，但负载因子又不高，从而无法执行增量搬迁的情况，如下图所示：</p>
+<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_f3a5989c90204df9304d5ae246f3db72_r.png" alt="img" style="zoom:80%;">
+
+<p>上图可见，overflow的bucket中大部分是空的，访问效率会很差。此时进行一次等量扩容，即buckets数量不变，经过重新组织后overflow的bucket数量会减少，即节省了空间又会提高访问效率。</p>
+<h2 id="查找过程"><a href="#查找过程" class="headerlink" title="查找过程"></a>查找过程</h2><p>查找过程如下：</p>
+<ol>
+<li>根据key值算出哈希值</li>
+<li>取哈希值低位与hmap.B取模确定bucket位置</li>
+<li>取哈希值高位在tophash数组中查询</li>
+<li>如果tophash[i]中存储值也哈希值相等，则去找到该bucket中的key值进行比较</li>
+<li>当前bucket没有找到，则继续从下个overflow的bucket中查找。</li>
+<li>如果当前处于搬迁过程，则优先从oldbuckets查找</li>
+</ol>
+<p>注：如果查找不到，也不会返回空值，而是返回相应类型的0值。</p>
+<h2 id="插入过程"><a href="#插入过程" class="headerlink" title="插入过程"></a>插入过程</h2><p>新元素插入过程如下：</p>
+<ol>
+<li>根据key值算出哈希值</li>
+<li>取哈希值低位与hmap.B取模确定bucket位置</li>
+<li>查找该key是否已经存在，如果存在则直接更新值</li>
+<li>如果没找到将key，将key插入</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 

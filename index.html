@@ -159,18 +159,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">分類</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">標籤</span></a>
       </div>
   </nav>
@@ -200,6 +200,104 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/08/const%E4%BF%AE%E9%A5%B0%E6%8C%87%E9%92%88and%E5%BC%95%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/08/const%E4%BF%AE%E9%A5%B0%E6%8C%87%E9%92%88and%E5%BC%95%E7%94%A8/" class="post-title-link" itemprop="url">const修饰指针and引用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-09-08 16:35:28 / 修改時間：16:43:35" itemprop="dateCreated datePublished" datetime="2021-09-08T16:35:28+08:00">2021-09-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="const修饰指针"><a href="#const修饰指针" class="headerlink" title="const修饰指针"></a>const修饰指针</h2><p>const修饰指针有三种情况</p>
+<ol>
+<li>const修饰指针   — 常量指针</li>
+<li>const修饰常量   — 指针常量</li>
+<li>const即修饰指针，又修饰常量</li>
+</ol>
+<p>举例：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">	<span class="keyword">int</span> b = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//const修饰的是指针，指针指向可以改，指针指向的值不可以更改</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">int</span> * p1 = &amp;a; </span><br><span class="line">	p1 = &amp;b; <span class="comment">//正确</span></span><br><span class="line">	<span class="comment">//*p1 = 100;  报错</span></span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="comment">//const修饰的是常量，指针指向不可以改，指针指向的值可以更改</span></span><br><span class="line">	<span class="keyword">int</span> * <span class="keyword">const</span> p2 = &amp;a;</span><br><span class="line">	<span class="comment">//p2 = &amp;b; //错误</span></span><br><span class="line">	*p2 = <span class="number">100</span>; <span class="comment">//正确</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//const既修饰指针又修饰常量</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">int</span> * <span class="keyword">const</span> p3 = &amp;a;</span><br><span class="line">	<span class="comment">//p3 = &amp;b; //错误</span></span><br><span class="line">	<span class="comment">//*p3 = 100; //错误</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>技巧：看const右侧紧跟着的是指针还是常量, 是指针就是常量指针，是常量就是指针常量</p>
+</blockquote>
+<h2 id="引用的本质"><a href="#引用的本质" class="headerlink" title="引用的本质"></a>引用的本质</h2><p>本质：<strong>引用的本质在c++内部实现是一个指针常量.</strong></p>
+<p>讲解示例：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//const修饰的是常量，指针指向不可以改，指针指向的值可以更改</span></span><br><span class="line"><span class="keyword">int</span> * <span class="keyword">const</span> p2 = &amp;a;</span><br><span class="line"><span class="comment">//p2 = &amp;b; //错误</span></span><br><span class="line">*p2 = <span class="number">100</span>; <span class="comment">//正确</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//发现是引用，转换为 int* const ref = &amp;a;</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">(<span class="keyword">int</span>&amp; ref)</span></span>&#123;</span><br><span class="line">	ref = <span class="number">100</span>; <span class="comment">// ref是引用，转换为*ref = 100</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//自动转换为 int* const ref = &amp;a; 指针常量是指针指向不可改，也说明为什么引用不可更改</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref = a; </span><br><span class="line">	ref = <span class="number">20</span>; <span class="comment">//内部发现ref是引用，自动帮我们转换为: *ref = 20;</span></span><br><span class="line">    </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;a:&quot;</span> &lt;&lt; a &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref:&quot;</span> &lt;&lt; ref &lt;&lt; endl;</span><br><span class="line">    </span><br><span class="line">	<span class="built_in">func</span>(a);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结论：C++推荐用引用技术，因为语法方便，引用本质是指针常量，但是所有的指针操作编译器都帮我们做了</p>
+<h2 id="常量引用"><a href="#常量引用" class="headerlink" title="常量引用"></a>常量引用</h2><p><strong>作用：</strong>常量引用主要用来修饰形参，防止误操作</p>
+<p>在函数形参列表中，可以加==const修饰形参==，防止形参改变实参</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//引用使用的场景，通常用来修饰形参</span></span><br><span class="line"><span class="comment">// int&amp; v = int* const v</span></span><br><span class="line"><span class="comment">// const int&amp; v =  const int * const v </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">showValue</span><span class="params">(<span class="keyword">const</span> <span class="keyword">int</span>&amp; v)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//v += 10;</span></span><br><span class="line">	cout &lt;&lt; v &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//int&amp; ref = 10;  引用本身需要一个合法的内存空间，因此这行错误</span></span><br><span class="line">	<span class="comment">//加入const就可以了，编译器优化代码，int temp = 10; const int&amp; ref = temp;</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">int</span>&amp; ref = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//ref = 100;  //加入const后不可以修改变量</span></span><br><span class="line">	cout &lt;&lt; ref &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//函数中利用常量引用防止误操作修改实参</span></span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">	<span class="built_in">showValue</span>(a);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1616,201 +1714,6 @@
 <p>让死锁进程回退到足以避免死锁的地步 (这就要求系统记录历史信息、设置还原点)</p>
 <h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103747269.png" alt="img" style="zoom:150%;">
 
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/" class="post-title-link" itemprop="url">进程管理03</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-28 19:15:52 / 修改時間：20:41:18" itemprop="dateCreated datePublished" datetime="2021-08-28T19:15:52+08:00">2021-08-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="一、进程同步、互斥"><a href="#一、进程同步、互斥" class="headerlink" title="一、进程同步、互斥"></a>一、进程同步、互斥</h2><h3 id="1-进程同步的概念"><a href="#1-进程同步的概念" class="headerlink" title="1. 进程同步的概念"></a>1. 进程同步的概念</h3><blockquote>
-<p>进程同步指的是协调多个并发执行进程的工作先后次序</p>
-</blockquote>
-<h3 id="2-进程互斥的概念"><a href="#2-进程互斥的概念" class="headerlink" title="2. 进程互斥的概念"></a>2. 进程互斥的概念</h3><blockquote>
-<p>临界资源：一个时间段内只允许一个进程使用的资源</p>
-<p>进程互斥指的是当一个进程访问某临界资源时，另一个想要访问该临界资源的进程必须等待， 当前访问临界资源的进程访问结束，释放该资源后，另一个进程才能去访问临界资源</p>
-</blockquote>
-<h3 id="3-访问临界资源"><a href="#3-访问临界资源" class="headerlink" title="3. 访问临界资源"></a>3. 访问临界资源</h3><p>对临界资源的互斥访问，可在逻辑上分为如下四个部分：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102144475.png" alt="img" style="zoom:150%;">
-
-<h3 id="4-访问临界资源需要遵循的原则"><a href="#4-访问临界资源需要遵循的原则" class="headerlink" title="4. 访问临界资源需要遵循的原则"></a>4. 访问临界资源需要遵循的原则</h3><ol>
-<li>空闲让进  <ul>
-<li>临界区空闲时，可以允许一个请求进入临界区的进程立即进入临界区</li>
-</ul>
-</li>
-<li>忙则等待 <ul>
-<li> 当已有进程进入临界区时，其他试图进入临界区的进程必须等待</li>
-</ul>
-</li>
-<li>有限等待  <ul>
-<li>对请求访问的进程，应保证能在有限时间内进入临界区 (保证不会饥饿)</li>
-</ul>
-</li>
-<li>让权等待 <ul>
-<li>当进程不能进入临界区，应当立即释放处理机，防止进程忙等待 (不应该让他占用处理机 一直执行循环无法前进，应当得知无法进入临界区时不执行循环，直接切换进程)</li>
-</ul>
-</li>
-</ol>
-<h3 id="5-知识回顾"><a href="#5-知识回顾" class="headerlink" title="5. 知识回顾"></a>5. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102207229.png" alt="img" style="zoom:80%;">
-
-<h2 id="二、进程互斥的软件实现方法"><a href="#二、进程互斥的软件实现方法" class="headerlink" title="二、进程互斥的软件实现方法"></a>二、进程互斥的软件实现方法</h2><h3 id="1-单标志法"><a href="#1-单标志法" class="headerlink" title="1. 单标志法"></a>1. 单标志法</h3><p>思想：一个进程访问完临界区后会把使用临界区的权限交给另一个进程，即每个进程进入临界 区的权限只能被另一个进程赋予</p>
-<p>过程：<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102234925.png" alt="img" style="zoom:150%;"></p>
-<p>若P0要访问临界区，turn变为0，P1会一直在⑤循环，无法向下进行，P0访问完，将 turn改为1，P1跳出循环，P1可访问临界区</p>
-<p>注意：<br>(1) 该算法可以实现同一时刻最多只允许一个进程访问临界区<br>(2) 如果此时允许进入临界区的进程是P0，而P0一直不访问临界区，那么此时虽然临界区 空闲，但一直不允许P1访问，因此，单标志法存在的问题是：违背空闲让进原则</p>
-<h3 id="2-双标志先检查法"><a href="#2-双标志先检查法" class="headerlink" title="2. 双标志先检查法"></a>2. 双标志先检查法</h3><p>思想：设置一个布尔数组flag[]，数组中各元素标记各进程是否想进入临界区，true表示想进入， false表示不想进入；每个进程在进入临界区之前先检查当前有没有别的进程想进入临界 区，如果没有，把自身对应的标志flag[i]改为true，之后开始访问临界区</p>
-<p>过程：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102253393.png" alt="img " style="zoom:150%;">
-
-<p>存在的问题：P0进程进入之后，在修改P0为true之前，切换到P1，P1检查无别的进程 想进入临界区，故会将P1改为true，导致两个进程都为true，会同时访问</p>
-<p>注意：<br>(1) 双标志先检查法存在的问题是：违背忙则等待原则<br>(2) 出现的原因：进入区的检查和上锁不是一气呵成的</p>
-<h3 id="3-双标志后检查法"><a href="#3-双标志后检查法" class="headerlink" title="3. 双标志后检查法"></a>3. 双标志后检查法</h3><p>思想：双标志先检查法的改版，先上锁后检查，谁想进谁直接将自身改为true，不关心其他进 程，改为true之后，再检查有没有其他进程想访问</p>
-<p>过程：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102304319.png" alt="img" style="zoom:150%;">
-
-<blockquote>
-<p>存在的问题：P0想进入，P0改为true，在检查之前切换到P1，P1想进入，改为true，                      </p>
-<p>导致两个进程都为true，谁都无法访问临界区，产生饥饿现象</p>
-</blockquote>
-<p>注意：<br>(1) 双标志后检查法解决了忙则等待的问题，但是又违背了空闲让进和有限等待原则<br>(2) 出现的原因：进入区的检查和上锁不是一气呵成的</p>
-<h3 id="4-Peterson算法"><a href="#4-Peterson算法" class="headerlink" title="4. Peterson算法"></a>4. Peterson算法</h3><p>思想：双标志后检查法的改版，若两个进程都想进入临界区，可以主动让对方优先访问临界区</p>
-<p>过程：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102354672.png" alt="img" style="zoom:120%;">
-
-<p>进入区做了三件事：1. 主动争取 2. 主动谦让 3. 检查对方</p>
-<p>注意：<br>Peterson算法解决了空闲让进，忙则等待，有限等待三个原则，但违背了让权等待原则</p>
-<h3 id="5-知识回顾-1"><a href="#5-知识回顾-1" class="headerlink" title="5. 知识回顾"></a>5. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102412523.png" alt="img" style="zoom:150%;">
-
-<h2 id="三、进程互斥的硬件实现方法"><a href="#三、进程互斥的硬件实现方法" class="headerlink" title="三、进程互斥的硬件实现方法"></a>三、进程互斥的硬件实现方法</h2><h3 id="1-中断屏蔽方法"><a href="#1-中断屏蔽方法" class="headerlink" title="1. 中断屏蔽方法"></a>1. 中断屏蔽方法</h3><p>利用开/关中断指令实现，与原语思想相同，即在某进程开始访问临界区到结束访问为止都不允 许被中断，也就不能发生进程切换，因此也不可能出现两个进程同时访问临界区的情况</p>
-<p>优点：简单、高效</p>
-<p>缺点：不适用于多处理机；只适用于内核进程，不适用于用户进程</p>
-<h3 id="2-TestAndSet指令-TS指令"><a href="#2-TestAndSet指令-TS指令" class="headerlink" title="2. TestAndSet指令(TS指令)"></a>2. TestAndSet指令(TS指令)</h3><p>又称为TestAndSetLock指令(TSL指令)</p>
-<p>TSL指令是用硬件实现的，执行的过程不允许被中断，只能一气呵成，如图：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102423874.png" alt="img" style="zoom:150%;">
-
-<p>若刚开始lock是false(没有进程访问临界区)，则TSL返回值是false，不会卡在while循环，此 进程可以访问临界区；若刚开始是true(有进程在访问临界区)，TSL返回值是true，会卡在while 循环，直到正在访问临界区的进程访问结束，将lock值改为false，此进程才可进入临界区</p>
-<p>优点：实现简单，适用于多处理机环境</p>
-<p>缺点：不满足让权等待原则，暂时无法进入临界区的进程会占用CPU并循环执行TSL指令，从 而导致忙等</p>
-<h3 id="3-Swap指令"><a href="#3-Swap指令" class="headerlink" title="3.Swap指令"></a>3.Swap指令</h3><p>又称为Exchange指令(XCHG指令)</p>
-<p>Swap指令是用硬件实现的，执行的过程不允许被中断，只能一气呵成，如图：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102445294.png" alt="img" style="zoom:150%;">
-
-<p>当lock为false(无进程访问临界区时)才可以跳出循环，访问临界区</p>
-<p>优点：实现简单，适用于多处理机环境</p>
-<p>缺点：不满足让权等待原则，暂时无法进入临界区的进程会占用CPU并循环执行Swap指令， 从而导致忙等</p>
-<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102454314.png" alt="img" style="zoom:150%;">
-
-<h2 id="四、信号量机制"><a href="#四、信号量机制" class="headerlink" title="四、信号量机制"></a>四、信号量机制</h2><h3 id="1-产生原因"><a href="#1-产生原因" class="headerlink" title="1. 产生原因"></a>1. 产生原因</h3><p>进程互斥的四种软件实现方法、三种硬件实现方法都无法实现让权等待，也就是进程无法进入 临界区时，会占用处理机一直循环(因为并没有必要一直循环，可以直接切换进程)</p>
-<h3 id="2-介绍"><a href="#2-介绍" class="headerlink" title="2. 介绍"></a>2. 介绍</h3><ol>
-<li>信号量就是一个变量，表示系统中某种资源的数量</li>
-<li>用户进程可以通过使用操作系统提供的一对原语来对信号量进行操作</li>
-<li> 一对原语是：wait(S)原语和signal(S)原语，S是信号量 (将此对原语理解为函数)</li>
-<li> 通常将wait(S)称为P操作，写为P(S)；通常将signal(S)称为V操作，写为V(S)</li>
-</ol>
-<h3 id="3-整型信号量"><a href="#3-整型信号量" class="headerlink" title="3. 整型信号量"></a>3. 整型信号量</h3><p>用一个整数型变量作为信号量，用来表示系统中某种资源的数量，如下：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102523953.png" alt="img" style="zoom:150%;">
-
-<h3 id="4-记录型信号量"><a href="#4-记录型信号量" class="headerlink" title="4. 记录型信号量"></a>4. 记录型信号量</h3><p>在整型信号量(不满足让权等待)的基础上进行改进，使用记录型数据结构表示信号量，如下：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102528780.png" alt="img" style="zoom:150%;">
-
-<p>举个例子：<br>计算机有两台打印机，需要分配给不同的进程使用，value初始值为2，等待队列为空：</p>
-<ol>
-<li>P0进程使用打印机，执行wait，value–，value值成为1</li>
-<li>P1进程使用打印机，执行wait，value–，value值成为0 (无打印机可用)</li>
-<li>P2进程使用打印机，执行wait，value–，value值成为-1，value &lt; 0，执行block，成为等 待队列的队首 (无法使用时，不会占用处理机执行循环，未出现忙等现象)</li>
-<li>P3进程使用打印机，执行wait，value–，value值成为-2，value &lt; 0，执行block，成为等 待队列的第二个进程</li>
-<li>切换到P0，P0使用完打印机，执行signal，value++，value值成为-1，value &lt;= 0，执行 wakeup，唤醒等待队列的队首进程(P2进程)，P2移出等待队列，P2使用打印机</li>
-<li>切换到P2，P2使用完打印机，执行signal，value++，value值成为-1，value &lt;= 0，执行 wakeup，唤醒等待队列的队首进程(P3进程)，P3移出等待队列，P3使用打印机</li>
-</ol>
-<h3 id="5-知识回顾-2"><a href="#5-知识回顾-2" class="headerlink" title="5.知识回顾"></a>5.知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102545233.png" alt="img" style="zoom:150%;">
-
-<h2 id="五、用信号量实现进程互斥、同步、前驱关系"><a href="#五、用信号量实现进程互斥、同步、前驱关系" class="headerlink" title="五、用信号量实现进程互斥、同步、前驱关系"></a>五、用信号量实现进程互斥、同步、前驱关系</h2><h3 id="1-信号量机制实现进程互斥"><a href="#1-信号量机制实现进程互斥" class="headerlink" title="1. 信号量机制实现进程互斥"></a>1. 信号量机制实现进程互斥</h3><p>设置互斥信号量mutex，初值为1，如图：</p>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102555237.png" alt="img" style="zoom:150%;">
-
-<p>注意：<br>(1) 对不同的临界资源需要设置不同的互斥信号量<br>(2) P、V操作必须成对出现，缺少P无法保证互斥访问，缺少V无法唤醒等待进程</p>
-<h3 id="2-信号量机制实现进程同步"><a href="#2-信号量机制实现进程同步" class="headerlink" title="2. 信号量机制实现进程同步"></a>2. 信号量机制实现进程同步</h3><p>实现进程同步，必须保证进程的执行是有先后次序的，即一前一后</p>
-<ol>
-<li>设置同步信号量S，初值为0 (理解为刚开始没有资源，P1进程想使用必须通过P2产生资源)</li>
-<li>在前进程之后执行V(S)</li>
-<li>在后进程之前执行P(S)</li>
-</ol>
-<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102614435.png" alt="img" style="zoom:150%;">
-
-<h3 id="3-信号量机制实现前驱关系"><a href="#3-信号量机制实现前驱关系" class="headerlink" title="3. 信号量机制实现前驱关系"></a>3. 信号量机制实现前驱关系</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102623827.png" alt="img" style="zoom:150%;">
-
-<h3 id="4-知识回顾-1"><a href="#4-知识回顾-1" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102635850.png" alt="img" style="zoom:150%;">
-
-<h2 id="六、生产者-消费者问题"><a href="#六、生产者-消费者问题" class="headerlink" title="六、生产者 - 消费者问题"></a>六、生产者 - 消费者问题</h2><p>问题分析<br>系统中有一组生产者进程和一组消费者进程，生产者进程每次生产一个产品放入缓冲区，消费 者进程每次从缓冲区中取出一个产品并使用，生产者、消费者共享一个初始为空、大小为n的 缓冲区<br>2. 关系分析</p>
-<p>(1) 同步关系</p>
-<p>i. 缓冲区满时，生产者需要等消费者取走产品<br>ii. 缓冲区空时，消费者需要等生产者放入产品</p>
-<p>(2) 互斥关系</p>
-<p>i. 生产者与消费者要互斥访问缓冲区 (缓冲区是临界资源)<br>ii. 生产者与生产者要互斥访问缓冲区 (两个生产者可能会覆盖数据)<br>iii. 消费者与消费者要互斥访问缓冲区 (两个消费者可能有一个读的是空数据)</p>
-<p>实现<br><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102656876.png" alt="img" style="zoom:150%;"></p>
 
       
     </div>
