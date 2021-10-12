@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -200,6 +200,349 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/" class="post-title-link" itemprop="url">对sync.Map的理解</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-09-15 08:21:42 / 修改時間：09:58:44" itemprop="dateCreated datePublished" datetime="2021-09-15T08:21:42+08:00">2021-09-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="并发报错的map"><a href="#并发报错的map" class="headerlink" title="并发报错的map"></a>并发报错的map</h2><p>举例：一个goroutine一直读，一个goroutine一只写同一个键值，即即使读写的键不相同，而且map也没有”扩容”等操作，代码还是会报错。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	m := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			_ = m[<span class="number">1</span>]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			m[<span class="number">2</span>] = <span class="number">2</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">select</span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>错误信息是： <font color="red"><code>fatal error: concurrent map read and map write</code></font></p>
+<p>源码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line"> 	 ...</span><br><span class="line">	hashWriting  = <span class="number">4</span> <span class="comment">// a goroutine is writing to the map</span></span><br><span class="line">	...</span><br><span class="line">) </span><br><span class="line"><span class="keyword">type</span> hmap <span class="keyword">struct</span> &#123;</span><br><span class="line">	...</span><br><span class="line">	flags     <span class="keyword">uint8</span></span><br><span class="line">	...</span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">// map是检查是否有另外线程修改h.flag来判断，是否有并发问题。</span></span><br><span class="line"><span class="comment">// 在更新map的函数里检查并发写</span></span><br><span class="line"><span class="keyword">if</span> h.flags&amp;hashWriting == <span class="number">0</span> &#123;</span><br><span class="line">	throw(<span class="string">&quot;concurrent map writes&quot;</span>)</span><br><span class="line">&#125;	</span><br><span class="line"><span class="comment">// 在读map的函数里检查是否有并发写</span></span><br><span class="line"><span class="keyword">if</span> h.flags&amp;hashWriting != <span class="number">0</span> &#123;</span><br><span class="line">	throw(<span class="string">&quot;concurrent map read and map write&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Go通过map结构体中的flags字段来管理并发。当程序试图修改map（赋新值、删除value或者清空map），flags字段的某一位会被设置为1：</p>
+<p>hashWriting的值是4，并将相应的位设置为1。 ^是一个异或操作，如果两个操作数的位相反，则将对应位设置为1。</p>
+<img src="/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/578e8ecd09367196eb5e37da0a608bb4.png" alt="img" style="zoom:67%;">
+
+<p>然而，该标志位将在操作结束时被重置：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">mapdelete</span><span class="params">(t *maptype, h *hmap, key unsafe.Pointer)</span></span> &#123;</span><br><span class="line">   [...]</span><br><span class="line">   <span class="comment">// if another process is currently writing, throw error</span></span><br><span class="line">   <span class="keyword">if</span> h.flags&amp;hashWriting != <span class="number">0</span> &#123;</span><br><span class="line">      throw(<span class="string">&quot;concurrent map writes&quot;</span>)</span><br><span class="line">   &#125;</span><br><span class="line">   [...]</span><br><span class="line">   <span class="comment">// no one is writing, we can set now the flag</span></span><br><span class="line">   h.flags ^= hashWriting   <span class="comment">// 0 0 0 1 0 0</span></span><br><span class="line">   [...]</span><br><span class="line">   <span class="comment">// flag reset</span></span><br><span class="line">   h.flags &amp;^= hashWriting</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="sync-Map"><a href="#sync-Map" class="headerlink" title="sync.Map"></a>sync.Map</h2><p>底层结构：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 封装的线程安全的map</span></span><br><span class="line"><span class="keyword">type</span> Map <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// lock</span></span><br><span class="line">	mu Mutex</span><br><span class="line">	<span class="comment">// 实际是readOnly这个结构</span></span><br><span class="line">	<span class="comment">// 一个只读的数据结构，因为只读，所以不会有读写冲突。</span></span><br><span class="line">	<span class="comment">// readOnly包含了map的一部分数据，用于并发安全的访问。(冗余，内存换性能)</span></span><br><span class="line">	<span class="comment">// 访问这一部分不需要锁。</span></span><br><span class="line">	read atomic.Value <span class="comment">// readOnly 原子性</span></span><br><span class="line">	<span class="comment">// dirty数据包含当前的map包含的entries,它包含最新的entries(包括read中未删除的数据,虽有冗余，但是提升dirty字段为read的时候非常快，不用一个一个的复制，而是直接将这个数据结构作为read字段的一部分),有些数据还可能没有移动到read字段中。</span></span><br><span class="line">	<span class="comment">// 对于dirty的操作需要加锁，因为对它的操作可能会有读写竞争。</span></span><br><span class="line">	<span class="comment">// 当dirty为空的时候， 比如初始化或者刚提升完，下一次的写操作会复制read字段中未删除的数据到这个数据中。</span></span><br><span class="line">	dirty <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*entry</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 当从Map中读取entry的时候，如果read中不包含这个entry,会尝试从dirty中读取，这个时候会将misses加一，</span></span><br><span class="line">	<span class="comment">// 当misses累积到 dirty的长度的时候， 就会将dirty提升为read,避免从dirty中miss太多次。因为操作dirty需要加锁。</span></span><br><span class="line">	misses <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// readOnly is an immutable struct stored atomically in the Map.read field.</span></span><br><span class="line"><span class="keyword">type</span> readOnly <span class="keyword">struct</span> &#123;</span><br><span class="line">	m <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*entry</span><br><span class="line">	<span class="comment">// 如果Map.dirty有些数据不在m中，这个值为true</span></span><br><span class="line">	amended <span class="keyword">bool</span> </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// An entry is a slot in the map corresponding to a particular key.</span></span><br><span class="line"><span class="keyword">type</span> entry <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// *interface&#123;&#125;</span></span><br><span class="line">	p unsafe.Pointer </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>readOnly中<code>amended</code>指明<code>Map.dirty</code>中有<code>readOnly.m</code>未包含的数据，所以如果从<code>Map.read</code>找不到数据的话，还要进一步到<code>Map.dirty</code>中查找。</p>
+<p>这里虽然有冗余的两份map数据，但是Map.dirty和readOnly.m的value都是一个指针变量 *entry，所以整体内存占用还好。</p>
+<p>sync.Map 的kv都是 interface{} ，entry里面的p实际是一个 *interface{}，也就是entry实际保存的是指向value的指针。</p>
+<p>entry中的p有三个值：</p>
+<ol>
+<li>nil: entry已被删除了，并且m.dirty为nil</li>
+<li>expunged: entry已被删除了，并且m.dirty不为nil，而且这个entry不存在于m.dirty中</li>
+<li>其它： entry是一个正常的value</li>
+</ol>
+<h3 id="Load"><a href="#Load" class="headerlink" title="Load"></a>Load</h3><p>线程安全的加载key对应的value：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span> <span class="title">Load</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(value <span class="keyword">interface</span>&#123;&#125;, ok <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1.首先从m.read中加载只读的readOnly, 从它的map中查找，无锁。</span></span><br><span class="line">	read, _ := m.read.Load().(readOnly)</span><br><span class="line">	e, ok := read.m[key]</span><br><span class="line">	<span class="comment">// 2. 如果没找到，并且m.dirty中有新数据，需要从m.dirty查找，这个时候需要加锁</span></span><br><span class="line">    <span class="comment">// read.amended 指明&#x27;Map.dirty`中有`readOnly.m`未包含的数据，所以如果从`Map.read`找不到数据的话，还要进一步到`Map.dirty`中查找</span></span><br><span class="line">	<span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">		m.mu.Lock()</span><br><span class="line">		<span class="comment">// double check</span></span><br><span class="line">		read, _ = m.read.Load().(readOnly)</span><br><span class="line">		e, ok = read.m[key]</span><br><span class="line">		<span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">			<span class="comment">// // 从m.dirty查找</span></span><br><span class="line">			e, ok = m.dirty[key]</span><br><span class="line">			<span class="comment">// 不管m.dirty中存不存在，都将misses计数加一</span></span><br><span class="line">			<span class="comment">// missLocked()中满足条件后就会提升m.dirty</span></span><br><span class="line">			m.missLocked()</span><br><span class="line">		&#125;</span><br><span class="line">		m.mu.Unlock()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 原子加载 *entry 所保存的value。</span></span><br><span class="line">	<span class="keyword">return</span> e.load()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span> <span class="title">missLocked</span><span class="params">()</span></span> &#123;</span><br><span class="line">	m.misses++</span><br><span class="line">	<span class="keyword">if</span> m.misses &lt; <span class="built_in">len</span>(m.dirty) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	m.read.Store(readOnly&#123;m: m.dirty&#125;)</span><br><span class="line">	m.dirty = <span class="literal">nil</span></span><br><span class="line">	m.misses = <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/20200112110724714.png" alt="img" style="zoom:80%;">
+
+<p>首先要强调的是，首先是从readonly里面读，读不到时候才加锁去 map.dirty 里面去读，并且加锁之后首先是进行double check(熟悉Java的都知道double check是什么)。</p>
+<p>double check 之后即使不存在于m.read中，经过miss几次之后，m.dirty会被提升为m.read，又会从m.read中查找。所以对于更新／增加较少，加载存在的key很多的case,性能基本和无锁的map类似。</p>
+<p>missLocked方法中可能会将m.dirty提升，m,misses会记录从readOnly中获取不到 *entry 的次数，也就是miss的次数，如果达到了 len(m.dirty) 就会原子的替换m.read.m 为 m.dirty。提升后m.dirty、m.misses重置， 并且m.read.amended为false。</p>
+<h3 id="Store"><a href="#Store" class="headerlink" title="Store"></a>Store</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Store sets the value for a key.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span> <span class="title">Store</span><span class="params">(key, value <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 如果m.read存在这个键，并且这个entry没有被标记删除(expunged)，尝试直接存储</span></span><br><span class="line">	<span class="comment">// 因为m.dirty也指向这个entry,所以m.dirty也保持最新的entry。</span></span><br><span class="line">	read, _ := m.read.Load().(readOnly)</span><br><span class="line">	<span class="keyword">if</span> e, ok := read.m[key]; ok &amp;&amp; e.tryStore(&amp;value) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. m.read不存在或者已经被标记删除</span></span><br><span class="line">	m.mu.Lock()</span><br><span class="line">	<span class="comment">// double check</span></span><br><span class="line">	read, _ = m.read.Load().(readOnly)</span><br><span class="line">	<span class="keyword">if</span> e, ok := read.m[key]; ok &#123;</span><br><span class="line">		<span class="keyword">if</span> e.unexpungeLocked() &#123;<span class="comment">//标记成未被删除</span></span><br><span class="line">			<span class="comment">//m.dirty中不存在这个键，所以加入m.dirty</span></span><br><span class="line">			m.dirty[key] = e</span><br><span class="line">		&#125;</span><br><span class="line">		e.storeLocked(&amp;value)</span><br><span class="line">	<span class="comment">// m.dirty存在这个键，更新</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> e, ok := m.dirty[key]; ok &#123;</span><br><span class="line">		e.storeLocked(&amp;value)</span><br><span class="line">	<span class="comment">//新键值</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">//m.dirty中没有比m.readOnly更新的数据，往m.dirty中增加第一个新键</span></span><br><span class="line">		<span class="keyword">if</span> !read.amended &#123;</span><br><span class="line">			<span class="comment">// 从m.read中复制未删除的数据</span></span><br><span class="line">			<span class="comment">// 并标记m.read已经落后于m.dirty</span></span><br><span class="line">			m.dirtyLocked()</span><br><span class="line">			m.read.Store(readOnly&#123;m: read.m, amended: <span class="literal">true</span>&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//将这个entry加入到m.dirty中</span></span><br><span class="line">		m.dirty[key] = newEntry(value)</span><br><span class="line">	&#125;</span><br><span class="line">	m.mu.Unlock()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// tryStore stores a value if the entry has not been expunged.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// If the entry is expunged, tryStore returns false and leaves the entry</span></span><br><span class="line"><span class="comment">// unchanged.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span> <span class="title">tryStore</span><span class="params">(i *<span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		p := atomic.LoadPointer(&amp;e.p)</span><br><span class="line">		<span class="keyword">if</span> p == expunged &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> atomic.CompareAndSwapPointer(&amp;e.p, p, unsafe.Pointer(i)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span> <span class="title">dirtyLocked</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> m.dirty != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	read, _ := m.read.Load().(readOnly)</span><br><span class="line">	m.dirty = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*entry, <span class="built_in">len</span>(read.m))</span><br><span class="line">	<span class="keyword">for</span> k, e := <span class="keyword">range</span> read.m &#123;</span><br><span class="line">		<span class="keyword">if</span> !e.tryExpungeLocked() &#123;</span><br><span class="line">			m.dirty[k] = e</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/20200112110342685.png" alt="img" style="zoom:40%;">
+
+<p>以上操作都是先从操作m.read开始的，不满足条件再加锁，然后操作m.dirty。</p>
+<p>可能会发生两种数据迁移：</p>
+<ol>
+<li><p>从m.dirty到m.read的迁移，这个迁移过程其实是指针的的修改，所以效率高；</p>
+</li>
+<li><p>从read map到dirty map的迁移, 这个迁移需要创建一个新的map来复制key-value，所以效率会低一些</p>
+<p><font color="red">Store可能会在某种情况下（在刚初始化和将所有元素迁移到read中后，dirty默认都是nil元素，而此时如果有新的元素增加，则需要先将read map中的所有未删除数据先迁移到dirty中）从m.read中复制数据到m.dirty，如果这个时候m.read中数据量非常大，可能会影响性能。</font></p>
+</li>
+</ol>
+<h3 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span> <span class="title">Delete</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 如果不存在于 m.read中，而且 m.dirty 和 m.read 数据不一致。</span></span><br><span class="line">	read, _ := m.read.Load().(readOnly)</span><br><span class="line">	e, ok := read.m[key]</span><br><span class="line">	<span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">		<span class="comment">// 加锁，double check， 然后删除对应的key。</span></span><br><span class="line">		m.mu.Lock()</span><br><span class="line">		read, _ = m.read.Load().(readOnly)</span><br><span class="line">		e, ok = read.m[key]</span><br><span class="line">		<span class="keyword">if</span> !ok &amp;&amp; read.amended &#123;</span><br><span class="line">			<span class="built_in">delete</span>(m.dirty, key)</span><br><span class="line">		&#125;</span><br><span class="line">		m.mu.Unlock()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> ok &#123;</span><br><span class="line">		e.<span class="built_in">delete</span>()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/20200112111125713.png" alt="img" style="zoom:80%;">
+
+<p>这里会删除 m.dirty 对应的key-value, 但是m.read中的key-value其实并没有删除，只是设置了删除的标志为expunged。这里的惰性删除避免了重新创建 entry 实体，只用更新指针和value指针。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *entry)</span> <span class="title">delete</span><span class="params">()</span> <span class="params">(hadValue <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		p := atomic.LoadPointer(&amp;e.p)</span><br><span class="line">		<span class="keyword">if</span> p == <span class="literal">nil</span> || p == expunged &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> atomic.CompareAndSwapPointer(&amp;e.p, p, <span class="literal">nil</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Range"><a href="#Range" class="headerlink" title="Range"></a>Range</h3><p>这里sync.Map是对map关键字的封装，肯定无法使用系统提供的 for range 操作。所以这里采用了一个回调的操作：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Map)</span> <span class="title">Range</span><span class="params">(f <span class="keyword">func</span>(key, value <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span>)</span> &#123;</span><br><span class="line">	<span class="comment">// 如果m.dirty中有新数据，则提升m.dirty,然后在遍历</span></span><br><span class="line">	read, _ := m.read.Load().(readOnly)</span><br><span class="line">	<span class="keyword">if</span> read.amended &#123;</span><br><span class="line">		<span class="comment">///提升m.dirty</span></span><br><span class="line">		m.mu.Lock()</span><br><span class="line">		read, _ = m.read.Load().(readOnly)</span><br><span class="line">		<span class="keyword">if</span> read.amended &#123;</span><br><span class="line">			read = readOnly&#123;m: m.dirty&#125;</span><br><span class="line">			m.read.Store(read)</span><br><span class="line">			m.dirty = <span class="literal">nil</span></span><br><span class="line">			m.misses = <span class="number">0</span></span><br><span class="line">		&#125;</span><br><span class="line">		m.mu.Unlock()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 遍历, for range是安全的</span></span><br><span class="line">	<span class="keyword">for</span> k, e := <span class="keyword">range</span> read.m &#123;</span><br><span class="line">		v, ok := e.load()</span><br><span class="line">		<span class="keyword">if</span> !ok &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !f(k, v) &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Range方法调用前可能会做一个m.dirty的提升，不过提升m.dirty不是一个耗时的操作。</p>
+<h3 id="sync-Map总结"><a href="#sync-Map总结" class="headerlink" title="sync.Map总结"></a>sync.Map总结</h3><p>sync.Map的优化策略简单总结可以理解为：</p>
+<ol>
+<li>无锁读与读写分离；</li>
+</ol>
+<img src="/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/20200112110232202.png" alt="img" style="zoom:50%;">
+
+<ol start="2">
+<li>写加锁与延迟提升；</li>
+</ol>
+<img src="/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/20200112110214618.png" alt="img" style="zoom:50%;">
+
+<ol start="3">
+<li>指针与惰性删除，map保存的value都是指针。惰性删除，实际删除是在 Store时候去check 然后删除。</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/13/Linux%E4%B8%8B4G%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%86%E5%B8%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/13/Linux%E4%B8%8B4G%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%86%E5%B8%83/" class="post-title-link" itemprop="url">Linux下4G虚拟地址空间的分布</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-09-13 16:46:59 / 修改時間：17:07:29" itemprop="dateCreated datePublished" datetime="2021-09-13T16:46:59+08:00">2021-09-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>所编写的源代码并不是程序，从C代码（.c/.cpp)—-&gt;链接程序（.exe）是要经过以下几个过程才能真正的运行链接的；</p>
+<p>C源程序—&gt;预编译处理（.c/.cpp）–&gt;编译，优化程序（.s）—&gt;汇编程序(.o)—&gt;链接(.exe)</p>
+<p>在编译运行过程中，首先需要将程序存储到内存中才能调取运行，但是内存是有限的，不可能将所有的进程都放在内存中去，所以都会给给进程分配一个4G的虚拟地址空间存储数据，在进程运行时在映射到内存中去。</p>
+<blockquote>
+<p>windows下 4G的空间分布为 ：  用户态：内核态=1：1</p>
+<p>Linux下    4G的空间分布为：   用户态：内核态=3：1  </p>
+</blockquote>
+<p>32位处理机 32 指计算机最多一次处理的比特位, 进程地址空间需要隔离，防止恶意的程序修改其他程序的内存数据，因此计算机中引入虚拟地址空间。4GB虚拟地址空间布局如下图所示</p>
+<img src="/2021/09/13/Linux%E4%B8%8B4G%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%86%E5%B8%83/20181113112843119.png" alt="img" style="zoom:60%;">
+
+<p>用户空间：</p>
+<p>1、128M大小的不可访问区域（保留区）不可读、不可写</p>
+<pre><code>  我们通常将申请的临时变量指针初始化时置为NULL，可以防止后续无意使用这个指针时出错，NULL=0X00，而保留区的数据不能访问。
+</code></pre>
+<p>2、.text代码段</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">存储代码中的指令。一份代码是由数据和指令构成的，局部变量也属于指令，但是局部变量存储在栈上，代码运行时才在栈中预留好的区域中开辟</span><br></pre></td></tr></table></figure>
+
+<p>3、.data段</p>
+<pre><code>这个区域存储代码中的各种数据，包括全局变量，静态局部变量。且必须为已经初始化且初始化不为0的数据
+</code></pre>
+<p>4、.bss段</p>
+<pre><code> 这个区域存储的也是代码中的各种数据，和.data不同的是，存储的是未初始化或者初始化了但为0 的数据（这个段在可执行文件中不占用空间）
+</code></pre>
+<p>5、堆</p>
+<pre><code> 当我们需要申请一块连续且指定大小的内存块的动态内存时，需要在 堆中申请。并且需要手动申请，手动释放。不释放会造成内存泄漏
+</code></pre>
+<p>6、栈</p>
+<pre><code>所有的局部变量存储在这里，函数的运行也需要栈的开辟，释放空间由系统完成
+</code></pre>
+<p>内核空间：</p>
+<p>1、内存直接访问区（ZONE_DMA 大约16M）</p>
+<blockquote>
+<p>ZONE_DirectMemoryAccess(直接内存访问)可以加快磁盘和内存之间的数据交换，不需要经过CPU的寄存器，这是CPU可以去干别的事，大大增加了效率。</p>
+</blockquote>
+<p>2、ZONE_NORMAL（大约892M）</p>
+<blockquote>
+<p>内核中最重要最常用的部分，用于直接映射，PCB就在这里。</p>
+</blockquote>
+<p>3、ZONE_HIGHMEM(128M)</p>
+<blockquote>
+<p>高端内存，用于在内核中映射高于1GB的物理内存时使用，64位操作系统没有该段</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> gdata1=<span class="number">10</span>;  <span class="comment">//.data</span></span><br><span class="line"><span class="keyword">int</span> gdata2=<span class="number">0</span>;   <span class="comment">//.bss</span></span><br><span class="line"><span class="keyword">int</span>  gdata3;    <span class="comment">//.bss</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> gdata4=<span class="number">20</span>;  <span class="comment">//.data</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> gdata5=<span class="number">0</span>;  <span class="comment">//.bss</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> gdata6;     <span class="comment">//.bss</span></span><br><span class="line"><span class="function"><span class="keyword">int</span>  <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">     <span class="keyword">int</span> ldata1=<span class="number">30</span>;  <span class="comment">//.text(普通的局部变量开始都为指令存在指令区，只有在运行编译时在栈上开辟空间存储)</span></span><br><span class="line">     <span class="keyword">int</span> ldata2=<span class="number">0</span>;   <span class="comment">//.text</span></span><br><span class="line">     <span class="keyword">int</span> ldata3;    <span class="comment">//.text</span></span><br><span class="line">     ststic <span class="keyword">int</span> ldata4=<span class="number">40</span>;  <span class="comment">//.data</span></span><br><span class="line">     <span class="keyword">static</span>  <span class="keyword">int</span>  ldata5=<span class="number">0</span>;  <span class="comment">//.bss</span></span><br><span class="line">     <span class="keyword">static</span>  <span class="keyword">int</span>  ldata6;    <span class="comment">//.bss</span></span><br><span class="line">      <span class="keyword">return</span>  <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/11/%E9%A2%98%E7%9B%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/11/%E9%A2%98%E7%9B%AE/" class="post-title-link" itemprop="url">题目01</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-09-11 22:27:44 / 修改時間：22:51:36" itemprop="dateCreated datePublished" datetime="2021-09-11T22:27:44+08:00">2021-09-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ol>
+<li>UNIX操作系统，是一个强大的多用户、多任务操作系统，支持多种处理器架构按照操作系统的分类，属于分时操作系统。<br>UNIX系统是一个多用户，多任务的分时操作系统。<br>UNIX的系统结构可分为三部分：<pre><code>操作系统内核（是UNIX系统核心管理和控制中心，在系统启动或常驻内存），
+系统调用（供程序开发者开发应用程序时调用系统组件，包括进程管理，文件管理，设备状态等），
+应用程序（包括各种开发工具，编译器，网络通讯处理程序等，所有应用程序都在Shell的管理和控制下为用户服务）。     
+</code></pre>
+UNIX系统大部分是由C语言编写的。</li>
+<li></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1230,510 +1573,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/" class="post-title-link" itemprop="url">一致性哈希</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-30 19:38:37 / 修改時間：20:11:52" itemprop="dateCreated datePublished" datetime="2021-08-30T19:38:37+08:00">2021-08-30</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="一致性哈希"><a href="#一致性哈希" class="headerlink" title="一致性哈希"></a>一致性哈希</h1><h2 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h2><p>假设，我们有三台缓存服务器，用于缓存图片，我们为这三台缓存服务器编号为0号、1号、2号，现在，有3万张图片需要缓存，我们希望这些图片被均匀的缓存到这3台服务器上，以便它们能够分摊缓存的压力。也就是说，我们希望每台服务器能够缓存1万张左右的图片，那么，我们应该怎样做呢？</p>
-<h3 id="落伍的方式"><a href="#落伍的方式" class="headerlink" title="落伍的方式"></a>落伍的方式</h3><blockquote>
-<p>原始的做法是对缓存项的键进行哈希，将hash后的结果对缓存服务器的数量进行取模操作，通过取模后的结果，决定缓存项将会缓存在哪一台服务器上。</p>
-<p>举例说明，仍然以刚才描述的场景为例，假设我们使用图片名称作为访问图片的key，假设图片名称是不重复的，那么，我们可以使用如下公式，计算出图片应该存放在哪台服务器上。</p>
-<p><strong>hash（图片名称）% N</strong></p>
-</blockquote>
-<p><font color="red">哈希函数最重要的一个特征：无限的输入经过哈希函数得到的哈希值均匀的分布在有限的输出域上。</font></p>
-<p><font color="red">假设某哈希函数输出16位数据，可以截取前八位和后八位作为两个相互独立的哈希函数，假设这两个哈希函数为a和b，则a+1b,a+2b,a+3b….也是相互独立的，我们可以以此方式拼接处无数个相互独立的哈希函数。</font></p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830194520098.png" alt="image-20210830194520098" style="zoom:60%;">
-
-<h3 id="上述方法存在的问题："><a href="#上述方法存在的问题：" class="headerlink" title="上述方法存在的问题："></a>上述方法存在的问题：</h3><blockquote>
-<p>如果3台缓存服务器已经不能满足我们的缓存需求，怎么办呢？多增加两台缓存服务器，假设，我们增加了一台缓存服务器，那么缓存服务器的数量就由3台变成了4台，此时，如果仍然使用上述方法对同一张图片进行缓存，那么这张图片所在的服务器编号必定与原来3台服务器时所在的服务器编号不同，因为除数由3变为了4，被除数不变的情况下，余数肯定不同，这种情况带来的结果就是当服务器数量变动时，所有缓存的位置都要发生改变，换句话说，当服务器数量发生改变时，所有缓存在一定时间内是失效的，当应用无法从缓存中获取数据时，则会向后端服务器请求数据，同理，假设3台缓存中突然有一台缓存服务器出现了故障，无法进行缓存，那么我们则需要将故障机器移除，但是如果移除了一台缓存服务器，那么缓存服务器数量从3台变为2台，如果想要访问一张图片，这张图片的缓存位置必定会发生改变，以前缓存的图片也会失去缓存的作用与意义，由于大量缓存在同一时间失效，造成了缓存的雪崩，此时前端缓存已经无法起到承担部分压力的作用，后端服务器将会承受巨大的压力，整个系统很有可能被压垮，所以，我们应该想办法不让这种情况发生，但是由于上述HASH算法本身的缘故，使用取模法进行缓存时，这种情况是无法避免的，为了解决这些问题，一致性哈希算法诞生了。</p>
-</blockquote>
-<h2 id="一致性哈希算法的基本概念"><a href="#一致性哈希算法的基本概念" class="headerlink" title="一致性哈希算法的基本概念"></a>一致性哈希算法的基本概念</h2><p>一致性哈希算法也是使用取模的方法，只是，刚才描述的取模法是对服务器的数量进行取模，而一致性哈希算法是对2^32取模，什么意思呢？</p>
-<p>首先，我们把二的三十二次方想象成一个圆，就像钟表一样，钟表的圆可以理解成由60个点组成的圆，而此处我们把这个圆想象成由2^32个点组成的圆，示意图如下：</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195432751.png" alt="image-20210830195432751" style="zoom:80%;">
-
-<p>圆环的正上方的点代表0，0点右侧的第一个点代表1，以此类推，2、3、4、5、6……直到2^32-1,也就是说0点左侧的第一个点代表2^32-1</p>
-<p>我们把这个由2的32次方个点组成的圆环称为hash环。</p>
-<p>那么，一致性哈希算法与上图中的圆环有什么关系呢？</p>
-<blockquote>
-<p>仍然以之前描述的场景为例，假设我们有3台缓存服务器，服务器A、服务器B、服务器C，那么，在生产环境中，这三台服务器肯定有自己的IP地址，我们使用它们各自的IP地址进行哈希计算，使用哈希后的结果对2^32取模，可以使用如下公式示意。</p>
-</blockquote>
-<blockquote>
-<p><strong>hash（服务器A的IP地址） %  2^32</strong></p>
-</blockquote>
-<p>通过上述公式算出的结果一定是一个0到2^32-1之间的一个整数，我们就用算出的这个整数，代表服务器A，既然这个整数肯定处于0到2^32-1之间，那么，上图中的hash环上必定有一个点与这个整数对应，而我们刚才已经说明，使用这个整数代表服务器A，那么，服务器A就可以映射到这个环上，用下图示意:</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/020717_1707_3.png" alt="img " style="zoom:150%;">
-
-<p>同理，服务器B与服务器C也可以通过相同的方法映射到上图中的hash环中</p>
-<p><strong>hash（服务器B的IP地址） %  2^32</strong></p>
-<p><strong>hash（服务器C的IP地址） %  2^32</strong></p>
-<p>通过上述方法，可以将服务器B与服务器C映射到上图中的hash环上，示意图如下</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195650374.png" alt="image-20210830195650374" style="zoom:40%;">
-
-<p>假设3台服务器映射到hash环上以后如上图所示（当然，这是理想的情况)</p>
-<p>好了，到目前为止，我们已经把缓存服务器与hash环联系在了一起，我们通过上述方法，把缓存服务器映射到了hash环上，那么使用同样的方法，我们也可以将需要缓存的对象映射到hash环上。</p>
-<p>假设，我们需要使用缓存服务器缓存图片，而且我们仍然使用图片的名称作为找到图片的key，那么我们使用如下公式可以将图片映射到上图中的hash环上。</p>
-<blockquote>
-<p> <strong>hash（图片名称） %  2^32</strong></p>
-</blockquote>
-<p>映射后的示意图如下，下图中的橘黄色圆形表示图片</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195804698.png" alt="image-20210830195804698" style="zoom:40%;">
-
-<p>好了，现在服务器与图片都被映射到了hash环上，那么上图中的这个图片到底应该被缓存到哪一台服务器上呢？上图中的图片将会被缓存到服务器A上，为什么呢？因为从图片的位置开始，沿顺时针方向遇到的第一个服务器就是A服务器，所以，上图中的图片将会被缓存到服务器A上，如下图所示。</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195840410.png" alt="image-20210830195840410" style="zoom:33%;">
-
-<p>一致性哈希算法就是通过这种方法，判断一个对象应该被缓存到哪台服务器上的，将缓存服务器与被缓存对象都映射到hash环上以后，从被缓存对象的位置出发，沿顺时针方向遇到的第一个服务器，就是当前对象将要缓存于的服务器，由于被缓存对象与服务器hash后的值是固定的，所以，在服务器不变的情况下，一张图片必定会被缓存到固定的服务器上，那么，当下次想要访问这张图片时，只要再次使用相同的算法进行计算，即可算出这个图片被缓存在哪个服务器上，直接去对应的服务器查找对应的图片即可。</p>
-<p>刚才的示例只使用了一张图片进行演示，假设有四张图片需要缓存，示意图如下</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195944118.png" alt="image-20210830195944118" style="zoom:33%;">
-
-<p>1号、2号图片将会被缓存到服务器A上，3号图片将会被缓存到服务器B上，4号图片将会被缓存到服务器C上。</p>
-<h2 id="一致性哈希算法的优点"><a href="#一致性哈希算法的优点" class="headerlink" title="一致性哈希算法的优点"></a>一致性哈希算法的优点</h2><p>假设，服务器B出现了故障，我们现在需要将服务器B移除，那么，我们将上图中的服务器B从hash环上移除即可，移除服务器B以后示意图如下。</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200147236.png" alt="image-20210830200147236" style="zoom:33%;">
-
-<p>在服务器B未移除时，图片3应该被缓存到服务器B中，可是当服务器B移除以后，按照之前描述的一致性哈希算法的规则，图片3应该被缓存到服务器C中，因为从图片3的位置出发，沿顺时针方向遇到的第一个缓存服务器节点就是服务器C，也就是说，如果服务器B出现故障被移除时，图片3的缓存位置会发生改变</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200208142.png" alt="image-20210830200208142" style="zoom:33%;">
-
-<p>但是，图片4仍然会被缓存到服务器C中，图片1与图片2仍然会被缓存到服务器A中，这与服务器B移除之前并没有任何区别，这就是一致性哈希算法的优点，如果使用之前的hash算法，服务器数量发生改变时，所有服务器的所有缓存在同一时间失效了，而使用一致性哈希算法时，服务器的数量如果发生改变，并不是所有缓存都会失效，而是只有部分缓存会失效，前端的缓存仍然能分担整个系统的压力，而不至于所有压力都在同一时间集中到后端服务器上。</p>
-<h2 id="hash环的偏斜"><a href="#hash环的偏斜" class="headerlink" title="hash环的偏斜"></a>hash环的偏斜</h2><p>在介绍一致性哈希的概念时，我们理想化的将3台服务器均匀的映射到了hash环上，如下图所示</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200311037.png" alt="image-20210830200311037" style="zoom:30%;">
-
-<p>在实际的映射中，服务器可能会被映射成如下模样。<font color="red">哈希函数在大数据下保证大致的平均（并不是绝对平均）。</font></p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200339888.png" alt="image-20210830200339888" style="zoom:33%;">
-
-<p>如果服务器被映射成上图中的模样，那么被缓存的对象很有可能大部分集中缓存在某一台服务器上，如下图所示。</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200448650.png" alt="image-20210830200448650" style="zoom:33%;">
-
-<p>如上图所示就造成了服务器A负责大量工作，而服务器B和C则很闲。没有达到负载均衡的目的。</p>
-<h2 id="虚拟节点"><a href="#虚拟节点" class="headerlink" title="虚拟节点"></a>虚拟节点</h2><p>由于我们只有3台服务器，当我们把服务器映射到hash环上的时候，很有可能出现hash环偏斜的情况，当hash环偏斜以后，缓存往往会极度不均衡的分布在各服务器上。</p>
-<p>如果想要均衡的将缓存分布到3台服务器上，最好能让这3台服务器尽量多的、均匀的出现在hash环上，但是，真实的服务器资源只有3台，我们怎样凭空的让它们多起来呢，没错，就是凭空的让服务器节点多起来，既然没有多余的真正的物理服务器节点，我们就只能将现有的物理节点通过虚拟的方法复制出来，这些由实际节点虚拟复制而来的节点被称为”虚拟节点”。加入虚拟节点以后的hash环如下。</p>
-<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200726308.png" alt="image-20210830200726308" style="zoom:33%;">
-
-<p>“虚拟节点”是”实际节点”（实际的物理服务器）在hash环上的复制品,一个实际节点可以对应多个虚拟节点。</p>
-<p>从上图可以看出，A、B、C三台服务器分别虚拟出了一个虚拟节点，当然，如果你需要，也可以虚拟出更多的虚拟节点。引入虚拟节点的概念后，缓存的分布就均衡多了，上图中，1号、3号图片被缓存在服务器A中，5号、4号图片被缓存在服务器B中，6号、2号图片被缓存在服务器C中，如果你还不放心，可以虚拟出更多的虚拟节点，以便减小hash环偏斜所带来的影响，虚拟节点越多，hash环上的节点就越多，缓存被均匀分布的概率就越大。</p>
-<p><font color="red">保存两个字典：每个服务器对应的多个虚拟节点；每个虚拟节点相对应的服务器。</font></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">内存管理的概念</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-
-      <time title="創建時間：2021-08-28 23:27:51" itemprop="dateCreated datePublished" datetime="2021-08-28T23:27:51+08:00">2021-08-28</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新於</span>
-        <time title="修改時間：2021-08-29 17:02:53" itemprop="dateModified" datetime="2021-08-29T17:02:53+08:00">2021-08-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="一、内存管理的概念"><a href="#一、内存管理的概念" class="headerlink" title="一、内存管理的概念"></a>一、内存管理的概念</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210828232818560.png" alt="image-20210828232818560" style="zoom:80%;">
-
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227131925434.png" alt="img " style="zoom:100%;">
-
-<h2 id="二、覆盖与交换"><a href="#二、覆盖与交换" class="headerlink" title="二、覆盖与交换"></a>二、覆盖与交换</h2><h3 id="1-覆盖技术"><a href="#1-覆盖技术" class="headerlink" title="1. 覆盖技术"></a>1. 覆盖技术</h3><p>将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存</p>
-<h3 id="2-交换技术"><a href="#2-交换技术" class="headerlink" title="2. 交换技术"></a>2. 交换技术</h3><p>内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成</p>
-<ul>
-<li>应该在外存（磁盘）的什么位置保存被换出的进程？</li>
-</ul>
-<blockquote>
-<p>1.具有对换功能的操作系统中，通常把磁盘空间分为文件区和对换区两部分。文件区主要用于存放文件，主要追求存储空间的利用率，因此对文件区空间的管理采用离散分配方式;对换区空间只占磁盘空间的小部分，被换出的进程数据就存放在对换区。由于对换的速度直接影响到系统的整体速度，因此对换区空间的管理主要追求换入换出速度，因此通常对换区采用连续分配方式(学过文件管理章节后即可理解)。总之，对换区的/0速度比文件区的更快。</p>
-</blockquote>
-<ul>
-<li>什么时候应该交换?</li>
-</ul>
-<blockquote>
-<p> 交换通常在许多进程运行且内存吃紧时进行，而系统负荷降低就暂停。例如:在发现许多进程运行时经常发生缺页，就说明内存紧张，此时可以换出–些进程;.如果缺页率明显下降，就可以暂停换出。</p>
-</blockquote>
-<ul>
-<li>应该换出哪些进程?</li>
-</ul>
-<blockquote>
-<p>3.可优先换出阻塞进程;可换出优先级低的进程;为了防止优先级低的进程在被调入内存后很快又被换出，有的系统还会考虑进程在内存的驻留时间…</p>
-</blockquote>
-<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713194229.png" alt="img " style="zoom:150%;">
-
-<h2 id="三、连续分配管理方式"><a href="#三、连续分配管理方式" class="headerlink" title="三、连续分配管理方式"></a>三、连续分配管理方式</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829110339431.png" alt="image-20210829110339431 " style="zoom:80%;">
-
-<p>连续分配指为进程分配的必须是一个连续的内存空间</p>
-<p>内部碎片指分配给某进程的内存区域中，有些部分没有用上</p>
-<p>外部碎片指内存中的某些空闲分区由于太小而难以利用</p>
-<h3 id="1-单一连续分配"><a href="#1-单一连续分配" class="headerlink" title="1. 单一连续分配"></a>1. 单一连续分配</h3><ul>
-<li><p>介绍</p>
-<p>内存被分为系统区和用户区；系统区用于存放操作系统相关数据，用户区用于存放用户进 程相关数据</p>
-</li>
-<li><p>图示</p>
-</li>
-</ul>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713195680.png" alt="img" style="zoom:100%;">
-
-<ul>
-<li>特点：内存中只能有一道用户程序，用户程序独占整个用户区</li>
-<li>优点：实现简单，无外部碎片</li>
-<li>缺点：只能用于单用户、单系统的操作系统中，有内部碎片</li>
-</ul>
-<h3 id="2-固定分区分配"><a href="#2-固定分区分配" class="headerlink" title="2. 固定分区分配"></a>2. 固定分区分配</h3><p>(1) 介绍</p>
-<p>i. 将整个用户区划分成若干个固定大小的分区，在每个分区中只装入一道作业，某个作业 独占一个固定分区</p>
-<p>ii. 固定分区分配分为分区大小相等和分区大小不相等</p>
-<p>(2) 图示</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132006159.png" alt="img" style="zoom:80%;">
-
-<p>(3) 特点：无外部碎片，有内部碎片</p>
-<p>(4) 需要使用分区说明表实现各个分区的分配与回收</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132009447.png" alt="img" style="zoom:80%;">
-
-<h3 id="3-动态分区分配"><a href="#3-动态分区分配" class="headerlink" title="3. 动态分区分配"></a>3. 动态分区分配</h3><p>(1) 介绍</p>
-<p>不会预先划分内存分区，而是在进程装入内存时，根据进程的大小动态地建立分区，并使 分区的大小正好适合进程的需要，因此系统分区的大小和数目是可变的</p>
-<p>(2) 系统使用空闲分区表和空闲分区链记录内存的使用情况</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132015603.png" alt="img" style="zoom:80%;">
-
-<p>(3) 当一个作业装入内存时，按照动态分区分配算法，从空闲分区表/链中选出一个分区分配给 该作业</p>
-<p>(4) 根据动态分区分配算法算得进程5(4MB)应将分区1分配给该进程</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132020810.png" alt="img" style="zoom:80%;">
-
-<p>(5) 其余几种情况</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132026498.png" alt="img" style="zoom:80%;">
-
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132028740.png" alt="img" style="zoom:80%;">
-
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132031463.png" alt="img" style="zoom:80%;">
-
-<p>(6) 特点：无内部碎片，有外部碎片</p>
-<p>(7) 拼凑技术：将原本不相邻的空闲分区合并成一个更大的空闲分区，用于解决碎片分区不满 足进程的需求的问题</p>
-<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132041224.png" alt="img" style="zoom:80%;">
-
-<h2 id="四、动态分区分配算法"><a href="#四、动态分区分配算法" class="headerlink" title="四、动态分区分配算法"></a>四、动态分区分配算法</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132046314.png" alt="img" style="zoom:80%;">
-
-<h3 id="1-首次适应算法"><a href="#1-首次适应算法" class="headerlink" title="1. 首次适应算法"></a>1. 首次适应算法</h3><p>思想：空闲分区以地址递增的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132051978.png" alt="img" style="zoom:80%;">
-
-<p>注意：链表中的结点即使大小发生变化后，结点顺序依旧不变，因为结点只按照地址排序</p>
-<h3 id="2-最佳适应算法"><a href="#2-最佳适应算法" class="headerlink" title="2. 最佳适应算法"></a>2. 最佳适应算法</h3><p>思想：空闲分区以容量递增的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132059944.png" alt="img" style="zoom:80%;">
-
-<p>注意：链表中的结点当大小发生变化之后，需要调整结点顺序</p>
-<h3 id="3-最坏适应算法"><a href="#3-最坏适应算法" class="headerlink" title="3. 最坏适应算法"></a>3. 最坏适应算法</h3><p>思想：空闲分区以容量递减的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
-<p>缺点：每次都选择最大的分区进行分配，会导致较大的连续空间被迅速用完，当之后有大进程 到达时，无内存空间可分配</p>
-<h3 id="4-邻近适应算法"><a href="#4-邻近适应算法" class="headerlink" title="4. 邻近适应算法"></a>4. 邻近适应算法</h3><p>思想：空闲分区以地址递增的次序排列，每次分配内存空间时从上次查找结束的位置开始查找 空闲分区表/链，找到大小能满足要求的第一个空闲分区</p>
-<h3 id="知识回顾"><a href="#知识回顾" class="headerlink" title="知识回顾"></a>知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132110832.png" alt="img" style="zoom:80%;">
-
-<h2 id="五、基本分页存储管理"><a href="#五、基本分页存储管理" class="headerlink" title="五、基本分页存储管理"></a>五、基本分页存储管理</h2><p>连续分配：为进程分配的是连续的内存空间<br>非连续分配：为进程分配的是分散的内存空间，可以将进程分成几个部分，分散的放入空闲区</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132118893.png" alt="img" style="zoom:80%;">
-
-<h3 id="1-页框"><a href="#1-页框" class="headerlink" title="1. 页框"></a>1. 页框</h3><p>将内存空间分为一个个大小相等的分区，每个分区就是一个页框，<br>每个页框有一个编号，即页框号，页框号从0开始</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132142593.png" alt="img" style="zoom:80%;">
-
-<h3 id="2-页面"><a href="#2-页面" class="headerlink" title="2. 页面"></a>2. 页面</h3><p>将进程的逻辑地址空间分为与页框大小相等的一个个部分，<br>每个部分称为一个页或页面，每个页面都有一个编号，即页号，页号从0开始</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132138965.png" alt="img" style="zoom:80%;">
-
-<h3 id="3-分页存储"><a href="#3-分页存储" class="headerlink" title="3. 分页存储"></a>3. 分页存储</h3><p>(1) 操作系统以页框为单位为各个进程分配内存空间，进程的每个页面分别放入一个页框中， 即进程的页面与内存的页框有一一对应的关系</p>
-<p>(2) 各个页面无需连续存放，可以放到不相邻的各个页框中</p>
-<p>(3) 页框不能太大，否则可能会产生过大的内部碎片造成浪费</p>
-<h3 id="4-页表"><a href="#4-页表" class="headerlink" title="4. 页表"></a>4. 页表</h3><p>为了能知道进程的每个页面在内存中存放的位置，需要为每个进程建立一张页表<br>(页表通常存在于进程控制块PCB中)</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132147655.png" alt="img" style="zoom:80%;">
-
-<p>(1) 页表项连续存放，因此页号可以是隐藏的，不占用存储空间 (类比数组)</p>
-<p>(2) 页表记录的只是内存块号，而不是内存块的物理起始地址</p>
-<p>n号内存块的物理起始地址 = n * 内存块大小</p>
-<h3 id="5-页号、页内偏移量的计算"><a href="#5-页号、页内偏移量的计算" class="headerlink" title="5. 页号、页内偏移量的计算"></a>5. 页号、页内偏移量的计算</h3><p>(1) 问题描述：在某计算机系统中，页面大小是50B；某进程逻辑地址空间大小为200B，则逻 辑地址110对应的页号、页内偏移量是多少？</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132158205.png" alt="img" style="zoom:80%;">
-
-<p>(2) 计算方法：</p>
-<p>页号 = 逻辑地址 / 页面长度</p>
-<p>页内偏移量 = 逻辑地址 % 页面长度</p>
-<p>物理地址 = 页号对应页框的起始地址 + 页内偏移量</p>
-<p>页号对应页框的起始地址 = 根据页号查页表得到的页框号 * 页框大小</p>
-<p>(3) 计算结果：</p>
-<p>页号 = 110 / 50 = 2</p>
-<p>页内偏移量 = 110 % 50 = 10</p>
-<h3 id="6-逻辑地址结构"><a href="#6-逻辑地址结构" class="headerlink" title="6. 逻辑地址结构"></a>6. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132204229.png" alt="img" style="zoom:80%;">
-
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132218741.png" alt="img" style="zoom:80%;">
-
-<h3 id="基本地址变换机构"><a href="#基本地址变换机构" class="headerlink" title="基本地址变换机构"></a>基本地址变换机构</h3><p>基本地址变换机构可以借助进程的页表将逻辑地址转换为物理地址。</p>
-<p>通常会在系统中设置一个页表寄存器(PTR) ，存放页表在内存中的起始地址F和页表长度M。</p>
-<p>进程未执行时，页表的始址和页表长度放在进程控制块(PCB)中，当进程被调度时，操作系统内核会把它们放到页表寄存器中。</p>
-<p>注意:页面大小是2的整数幂</p>
-<p>例子：</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150011013.png" alt="image-20210829150011013" style="zoom:80%;">
-
-<h3 id="具有快表的地址变换机构"><a href="#具有快表的地址变换机构" class="headerlink" title="具有快表的地址变换机构"></a>具有快表的地址变换机构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150345182.png" alt="image-20210829150345182" style="zoom:80%;">
-
-<h4 id="局部性原理"><a href="#局部性原理" class="headerlink" title="局部性原理"></a>局部性原理</h4><p>时间局部性:如果执行了程序中的某条指令，那么不久后这条指令很有可能再次执行;如果某个数据被访问过，不久之后该数据很可能再次被访问。( 因为程序中存在大量的循环)</p>
-<p>空间局部性:一旦程序访问了某个存储单元，在不久之后，其附近的存储单元也很有可能被访问。( 因为很多数据在内存中都是连续存放的)</p>
-<p>上小节介绍的基本地址变换机构中，每次要访问一个逻辑地址，都需要查询内存中的页表。由于局部性原理，可能连续很多次查到的都是同一个页表项。既然如此，能否利用这个特性减少访问页表的次数呢?</p>
-<h4 id="什么是快表？"><a href="#什么是快表？" class="headerlink" title="什么是快表？"></a>什么是快表？</h4><p>快表，又称联想寄存器(TLB) ，是一种访问速度比内存快很多的高速缓冲存储器，用来存放当前访问的若干页表项，以加速地址变换的过程。与此对应，内存中的页表常称为慢表。</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151013541.png" alt="image-20210829151013541" style="zoom:80%;">
-
-<p>小结：</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151227125.png" alt="image-20210829151227125" style="zoom:80%;">
-
-<h2 id="六、基本分段存储管理"><a href="#六、基本分段存储管理" class="headerlink" title="六、基本分段存储管理"></a>六、基本分段存储管理</h2><p>与分页最大的区别：进程所划分的基本单位不同 (各段的大小可以不同)</p>
-<h3 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p>(1) 进程按照自身的逻辑关系划分为若干个段，每段都有一个段名，每段从0开始编址</p>
-<p>(2) 以段为单位进行分配，每个段在内存中占据连续空间，但各段之间可以不相邻</p>
-<h3 id="2-逻辑地址结构"><a href="#2-逻辑地址结构" class="headerlink" title="2. 逻辑地址结构"></a>2. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713222756.png" alt="img" style="zoom:80%;">
-
-<h3 id="3-段表"><a href="#3-段表" class="headerlink" title="3. 段表"></a>3. 段表</h3><p>记录各个逻辑段与实际的物理位置存放地址的对应关系</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132249865.png" alt="img" style="zoom:80%;">
-
-<h3 id="4-知识回顾-1"><a href="#4-知识回顾-1" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132253814.png" alt="img" style="zoom:150%;">
-
-<h2 id="七、段页式管理方式"><a href="#七、段页式管理方式" class="headerlink" title="七、段页式管理方式"></a>七、段页式管理方式</h2><p>段页式管理 = 分段 + 分页</p>
-<h3 id="1-基本概念-1"><a href="#1-基本概念-1" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p>(1) 将进程按照逻辑模块分段，再将各段分页 (如每个页面4KB)</p>
-<p>(2) 将内存空间按照4KB划分成多个页框</p>
-<p>(3) 将进程的各页面分别装入对应的页框中</p>
-<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132308534.png" alt="img" style="zoom:80%;">
-
-<h3 id="2-段表、页表"><a href="#2-段表、页表" class="headerlink" title="2. 段表、页表"></a>2. 段表、页表</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132314153.png" alt="img" style="zoom:80%;">
-
-<h3 id="3-逻辑地址结构"><a href="#3-逻辑地址结构" class="headerlink" title="3. 逻辑地址结构"></a>3. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132322294.png" alt="img" style="zoom:80%;">
-
-<h3 id="4-知识回顾-2"><a href="#4-知识回顾-2" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132328319.png" alt="img" style="zoom:80%;">
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/28/%E6%AD%BB%E9%94%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/28/%E6%AD%BB%E9%94%81/" class="post-title-link" itemprop="url">死锁</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-28 22:12:37 / 修改時間：23:06:19" itemprop="dateCreated datePublished" datetime="2021-08-28T22:12:37+08:00">2021-08-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="一、死锁的概念"><a href="#一、死锁的概念" class="headerlink" title="一、死锁的概念"></a>一、死锁的概念</h2><h3 id="1-死锁、饥饿、死循环的区别"><a href="#1-死锁、饥饿、死循环的区别" class="headerlink" title="1. 死锁、饥饿、死循环的区别"></a>1. 死锁、饥饿、死循环的区别</h3><p>(1) 死锁：各进程互相等待对方手里的资源，导致各进程都阻塞，无法向前推进<br>(2) 饥饿：长期得不到想要的资源，某进程无法向前推进<br>(3) 死循环：某进程执行过程中一直跳不出某个循环</p>
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103625525.png" alt="img" style="zoom:150%;">
-
-<h3 id="2-死锁产生的必要条件"><a href="#2-死锁产生的必要条件" class="headerlink" title="2. 死锁产生的必要条件"></a>2. 死锁产生的必要条件</h3><p>产生死锁必须同时满足以下四个条件，若有一个不满足，死锁就不会发生</p>
-<p>(1) 互斥条件：对互斥使用的资源的争夺才会导致死锁<br>(2) 不剥夺条件：进程获得的资源在未使用完之前，不能由其他进程强行夺走，只能主动释放<br>(3) 请求和保持条件：进程已经保持了至少一个资源，但又提出了新的资源请求，而该资源又 被其他进程占有，此时请求进程被阻塞，但又对自己已有的资源保持不放<br>(4) 循环等待条件：存在一种进程资源的循环等待链，链中的每一个进程已获得的资源同时被 下一个进程所请求</p>
-<p>注意：发生死锁时一定有循环等待，但是发生循环等待时未必死锁</p>
-<h3 id="3-死锁的处理策略"><a href="#3-死锁的处理策略" class="headerlink" title="3.死锁的处理策略"></a>3.死锁的处理策略</h3><p>(1) 预防死锁：破坏死锁产生的四个必要条件中的一个或几个<br>(2) 避免死锁：用某种方法防止系统进入不安全状态，从而避免死锁<br>(3) 死锁的检测和解除：允许死锁的发生，操作系统检测出死锁后，会采取措施解除死锁</p>
-<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103641570.png" alt="img" style="zoom:150%;">
-
-<h2 id="二、死锁的处理策略-—-预防死锁"><a href="#二、死锁的处理策略-—-预防死锁" class="headerlink" title="二、死锁的处理策略 — 预防死锁"></a>二、死锁的处理策略 — 预防死锁</h2><img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828221812000.png" alt="image-20210828221812000" style="zoom:67%;">
-
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828221834071.png" alt="image-20210828221834071" style="zoom:70%;">
-
-<p><strong>破坏互斥条件</strong></p>
-<p>只有对必须互斥使用的资源的争夺才会导致死锁。</p>
-<p>如果把只能互斥使用的资源改造为允许共享使用，则系统不会进入死锁状态。<font color="red">比如:SPOOLing技术。操作系统可以采用SPOOLing技术把独占设备在逻辑上改造成共享设备。比如用SPOOLing技术将打印机改造为共享设备….</font></p>
-<p>该策略的缺点：并不是所有的资源都可以改造成可以共享使用的资源。并且为了系统安全，很多地方还必须保护这种互斥性。因此，很多时候都无法破坏互斥条件。</p>
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103647730.png" alt="img" style="zoom:150%;">
-
-<h2 id="三、死锁的处理策略-—-避免死锁"><a href="#三、死锁的处理策略-—-避免死锁" class="headerlink" title="三、死锁的处理策略 — 避免死锁"></a>三、死锁的处理策略 — 避免死锁</h2><h3 id="1-安全序列的介绍"><a href="#1-安全序列的介绍" class="headerlink" title="1. 安全序列的介绍"></a>1. 安全序列的介绍</h3><p>所谓安全序列，就是指如果系统按照这种序列分配资源，则每个进程都能顺利完成，只要能找 出一个安全序列，系统就是安全状态 (安全序列可能有多个)</p>
-<p>如果分配了资源以后，系统中找不出任何一个安全序列，系统就进入了不安全状态，这就意味 着之后可能所有进程都无法顺利的执行下去</p>
-<p>注意：</p>
-<p>(1) 如果系统处于安全状态，就一定不会发生死锁<br>(2) 如果系统进入不安全状态，就可能发生死锁<br>(3) 处于不安全状态未必会发生死锁，但发生死锁时一定处于不安全状态</p>
-<h3 id="2-银行家算法"><a href="#2-银行家算法" class="headerlink" title="2. 银行家算法"></a>2. 银行家算法</h3><p>思想：在资源分配之前预先判断这次分配是否会导致系统进入不安全状态，由此决定是否答应 资源分配请求</p>
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103704759.png" alt="img" style="zoom:80%;">
-
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/202012271037089.png" alt="img" style="zoom:90%;">
-
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828225137636.png" alt="image-20210828225137636" style="zoom:80%;">
-
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828225049182.png" alt="image-20210828225049182" style="zoom:80%;">
-
-<p>注：如果银行家算法是安全性算法，说明此时系统处于安全状态，不会发生死锁</p>
-<h2 id="四、死锁的处理策略-—-死锁的检测与解除"><a href="#四、死锁的处理策略-—-死锁的检测与解除" class="headerlink" title="四、死锁的处理策略 — 死锁的检测与解除"></a>四、死锁的处理策略 — 死锁的检测与解除</h2><h3 id="1-死锁的检测"><a href="#1-死锁的检测" class="headerlink" title="1. 死锁的检测"></a>1. 死锁的检测</h3><p>为了能对系统是否发生了死锁进行检测，必须：</p>
-<p>(1) 用资源分配图保存资源的请求和分配信息<br>(2) 提供一种算法，利用上述信息检测系统是否进入死锁状态</p>
-<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103722593.png" alt="img" style="zoom:150%;">
-
-<p>P2进程请求1个资源，但R1的3个资源都已经分配出去，无法执行；P1进程请求1个资 源，R2剩余1个资源，P1执行；P1执行完毕之后，释放自身的所有资源，P1的三条边全 部消除；R1剩余的资源可满足P2进程；P2进程执行，P2的三条边全部消除</p>
-<p>注意：</p>
-<p>(1) 如果按照上述过程可以消除所有的边，表示此图可完全简化，不会发生死锁<br>(2) 如果不能消除所有的边，说明发生了死锁<br>(3) 最终还连着边的那些进程就是死锁进程</p>
-<h3 id="2-死锁的解除"><a href="#2-死锁的解除" class="headerlink" title="2. 死锁的解除"></a>2. 死锁的解除</h3><p>一旦检测出死锁的发生，就应该立即解除死锁，解除死锁的方法有：</p>
-<p>(1) 资源剥夺法</p>
-<p>挂起某些死锁进程，并抢占它的资源，将这些资源分配给其他的死锁进程；但是应防止被 挂起的进程长时间得不到资源而饥饿</p>
-<p>(2) 撤销进程法</p>
-<p>强制撤销部分甚至全部死锁进程，并剥夺这些进程的资源</p>
-<p>(3) 进程回退法</p>
-<p>让死锁进程回退到足以避免死锁的地步 (这就要求系统记录历史信息、设置还原点)</p>
-<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103747269.png" alt="img" style="zoom:150%;">
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一頁"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一頁"></i></a>
   </nav>
 
 </div>

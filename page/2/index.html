@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -200,6 +200,509 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/" class="post-title-link" itemprop="url">一致性哈希</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-30 19:38:37 / 修改時間：20:11:52" itemprop="dateCreated datePublished" datetime="2021-08-30T19:38:37+08:00">2021-08-30</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="一致性哈希"><a href="#一致性哈希" class="headerlink" title="一致性哈希"></a>一致性哈希</h1><h2 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h2><p>假设，我们有三台缓存服务器，用于缓存图片，我们为这三台缓存服务器编号为0号、1号、2号，现在，有3万张图片需要缓存，我们希望这些图片被均匀的缓存到这3台服务器上，以便它们能够分摊缓存的压力。也就是说，我们希望每台服务器能够缓存1万张左右的图片，那么，我们应该怎样做呢？</p>
+<h3 id="落伍的方式"><a href="#落伍的方式" class="headerlink" title="落伍的方式"></a>落伍的方式</h3><blockquote>
+<p>原始的做法是对缓存项的键进行哈希，将hash后的结果对缓存服务器的数量进行取模操作，通过取模后的结果，决定缓存项将会缓存在哪一台服务器上。</p>
+<p>举例说明，仍然以刚才描述的场景为例，假设我们使用图片名称作为访问图片的key，假设图片名称是不重复的，那么，我们可以使用如下公式，计算出图片应该存放在哪台服务器上。</p>
+<p><strong>hash（图片名称）% N</strong></p>
+</blockquote>
+<p><font color="red">哈希函数最重要的一个特征：无限的输入经过哈希函数得到的哈希值均匀的分布在有限的输出域上。</font></p>
+<p><font color="red">假设某哈希函数输出16位数据，可以截取前八位和后八位作为两个相互独立的哈希函数，假设这两个哈希函数为a和b，则a+1b,a+2b,a+3b….也是相互独立的，我们可以以此方式拼接处无数个相互独立的哈希函数。</font></p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830194520098.png" alt="image-20210830194520098" style="zoom:60%;">
+
+<h3 id="上述方法存在的问题："><a href="#上述方法存在的问题：" class="headerlink" title="上述方法存在的问题："></a>上述方法存在的问题：</h3><blockquote>
+<p>如果3台缓存服务器已经不能满足我们的缓存需求，怎么办呢？多增加两台缓存服务器，假设，我们增加了一台缓存服务器，那么缓存服务器的数量就由3台变成了4台，此时，如果仍然使用上述方法对同一张图片进行缓存，那么这张图片所在的服务器编号必定与原来3台服务器时所在的服务器编号不同，因为除数由3变为了4，被除数不变的情况下，余数肯定不同，这种情况带来的结果就是当服务器数量变动时，所有缓存的位置都要发生改变，换句话说，当服务器数量发生改变时，所有缓存在一定时间内是失效的，当应用无法从缓存中获取数据时，则会向后端服务器请求数据，同理，假设3台缓存中突然有一台缓存服务器出现了故障，无法进行缓存，那么我们则需要将故障机器移除，但是如果移除了一台缓存服务器，那么缓存服务器数量从3台变为2台，如果想要访问一张图片，这张图片的缓存位置必定会发生改变，以前缓存的图片也会失去缓存的作用与意义，由于大量缓存在同一时间失效，造成了缓存的雪崩，此时前端缓存已经无法起到承担部分压力的作用，后端服务器将会承受巨大的压力，整个系统很有可能被压垮，所以，我们应该想办法不让这种情况发生，但是由于上述HASH算法本身的缘故，使用取模法进行缓存时，这种情况是无法避免的，为了解决这些问题，一致性哈希算法诞生了。</p>
+</blockquote>
+<h2 id="一致性哈希算法的基本概念"><a href="#一致性哈希算法的基本概念" class="headerlink" title="一致性哈希算法的基本概念"></a>一致性哈希算法的基本概念</h2><p>一致性哈希算法也是使用取模的方法，只是，刚才描述的取模法是对服务器的数量进行取模，而一致性哈希算法是对2^32取模，什么意思呢？</p>
+<p>首先，我们把二的三十二次方想象成一个圆，就像钟表一样，钟表的圆可以理解成由60个点组成的圆，而此处我们把这个圆想象成由2^32个点组成的圆，示意图如下：</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195432751.png" alt="image-20210830195432751" style="zoom:80%;">
+
+<p>圆环的正上方的点代表0，0点右侧的第一个点代表1，以此类推，2、3、4、5、6……直到2^32-1,也就是说0点左侧的第一个点代表2^32-1</p>
+<p>我们把这个由2的32次方个点组成的圆环称为hash环。</p>
+<p>那么，一致性哈希算法与上图中的圆环有什么关系呢？</p>
+<blockquote>
+<p>仍然以之前描述的场景为例，假设我们有3台缓存服务器，服务器A、服务器B、服务器C，那么，在生产环境中，这三台服务器肯定有自己的IP地址，我们使用它们各自的IP地址进行哈希计算，使用哈希后的结果对2^32取模，可以使用如下公式示意。</p>
+</blockquote>
+<blockquote>
+<p><strong>hash（服务器A的IP地址） %  2^32</strong></p>
+</blockquote>
+<p>通过上述公式算出的结果一定是一个0到2^32-1之间的一个整数，我们就用算出的这个整数，代表服务器A，既然这个整数肯定处于0到2^32-1之间，那么，上图中的hash环上必定有一个点与这个整数对应，而我们刚才已经说明，使用这个整数代表服务器A，那么，服务器A就可以映射到这个环上，用下图示意:</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/020717_1707_3.png" alt="img " style="zoom:150%;">
+
+<p>同理，服务器B与服务器C也可以通过相同的方法映射到上图中的hash环中</p>
+<p><strong>hash（服务器B的IP地址） %  2^32</strong></p>
+<p><strong>hash（服务器C的IP地址） %  2^32</strong></p>
+<p>通过上述方法，可以将服务器B与服务器C映射到上图中的hash环上，示意图如下</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195650374.png" alt="image-20210830195650374" style="zoom:40%;">
+
+<p>假设3台服务器映射到hash环上以后如上图所示（当然，这是理想的情况)</p>
+<p>好了，到目前为止，我们已经把缓存服务器与hash环联系在了一起，我们通过上述方法，把缓存服务器映射到了hash环上，那么使用同样的方法，我们也可以将需要缓存的对象映射到hash环上。</p>
+<p>假设，我们需要使用缓存服务器缓存图片，而且我们仍然使用图片的名称作为找到图片的key，那么我们使用如下公式可以将图片映射到上图中的hash环上。</p>
+<blockquote>
+<p> <strong>hash（图片名称） %  2^32</strong></p>
+</blockquote>
+<p>映射后的示意图如下，下图中的橘黄色圆形表示图片</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195804698.png" alt="image-20210830195804698" style="zoom:40%;">
+
+<p>好了，现在服务器与图片都被映射到了hash环上，那么上图中的这个图片到底应该被缓存到哪一台服务器上呢？上图中的图片将会被缓存到服务器A上，为什么呢？因为从图片的位置开始，沿顺时针方向遇到的第一个服务器就是A服务器，所以，上图中的图片将会被缓存到服务器A上，如下图所示。</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195840410.png" alt="image-20210830195840410" style="zoom:33%;">
+
+<p>一致性哈希算法就是通过这种方法，判断一个对象应该被缓存到哪台服务器上的，将缓存服务器与被缓存对象都映射到hash环上以后，从被缓存对象的位置出发，沿顺时针方向遇到的第一个服务器，就是当前对象将要缓存于的服务器，由于被缓存对象与服务器hash后的值是固定的，所以，在服务器不变的情况下，一张图片必定会被缓存到固定的服务器上，那么，当下次想要访问这张图片时，只要再次使用相同的算法进行计算，即可算出这个图片被缓存在哪个服务器上，直接去对应的服务器查找对应的图片即可。</p>
+<p>刚才的示例只使用了一张图片进行演示，假设有四张图片需要缓存，示意图如下</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830195944118.png" alt="image-20210830195944118" style="zoom:33%;">
+
+<p>1号、2号图片将会被缓存到服务器A上，3号图片将会被缓存到服务器B上，4号图片将会被缓存到服务器C上。</p>
+<h2 id="一致性哈希算法的优点"><a href="#一致性哈希算法的优点" class="headerlink" title="一致性哈希算法的优点"></a>一致性哈希算法的优点</h2><p>假设，服务器B出现了故障，我们现在需要将服务器B移除，那么，我们将上图中的服务器B从hash环上移除即可，移除服务器B以后示意图如下。</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200147236.png" alt="image-20210830200147236" style="zoom:33%;">
+
+<p>在服务器B未移除时，图片3应该被缓存到服务器B中，可是当服务器B移除以后，按照之前描述的一致性哈希算法的规则，图片3应该被缓存到服务器C中，因为从图片3的位置出发，沿顺时针方向遇到的第一个缓存服务器节点就是服务器C，也就是说，如果服务器B出现故障被移除时，图片3的缓存位置会发生改变</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200208142.png" alt="image-20210830200208142" style="zoom:33%;">
+
+<p>但是，图片4仍然会被缓存到服务器C中，图片1与图片2仍然会被缓存到服务器A中，这与服务器B移除之前并没有任何区别，这就是一致性哈希算法的优点，如果使用之前的hash算法，服务器数量发生改变时，所有服务器的所有缓存在同一时间失效了，而使用一致性哈希算法时，服务器的数量如果发生改变，并不是所有缓存都会失效，而是只有部分缓存会失效，前端的缓存仍然能分担整个系统的压力，而不至于所有压力都在同一时间集中到后端服务器上。</p>
+<h2 id="hash环的偏斜"><a href="#hash环的偏斜" class="headerlink" title="hash环的偏斜"></a>hash环的偏斜</h2><p>在介绍一致性哈希的概念时，我们理想化的将3台服务器均匀的映射到了hash环上，如下图所示</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200311037.png" alt="image-20210830200311037" style="zoom:30%;">
+
+<p>在实际的映射中，服务器可能会被映射成如下模样。<font color="red">哈希函数在大数据下保证大致的平均（并不是绝对平均）。</font></p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200339888.png" alt="image-20210830200339888" style="zoom:33%;">
+
+<p>如果服务器被映射成上图中的模样，那么被缓存的对象很有可能大部分集中缓存在某一台服务器上，如下图所示。</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200448650.png" alt="image-20210830200448650" style="zoom:33%;">
+
+<p>如上图所示就造成了服务器A负责大量工作，而服务器B和C则很闲。没有达到负载均衡的目的。</p>
+<h2 id="虚拟节点"><a href="#虚拟节点" class="headerlink" title="虚拟节点"></a>虚拟节点</h2><p>由于我们只有3台服务器，当我们把服务器映射到hash环上的时候，很有可能出现hash环偏斜的情况，当hash环偏斜以后，缓存往往会极度不均衡的分布在各服务器上。</p>
+<p>如果想要均衡的将缓存分布到3台服务器上，最好能让这3台服务器尽量多的、均匀的出现在hash环上，但是，真实的服务器资源只有3台，我们怎样凭空的让它们多起来呢，没错，就是凭空的让服务器节点多起来，既然没有多余的真正的物理服务器节点，我们就只能将现有的物理节点通过虚拟的方法复制出来，这些由实际节点虚拟复制而来的节点被称为”虚拟节点”。加入虚拟节点以后的hash环如下。</p>
+<img src="/2021/08/30/%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C/image-20210830200726308.png" alt="image-20210830200726308" style="zoom:33%;">
+
+<p>“虚拟节点”是”实际节点”（实际的物理服务器）在hash环上的复制品,一个实际节点可以对应多个虚拟节点。</p>
+<p>从上图可以看出，A、B、C三台服务器分别虚拟出了一个虚拟节点，当然，如果你需要，也可以虚拟出更多的虚拟节点。引入虚拟节点的概念后，缓存的分布就均衡多了，上图中，1号、3号图片被缓存在服务器A中，5号、4号图片被缓存在服务器B中，6号、2号图片被缓存在服务器C中，如果你还不放心，可以虚拟出更多的虚拟节点，以便减小hash环偏斜所带来的影响，虚拟节点越多，hash环上的节点就越多，缓存被均匀分布的概率就越大。</p>
+<p><font color="red">保存两个字典：每个服务器对应的多个虚拟节点；每个虚拟节点相对应的服务器。</font></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">内存管理的概念</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+
+      <time title="創建時間：2021-08-28 23:27:51" itemprop="dateCreated datePublished" datetime="2021-08-28T23:27:51+08:00">2021-08-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新於</span>
+        <time title="修改時間：2021-09-11 22:26:19" itemprop="dateModified" datetime="2021-09-11T22:26:19+08:00">2021-09-11</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="一、内存管理的概念"><a href="#一、内存管理的概念" class="headerlink" title="一、内存管理的概念"></a>一、内存管理的概念</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210828232818560.png" alt="image-20210828232818560" style="zoom:80%;">
+
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227131925434.png" alt="img " style="zoom:100%;">
+
+<h2 id="二、覆盖与交换"><a href="#二、覆盖与交换" class="headerlink" title="二、覆盖与交换"></a>二、覆盖与交换</h2><h3 id="1-覆盖技术"><a href="#1-覆盖技术" class="headerlink" title="1. 覆盖技术"></a>1. 覆盖技术</h3><p>将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存</p>
+<p><font color="red">覆盖技术是早期 在单一连续存储管理中使用的扩大存储器容量的一种技术。</font></p>
+<h3 id="2-交换技术"><a href="#2-交换技术" class="headerlink" title="2. 交换技术"></a>2. 交换技术</h3><p>内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成</p>
+<ul>
+<li>应该在外存（磁盘）的什么位置保存被换出的进程？</li>
+</ul>
+<blockquote>
+<p>1.具有对换功能的操作系统中，通常把磁盘空间分为文件区和对换区两部分。文件区主要用于存放文件，主要追求存储空间的利用率，因此对文件区空间的管理采用离散分配方式;对换区空间只占磁盘空间的小部分，被换出的进程数据就存放在对换区。由于对换的速度直接影响到系统的整体速度，因此对换区空间的管理主要追求换入换出速度，因此通常对换区采用连续分配方式(学过文件管理章节后即可理解)。总之，对换区的/0速度比文件区的更快。</p>
+</blockquote>
+<ul>
+<li>什么时候应该交换?</li>
+</ul>
+<blockquote>
+<p> 交换通常在许多进程运行且内存吃紧时进行，而系统负荷降低就暂停。例如:在发现许多进程运行时经常发生缺页，就说明内存紧张，此时可以换出–些进程;.如果缺页率明显下降，就可以暂停换出。</p>
+</blockquote>
+<ul>
+<li>应该换出哪些进程?</li>
+</ul>
+<blockquote>
+<p>3.可优先换出阻塞进程;可换出优先级低的进程;为了防止优先级低的进程在被调入内存后很快又被换出，有的系统还会考虑进程在内存的驻留时间…</p>
+</blockquote>
+<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713194229.png" alt="img " style="zoom:150%;">
+
+<h2 id="三、连续分配管理方式"><a href="#三、连续分配管理方式" class="headerlink" title="三、连续分配管理方式"></a>三、连续分配管理方式</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829110339431.png" alt="image-20210829110339431 " style="zoom:80%;">
+
+<p>连续分配指为进程分配的必须是一个连续的内存空间</p>
+<p>内部碎片指分配给某进程的内存区域中，有些部分没有用上</p>
+<p>外部碎片指内存中的某些空闲分区由于太小而难以利用</p>
+<h3 id="1-单一连续分配"><a href="#1-单一连续分配" class="headerlink" title="1. 单一连续分配"></a>1. 单一连续分配</h3><ul>
+<li><p>介绍</p>
+<p>内存被分为系统区和用户区；系统区用于存放操作系统相关数据，用户区用于存放用户进 程相关数据</p>
+</li>
+<li><p>图示</p>
+</li>
+</ul>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713195680.png" alt="img" style="zoom:100%;">
+
+<ul>
+<li>特点：内存中只能有一道用户程序，用户程序独占整个用户区</li>
+<li>优点：实现简单，无外部碎片</li>
+<li>缺点：只能用于单用户、单系统的操作系统中，有内部碎片</li>
+</ul>
+<h3 id="2-固定分区分配"><a href="#2-固定分区分配" class="headerlink" title="2. 固定分区分配"></a>2. 固定分区分配</h3><p>(1) 介绍</p>
+<p>i. 将整个用户区划分成若干个固定大小的分区，在每个分区中只装入一道作业，某个作业 独占一个固定分区</p>
+<p>ii. 固定分区分配分为分区大小相等和分区大小不相等</p>
+<p>(2) 图示</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132006159.png" alt="img" style="zoom:80%;">
+
+<p>(3) 特点：无外部碎片，有内部碎片</p>
+<p>(4) 需要使用分区说明表实现各个分区的分配与回收</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132009447.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-动态分区分配"><a href="#3-动态分区分配" class="headerlink" title="3. 动态分区分配"></a>3. 动态分区分配</h3><p>(1) 介绍</p>
+<p>不会预先划分内存分区，而是在进程装入内存时，根据进程的大小动态地建立分区，并使 分区的大小正好适合进程的需要，因此系统分区的大小和数目是可变的</p>
+<p>(2) 系统使用空闲分区表和空闲分区链记录内存的使用情况</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132015603.png" alt="img" style="zoom:80%;">
+
+<p>(3) 当一个作业装入内存时，按照动态分区分配算法，从空闲分区表/链中选出一个分区分配给 该作业</p>
+<p>(4) 根据动态分区分配算法算得进程5(4MB)应将分区1分配给该进程</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132020810.png" alt="img" style="zoom:80%;">
+
+<p>(5) 其余几种情况</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132026498.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132028740.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132031463.png" alt="img" style="zoom:80%;">
+
+<p>(6) 特点：无内部碎片，有外部碎片</p>
+<p>(7) 拼凑技术：将原本不相邻的空闲分区合并成一个更大的空闲分区，用于解决碎片分区不满 足进程的需求的问题</p>
+<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132041224.png" alt="img" style="zoom:80%;">
+
+<h2 id="四、动态分区分配算法"><a href="#四、动态分区分配算法" class="headerlink" title="四、动态分区分配算法"></a>四、动态分区分配算法</h2><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132046314.png" alt="img" style="zoom:80%;">
+
+<h3 id="1-首次适应算法"><a href="#1-首次适应算法" class="headerlink" title="1. 首次适应算法"></a>1. 首次适应算法</h3><p>思想：空闲分区以地址递增的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132051978.png" alt="img" style="zoom:80%;">
+
+<p>注意：链表中的结点即使大小发生变化后，结点顺序依旧不变，因为结点只按照地址排序</p>
+<h3 id="2-最佳适应算法"><a href="#2-最佳适应算法" class="headerlink" title="2. 最佳适应算法"></a>2. 最佳适应算法</h3><p>思想：空闲分区以容量递增的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132059944.png" alt="img" style="zoom:80%;">
+
+<p>注意：链表中的结点当大小发生变化之后，需要调整结点顺序</p>
+<h3 id="3-最坏适应算法"><a href="#3-最坏适应算法" class="headerlink" title="3. 最坏适应算法"></a>3. 最坏适应算法</h3><p>思想：空闲分区以容量递减的次序排列，每次分配内存空间时顺序查找空闲分区表/链，找到大 小能满足要求的第一个空闲分区</p>
+<p>缺点：每次都选择最大的分区进行分配，会导致较大的连续空间被迅速用完，当之后有大进程 到达时，无内存空间可分配</p>
+<h3 id="4-邻近适应算法"><a href="#4-邻近适应算法" class="headerlink" title="4. 邻近适应算法"></a>4. 邻近适应算法</h3><p>思想：空闲分区以地址递增的次序排列，每次分配内存空间时从上次查找结束的位置开始查找 空闲分区表/链，找到大小能满足要求的第一个空闲分区</p>
+<h3 id="知识回顾"><a href="#知识回顾" class="headerlink" title="知识回顾"></a>知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132110832.png" alt="img" style="zoom:80%;">
+
+<h2 id="五、基本分页存储管理"><a href="#五、基本分页存储管理" class="headerlink" title="五、基本分页存储管理"></a>五、基本分页存储管理</h2><p>连续分配：为进程分配的是连续的内存空间<br>非连续分配：为进程分配的是分散的内存空间，可以将进程分成几个部分，分散的放入空闲区</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132118893.png" alt="img" style="zoom:80%;">
+
+<h3 id="1-页框"><a href="#1-页框" class="headerlink" title="1. 页框"></a>1. 页框</h3><p>将内存空间分为一个个大小相等的分区，每个分区就是一个页框，<br>每个页框有一个编号，即页框号，页框号从0开始</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132142593.png" alt="img" style="zoom:80%;">
+
+<h3 id="2-页面"><a href="#2-页面" class="headerlink" title="2. 页面"></a>2. 页面</h3><p>将进程的逻辑地址空间分为与页框大小相等的一个个部分，<br>每个部分称为一个页或页面，每个页面都有一个编号，即页号，页号从0开始</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132138965.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-分页存储"><a href="#3-分页存储" class="headerlink" title="3. 分页存储"></a>3. 分页存储</h3><p>(1) 操作系统以页框为单位为各个进程分配内存空间，进程的每个页面分别放入一个页框中， 即进程的页面与内存的页框有一一对应的关系</p>
+<p>(2) 各个页面无需连续存放，可以放到不相邻的各个页框中</p>
+<p>(3) 页框不能太大，否则可能会产生过大的内部碎片造成浪费</p>
+<h3 id="4-页表"><a href="#4-页表" class="headerlink" title="4. 页表"></a>4. 页表</h3><p>为了能知道进程的每个页面在内存中存放的位置，需要为每个进程建立一张页表<br>(页表通常存在于进程控制块PCB中)</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132147655.png" alt="img" style="zoom:80%;">
+
+<p>(1) 页表项连续存放，因此页号可以是隐藏的，不占用存储空间 (类比数组)</p>
+<p>(2) 页表记录的只是内存块号，而不是内存块的物理起始地址</p>
+<p>n号内存块的物理起始地址 = n * 内存块大小</p>
+<h3 id="5-页号、页内偏移量的计算"><a href="#5-页号、页内偏移量的计算" class="headerlink" title="5. 页号、页内偏移量的计算"></a>5. 页号、页内偏移量的计算</h3><p>(1) 问题描述：在某计算机系统中，页面大小是50B；某进程逻辑地址空间大小为200B，则逻 辑地址110对应的页号、页内偏移量是多少？</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132158205.png" alt="img" style="zoom:80%;">
+
+<p>(2) 计算方法：</p>
+<p>页号 = 逻辑地址 / 页面长度</p>
+<p>页内偏移量 = 逻辑地址 % 页面长度</p>
+<p>物理地址 = 页号对应页框的起始地址 + 页内偏移量</p>
+<p>页号对应页框的起始地址 = 根据页号查页表得到的页框号 * 页框大小</p>
+<p>(3) 计算结果：</p>
+<p>页号 = 110 / 50 = 2</p>
+<p>页内偏移量 = 110 % 50 = 10</p>
+<h3 id="6-逻辑地址结构"><a href="#6-逻辑地址结构" class="headerlink" title="6. 逻辑地址结构"></a>6. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132204229.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132218741.png" alt="img" style="zoom:80%;">
+
+<h3 id="基本地址变换机构"><a href="#基本地址变换机构" class="headerlink" title="基本地址变换机构"></a>基本地址变换机构</h3><p>基本地址变换机构可以借助进程的页表将逻辑地址转换为物理地址。</p>
+<p>通常会在系统中设置一个页表寄存器(PTR) ，存放页表在内存中的起始地址F和页表长度M。</p>
+<p>进程未执行时，页表的始址和页表长度放在进程控制块(PCB)中，当进程被调度时，操作系统内核会把它们放到页表寄存器中。</p>
+<p>注意:页面大小是2的整数幂</p>
+<p>例子：</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150011013.png" alt="image-20210829150011013" style="zoom:80%;">
+
+<h3 id="具有快表的地址变换机构"><a href="#具有快表的地址变换机构" class="headerlink" title="具有快表的地址变换机构"></a>具有快表的地址变换机构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829150345182.png" alt="image-20210829150345182" style="zoom:80%;">
+
+<h4 id="局部性原理"><a href="#局部性原理" class="headerlink" title="局部性原理"></a>局部性原理</h4><p>时间局部性:如果执行了程序中的某条指令，那么不久后这条指令很有可能再次执行;如果某个数据被访问过，不久之后该数据很可能再次被访问。( 因为程序中存在大量的循环)</p>
+<p>空间局部性:一旦程序访问了某个存储单元，在不久之后，其附近的存储单元也很有可能被访问。( 因为很多数据在内存中都是连续存放的)</p>
+<p>上小节介绍的基本地址变换机构中，每次要访问一个逻辑地址，都需要查询内存中的页表。由于局部性原理，可能连续很多次查到的都是同一个页表项。既然如此，能否利用这个特性减少访问页表的次数呢?</p>
+<h4 id="什么是快表？"><a href="#什么是快表？" class="headerlink" title="什么是快表？"></a>什么是快表？</h4><p>快表，又称联想寄存器(TLB) ，是一种访问速度比内存快很多的高速缓冲存储器，用来存放当前访问的若干页表项，以加速地址变换的过程。与此对应，内存中的页表常称为慢表。</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151013541.png" alt="image-20210829151013541" style="zoom:80%;">
+
+<p>小结：</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210829151227125.png" alt="image-20210829151227125" style="zoom:80%;">
+
+<h2 id="六、基本分段存储管理"><a href="#六、基本分段存储管理" class="headerlink" title="六、基本分段存储管理"></a>六、基本分段存储管理</h2><p>与分页最大的区别：进程所划分的基本单位不同 (各段的大小可以不同)</p>
+<h3 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p>(1) 进程按照自身的逻辑关系划分为若干个段，每段都有一个段名，每段从0开始编址</p>
+<p>(2) 以段为单位进行分配，每个段在内存中占据连续空间，但各段之间可以不相邻</p>
+<h3 id="2-逻辑地址结构"><a href="#2-逻辑地址结构" class="headerlink" title="2. 逻辑地址结构"></a>2. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/2020122713222756.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-段表"><a href="#3-段表" class="headerlink" title="3. 段表"></a>3. 段表</h3><p>记录各个逻辑段与实际的物理位置存放地址的对应关系</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132249865.png" alt="img" style="zoom:80%;">
+
+<h3 id="4-知识回顾-1"><a href="#4-知识回顾-1" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132253814.png" alt="img" style="zoom:150%;">
+
+<h2 id="七、段页式管理方式"><a href="#七、段页式管理方式" class="headerlink" title="七、段页式管理方式"></a>七、段页式管理方式</h2><p>段页式管理 = 分段 + 分页</p>
+<h3 id="1-基本概念-1"><a href="#1-基本概念-1" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p>(1) 将进程按照逻辑模块分段，再将各段分页 (如每个页面4KB)</p>
+<p>(2) 将内存空间按照4KB划分成多个页框</p>
+<p>(3) 将进程的各页面分别装入对应的页框中</p>
+<img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132308534.png" alt="img" style="zoom:80%;">
+
+<h3 id="2-段表、页表"><a href="#2-段表、页表" class="headerlink" title="2. 段表、页表"></a>2. 段表、页表</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132314153.png" alt="img" style="zoom:80%;">
+
+<h3 id="3-逻辑地址结构"><a href="#3-逻辑地址结构" class="headerlink" title="3. 逻辑地址结构"></a>3. 逻辑地址结构</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132322294.png" alt="img" style="zoom:80%;">
+
+<h3 id="4-知识回顾-2"><a href="#4-知识回顾-2" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132328319.png" alt="img" style="zoom:80%;">
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/28/%E6%AD%BB%E9%94%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/28/%E6%AD%BB%E9%94%81/" class="post-title-link" itemprop="url">死锁</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-28 22:12:37 / 修改時間：23:06:19" itemprop="dateCreated datePublished" datetime="2021-08-28T22:12:37+08:00">2021-08-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="一、死锁的概念"><a href="#一、死锁的概念" class="headerlink" title="一、死锁的概念"></a>一、死锁的概念</h2><h3 id="1-死锁、饥饿、死循环的区别"><a href="#1-死锁、饥饿、死循环的区别" class="headerlink" title="1. 死锁、饥饿、死循环的区别"></a>1. 死锁、饥饿、死循环的区别</h3><p>(1) 死锁：各进程互相等待对方手里的资源，导致各进程都阻塞，无法向前推进<br>(2) 饥饿：长期得不到想要的资源，某进程无法向前推进<br>(3) 死循环：某进程执行过程中一直跳不出某个循环</p>
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103625525.png" alt="img" style="zoom:150%;">
+
+<h3 id="2-死锁产生的必要条件"><a href="#2-死锁产生的必要条件" class="headerlink" title="2. 死锁产生的必要条件"></a>2. 死锁产生的必要条件</h3><p>产生死锁必须同时满足以下四个条件，若有一个不满足，死锁就不会发生</p>
+<p>(1) 互斥条件：对互斥使用的资源的争夺才会导致死锁<br>(2) 不剥夺条件：进程获得的资源在未使用完之前，不能由其他进程强行夺走，只能主动释放<br>(3) 请求和保持条件：进程已经保持了至少一个资源，但又提出了新的资源请求，而该资源又 被其他进程占有，此时请求进程被阻塞，但又对自己已有的资源保持不放<br>(4) 循环等待条件：存在一种进程资源的循环等待链，链中的每一个进程已获得的资源同时被 下一个进程所请求</p>
+<p>注意：发生死锁时一定有循环等待，但是发生循环等待时未必死锁</p>
+<h3 id="3-死锁的处理策略"><a href="#3-死锁的处理策略" class="headerlink" title="3.死锁的处理策略"></a>3.死锁的处理策略</h3><p>(1) 预防死锁：破坏死锁产生的四个必要条件中的一个或几个<br>(2) 避免死锁：用某种方法防止系统进入不安全状态，从而避免死锁<br>(3) 死锁的检测和解除：允许死锁的发生，操作系统检测出死锁后，会采取措施解除死锁</p>
+<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103641570.png" alt="img" style="zoom:150%;">
+
+<h2 id="二、死锁的处理策略-—-预防死锁"><a href="#二、死锁的处理策略-—-预防死锁" class="headerlink" title="二、死锁的处理策略 — 预防死锁"></a>二、死锁的处理策略 — 预防死锁</h2><img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828221812000.png" alt="image-20210828221812000" style="zoom:67%;">
+
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828221834071.png" alt="image-20210828221834071" style="zoom:70%;">
+
+<p><strong>破坏互斥条件</strong></p>
+<p>只有对必须互斥使用的资源的争夺才会导致死锁。</p>
+<p>如果把只能互斥使用的资源改造为允许共享使用，则系统不会进入死锁状态。<font color="red">比如:SPOOLing技术。操作系统可以采用SPOOLing技术把独占设备在逻辑上改造成共享设备。比如用SPOOLing技术将打印机改造为共享设备….</font></p>
+<p>该策略的缺点：并不是所有的资源都可以改造成可以共享使用的资源。并且为了系统安全，很多地方还必须保护这种互斥性。因此，很多时候都无法破坏互斥条件。</p>
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103647730.png" alt="img" style="zoom:150%;">
+
+<h2 id="三、死锁的处理策略-—-避免死锁"><a href="#三、死锁的处理策略-—-避免死锁" class="headerlink" title="三、死锁的处理策略 — 避免死锁"></a>三、死锁的处理策略 — 避免死锁</h2><h3 id="1-安全序列的介绍"><a href="#1-安全序列的介绍" class="headerlink" title="1. 安全序列的介绍"></a>1. 安全序列的介绍</h3><p>所谓安全序列，就是指如果系统按照这种序列分配资源，则每个进程都能顺利完成，只要能找 出一个安全序列，系统就是安全状态 (安全序列可能有多个)</p>
+<p>如果分配了资源以后，系统中找不出任何一个安全序列，系统就进入了不安全状态，这就意味 着之后可能所有进程都无法顺利的执行下去</p>
+<p>注意：</p>
+<p>(1) 如果系统处于安全状态，就一定不会发生死锁<br>(2) 如果系统进入不安全状态，就可能发生死锁<br>(3) 处于不安全状态未必会发生死锁，但发生死锁时一定处于不安全状态</p>
+<h3 id="2-银行家算法"><a href="#2-银行家算法" class="headerlink" title="2. 银行家算法"></a>2. 银行家算法</h3><p>思想：在资源分配之前预先判断这次分配是否会导致系统进入不安全状态，由此决定是否答应 资源分配请求</p>
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103704759.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/202012271037089.png" alt="img" style="zoom:90%;">
+
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828225137636.png" alt="image-20210828225137636" style="zoom:80%;">
+
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/image-20210828225049182.png" alt="image-20210828225049182" style="zoom:80%;">
+
+<p>注：如果银行家算法是安全性算法，说明此时系统处于安全状态，不会发生死锁</p>
+<h2 id="四、死锁的处理策略-—-死锁的检测与解除"><a href="#四、死锁的处理策略-—-死锁的检测与解除" class="headerlink" title="四、死锁的处理策略 — 死锁的检测与解除"></a>四、死锁的处理策略 — 死锁的检测与解除</h2><h3 id="1-死锁的检测"><a href="#1-死锁的检测" class="headerlink" title="1. 死锁的检测"></a>1. 死锁的检测</h3><p>为了能对系统是否发生了死锁进行检测，必须：</p>
+<p>(1) 用资源分配图保存资源的请求和分配信息<br>(2) 提供一种算法，利用上述信息检测系统是否进入死锁状态</p>
+<img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103722593.png" alt="img" style="zoom:150%;">
+
+<p>P2进程请求1个资源，但R1的3个资源都已经分配出去，无法执行；P1进程请求1个资 源，R2剩余1个资源，P1执行；P1执行完毕之后，释放自身的所有资源，P1的三条边全 部消除；R1剩余的资源可满足P2进程；P2进程执行，P2的三条边全部消除</p>
+<p>注意：</p>
+<p>(1) 如果按照上述过程可以消除所有的边，表示此图可完全简化，不会发生死锁<br>(2) 如果不能消除所有的边，说明发生了死锁<br>(3) 最终还连着边的那些进程就是死锁进程</p>
+<h3 id="2-死锁的解除"><a href="#2-死锁的解除" class="headerlink" title="2. 死锁的解除"></a>2. 死锁的解除</h3><p>一旦检测出死锁的发生，就应该立即解除死锁，解除死锁的方法有：</p>
+<p>(1) 资源剥夺法</p>
+<p>挂起某些死锁进程，并抢占它的资源，将这些资源分配给其他的死锁进程；但是应防止被 挂起的进程长时间得不到资源而饥饿</p>
+<p>(2) 撤销进程法</p>
+<p>强制撤销部分甚至全部死锁进程，并剥夺这些进程的资源</p>
+<p>(3) 进程回退法</p>
+<p>让死锁进程回退到足以避免死锁的地步 (这就要求系统记录历史信息、设置还原点)</p>
+<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/08/28/%E6%AD%BB%E9%94%81/20201227103747269.png" alt="img" style="zoom:150%;">
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1787,507 +2290,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/24/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/" class="post-title-link" itemprop="url">数字签名</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-24 16:00:55 / 修改時間：16:30:57" itemprop="dateCreated datePublished" datetime="2021-08-24T16:00:55+08:00">2021-08-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="数字签名"><a href="#数字签名" class="headerlink" title="数字签名"></a>数字签名</h1><h2 id="签名的生成和验证"><a href="#签名的生成和验证" class="headerlink" title="签名的生成和验证"></a>签名的生成和验证</h2><blockquote>
-<ol>
-<li><p>签名</p>
-<ul>
-<li>有原始数据对其进行哈希运算   -&gt;   散列值</li>
-<li>使用非对称加密的<font color="red">私钥</font>对散列值加密 -&gt; 签名</li>
-<li>将原始数据和签名一并发送给对方</li>
-</ul>
-</li>
-<li><p>验证</p>
-<ul>
-<li><p>接收数据 </p>
-<ul>
-<li>原始数据</li>
-<li>数字签名</li>
-</ul>
-</li>
-<li><p>数字签名, 需要使用<font color="red">公钥</font>解密, 得到散列值</p>
-</li>
-<li><p>对原始数据进行哈希运算得到新的散列值</p>
-</li>
-</ul>
-</li>
-</ol>
-</blockquote>
-<p>小结：</p>
-<blockquote>
-<ol>
-<li>数据通信<ul>
-<li>公钥加密, 私钥解密</li>
-</ul>
-</li>
-<li>数字签名:<ul>
-<li>私钥加密, 公钥解密</li>
-</ul>
-</li>
-</ol>
-</blockquote>
-<h2 id="数字签名的方法"><a href="#数字签名的方法" class="headerlink" title="数字签名的方法"></a>数字签名的方法</h2><p><img src="/2021/08/24/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/1539177860475.png" alt="1539177860475"></p>
-<h2 id="使用RSA进行数字签名"><a href="#使用RSA进行数字签名" class="headerlink" title="使用RSA进行数字签名"></a>使用RSA进行数字签名</h2><ol>
-<li>使用rsa生成密钥对</li>
-</ol>
-<blockquote>
-<ol>
-<li>生成密钥对</li>
-<li>序列化</li>
-<li>保存到磁盘文件</li>
-</ol>
-</blockquote>
-<ol start="2">
-<li>使用私钥进行数字签名</li>
-</ol>
-<blockquote>
-<ol>
-<li>打开磁盘的私钥文件</li>
-<li>将私钥文件中的内容读出</li>
-<li>使用pem对数据解码, 得到了pem.Block结构体变量</li>
-<li>x509将数据解析成私钥结构体 -&gt; 得到了私钥</li>
-<li>创建一个哈希对象 -&gt; md5/sha1</li>
-<li>给哈希对象添加数据</li>
-<li>计算哈希值</li>
-<li>使用rsa中的函数对散列值签名</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SignPKCS1v15</span><span class="params">(rand io.Reader, priv *PrivateKey, hash crypto.Hash, hashed []<span class="keyword">byte</span>)</span> <span class="params">(s []<span class="keyword">byte</span>, err error)</span></span></span><br><span class="line">参数<span class="number">1</span>: rand.Reader</span><br><span class="line">参数<span class="number">2</span>: 非对称加密的私钥</span><br><span class="line">参数<span class="number">3</span>: 使用的哈希算法</span><br><span class="line">	crypto.sha1</span><br><span class="line">	crypto.md5</span><br><span class="line">参数<span class="number">4</span>: 数据计算之后得到的散列值</span><br><span class="line">返回值: </span><br><span class="line">- s: 得到的签名数据</span><br><span class="line">- err: 错误信息</span><br></pre></td></tr></table></figure>
-</blockquote>
-<ol start="3">
-<li>使用公钥进行签名认证</li>
-</ol>
-<blockquote>
-<ol>
-<li><p>打开公钥文件, 将文件内容读出 - []byte</p>
-</li>
-<li><p>使用pem解码 -&gt; 得到pem.Block结构体变量</p>
-</li>
-<li><p>使用x509对pem.Block中的Bytes变量中的数据进行解析 -&gt;  得到一接口</p>
-</li>
-<li><p>进行类型断言 -&gt; 得到了公钥结构体</p>
-</li>
-<li><p>对原始消息进行哈希运算(和签名使用的哈希算法一致) -&gt; 散列值</p>
-<ol>
-<li>创建哈希接口</li>
-<li>添加数据</li>
-<li>哈希运算</li>
-</ol>
-</li>
-<li><p>签名认证 - rsa中的函数</p>
-</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">VerifyPKCS1v15</span><span class="params">(pub *PublicKey, hash crypto.Hash, hashed []<span class="keyword">byte</span>, sig []<span class="keyword">byte</span>)</span> <span class="params">(err error)</span></span></span><br><span class="line">参数<span class="number">1</span>: 公钥</span><br><span class="line">参数<span class="number">2</span>: 哈希算法 -&gt; 与签名使用的哈希算法一致</span><br><span class="line">参数<span class="number">3</span>: 将原始数据进行哈希原始得到的散列值</span><br><span class="line">参数<span class="number">4</span>: 签名的字符串</span><br><span class="line">返回值: </span><br><span class="line">	- <span class="literal">nil</span> -&gt; 验证成功</span><br><span class="line">	- !=<span class="literal">nil</span> -&gt; 失败</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>实例：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/rand&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/sha512&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line">	<span class="string">&quot;encoding/pem&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	src := []<span class="keyword">byte</span>(<span class="string">&quot;在消息认证码中，需要发送者和接收者之间共享密钥，而这个密钥不能被主动攻击者Mallory获取。如果这个密钥落入Mallory手中，则Mallory也可以计算出MAC值，从而就能够自由地进行篡改和伪装攻击，这样一来消息认证码就无法发挥作用了。&quot;</span>)</span><br><span class="line">	sigText := SignatureRSA(src, <span class="string">&quot;private.pem&quot;</span>)</span><br><span class="line">	bl := VerifyRSA(src, sigText, <span class="string">&quot;public.pem&quot;</span>)</span><br><span class="line">	fmt.Println(bl)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// RSA签名 - 私钥</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SignatureRSA</span><span class="params">(plainText []<span class="keyword">byte</span>, fileName <span class="keyword">string</span>)</span> []<span class="title">byte</span></span>&#123;</span><br><span class="line">	<span class="comment">//1. 打开磁盘的私钥文件</span></span><br><span class="line">	file, err := os.Open(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//2. 将私钥文件中的内容读出</span></span><br><span class="line">	info, err := file.Stat()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">	file.Read(buf)</span><br><span class="line">	file.Close()</span><br><span class="line">	<span class="comment">//3. 使用pem对数据解码, 得到了pem.Block结构体变量</span></span><br><span class="line">	block, _ := pem.Decode(buf)</span><br><span class="line">	<span class="comment">//4. x509将数据解析成私钥结构体 -&gt; 得到了私钥</span></span><br><span class="line">	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//5. 创建一个哈希对象 -&gt; md5/sha1 -&gt; sha512</span></span><br><span class="line">	<span class="comment">// sha512.Sum512()</span></span><br><span class="line">	myhash := sha512.New()</span><br><span class="line">	<span class="comment">//6. 给哈希对象添加数据</span></span><br><span class="line">	myhash.Write(plainText)</span><br><span class="line">	<span class="comment">//7. 计算哈希值</span></span><br><span class="line">	hashText := myhash.Sum(<span class="literal">nil</span>)</span><br><span class="line">	<span class="comment">//8. 使用rsa中的函数对散列值签名</span></span><br><span class="line">	sigText, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA512, hashText)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sigText</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// RSA签名验证</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">VerifyRSA</span><span class="params">(plainText, sigText []<span class="keyword">byte</span>, pubFileName <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">//1. 打开公钥文件, 将文件内容读出 - []byte</span></span><br><span class="line">	file, err := os.Open(pubFileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	info, err := file.Stat()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">	file.Read(buf)</span><br><span class="line">	file.Close()</span><br><span class="line">	<span class="comment">//2. 使用pem解码 -&gt; 得到pem.Block结构体变量</span></span><br><span class="line">	block, _ := pem.Decode(buf)</span><br><span class="line">	<span class="comment">//3. 使用x509对pem.Block中的Bytes变量中的数据进行解析 -&gt;  得到一接口</span></span><br><span class="line">	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//4. 进行类型断言 -&gt; 得到了公钥结构体</span></span><br><span class="line">	publicKey := pubInterface.(*rsa.PublicKey)</span><br><span class="line">	<span class="comment">//5. 对原始消息进行哈希运算(和签名使用的哈希算法一致) -&gt; 散列值</span></span><br><span class="line">	hashText := sha512.Sum512(plainText)</span><br><span class="line">	<span class="comment">//6. 签名认证 - rsa中的函数</span></span><br><span class="line">	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA512, hashText[:], sigText)</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="使用椭圆曲线进行数字签名"><a href="#使用椭圆曲线进行数字签名" class="headerlink" title="使用椭圆曲线进行数字签名"></a>使用椭圆曲线进行数字签名</h2><blockquote>
-<p>椭圆曲线在go中对应的包: import “crypto/elliptic”</p>
-<p>使用椭圆曲线在go中进行数字签名: import “crypto/ecdsa”</p>
-<p>美国FIPS186-2标准, 推荐使用5个素域上的椭圆曲线, 这5个素数模分别是:</p>
-<p>P<del>192</del> = 2^192^ - 2^64^ - 1</p>
-<p>P<del>224</del> = 2^224^ - 2^96^ + 1</p>
-<p>P<del>256</del> = 2^256^ - 2^224^  + 2^192^ - 2^96^ -1</p>
-<p>P<del>384</del> = 2^384^ - 2^128^  - 2^96^ + 2^32^ -1</p>
-<p>P<del>512</del> = 2^512^ - 1</p>
-</blockquote>
-<ol>
-<li>秘钥对称的生成, 并保存到磁盘</li>
-</ol>
-<blockquote>
-<ol>
-<li><p>使用ecdsa生成密钥对</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GenerateKey</span><span class="params">(c elliptic.Curve, rand io.Reader)</span> <span class="params">(priv *PrivateKey, err error)</span></span></span><br></pre></td></tr></table></figure></li>
-<li><p>将私钥写入磁盘</p>
-<ul>
-<li>使用x509进行序列化</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MarshalECPrivateKey</span><span class="params">(key *ecdsa.PrivateKey)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>将得到的切片字符串放入pem.Block结构体中</p>
-<p>block := pem.Block{</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Type : <span class="string">&quot;描述....&quot;</span>,</span><br><span class="line"></span><br><span class="line">Bytes : MarshalECPrivateKey返回值中的切片字符串,</span><br></pre></td></tr></table></figure>
-
-<p>}</p>
-</li>
-<li><p>使用pem编码</p>
-<p>​    pem.Encode();</p>
-</li>
-</ul>
-</li>
-<li><p>将公钥写入磁盘</p>
-<ul>
-<li>从私钥中得到公钥</li>
-<li>使用x509进行序列化</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MarshalPKIXPublicKey</span><span class="params">(pub <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>将得到的切片字符串放入pem.Block结构体中</li>
-</ul>
-<p>block := pem.Block{</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Type : <span class="string">&quot;描述....&quot;</span>,</span><br><span class="line"></span><br><span class="line">Bytes : MarshalECPrivateKey返回值中的切片字符串,</span><br></pre></td></tr></table></figure>
-
-<p>}</p>
-<ul>
-<li><p>使用pem编码</p>
-<p>pem.Encode();</p>
-</li>
-</ul>
-</li>
-</ol>
-</blockquote>
-<ol start="2">
-<li>使用私钥进行数字签名</li>
-</ol>
-<blockquote>
-<ol>
-<li><p>打开私钥文件, 将内容读出来 -&gt;[]byte</p>
-</li>
-<li><p>使用pem进行数据解码 -&gt; pem.Decode()</p>
-</li>
-<li><p>使用x509, 对私钥进行还原</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParseECPrivateKey</span><span class="params">(der []<span class="keyword">byte</span>)</span> <span class="params">(key *ecdsa.PrivateKey, err error)</span></span></span><br></pre></td></tr></table></figure></li>
-<li><p>对原始数据进行哈希运算 -&gt; 散列值</p>
-</li>
-<li><p>进行数字签名</p>
-</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sign</span><span class="params">(rand io.Reader, priv *PrivateKey, hash []<span class="keyword">byte</span>)</span> <span class="params">(r, s *big.Int, err error)</span></span></span><br><span class="line">- 得到的r和s不能直接使用, 因为这是指针</span><br><span class="line">	应该将这两块内存中的数据进行序列化 -&gt; []<span class="keyword">byte</span></span><br><span class="line">	<span class="function"><span class="keyword">func</span> <span class="params">(z *Int)</span> <span class="title">MarshalText</span><span class="params">()</span> <span class="params">(text []<span class="keyword">byte</span>, err error)</span></span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<ol start="3">
-<li><p>使用公钥验证数字签名</p>
-<blockquote>
-<ol>
-<li><p>打开公钥文件, 将里边的内容读出 -&gt; []byte</p>
-</li>
-<li><p>pem解码 -&gt; pem.Decode()</p>
-</li>
-<li><p>使用x509对公钥还原</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParsePKIXPublicKey</span><span class="params">(derBytes []<span class="keyword">byte</span>)</span> <span class="params">(pub <span class="keyword">interface</span>&#123;&#125;, err error)</span></span></span><br></pre></td></tr></table></figure></li>
-<li><p>将接口 -&gt; 公钥</p>
-</li>
-<li><p>对原始数据进行哈希运算 -&gt; 得到散列值</p>
-</li>
-<li><p>签名的认证 - &gt; ecdsa</p>
-</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Verify</span><span class="params">(pub *PublicKey, hash []<span class="keyword">byte</span>, r, s *big.Int)</span> <span class="title">bool</span></span></span><br><span class="line">- 参数<span class="number">1</span>: 公钥</span><br><span class="line">- 参数<span class="number">2</span>: 原始数据生成的散列值</span><br><span class="line">- 参数<span class="number">3</span>,<span class="number">4</span>: 通过签名得到的连个点</span><br><span class="line">	<span class="function"><span class="keyword">func</span> <span class="params">(z *Int)</span> <span class="title">UnmarshalText</span><span class="params">(text []<span class="keyword">byte</span>)</span> <span class="title">error</span></span></span><br></pre></td></tr></table></figure></blockquote>
-</li>
-</ol>
-<h2 id="数字签名无法解决的问题"><a href="#数字签名无法解决的问题" class="headerlink" title="数字签名无法解决的问题"></a>数字签名无法解决的问题</h2><p><img src="/2021/08/24/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/1539178819165.png" alt="1539178819165"></p>
-<p>实例：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/ecdsa&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/elliptic&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/rand&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/sha1&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line">	<span class="string">&quot;encoding/pem&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;math/big&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	GenerateEccKey()</span><br><span class="line">	src := []<span class="keyword">byte</span>(<span class="string">&quot;使用x509对pem.Block中的Bytes变量中的数据进行解析 -&gt;  得到一接口&quot;</span>)</span><br><span class="line">	rText, sText := EccSignature(src, <span class="string">&quot;eccPrivate.pem&quot;</span>)</span><br><span class="line">	bl := EccVerify(src, rText, sText, <span class="string">&quot;eccPublic.pem&quot;</span>)</span><br><span class="line">	fmt.Println(bl)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 1. 生成密钥对</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GenerateEccKey</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">//1. 使用ecdsa生成密钥对</span></span><br><span class="line">	privateKey, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//2. 将私钥写入磁盘</span></span><br><span class="line">	<span class="comment">//- 使用x509进行序列化</span></span><br><span class="line">	derText, err := x509.MarshalECPrivateKey(privateKey)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//- 将得到的切片字符串放入pem.Block结构体中</span></span><br><span class="line">	block := pem.Block&#123;</span><br><span class="line">		Type : <span class="string">&quot;ecdsa private key&quot;</span>,</span><br><span class="line">		Bytes : derText,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//- 使用pem编码</span></span><br><span class="line">	file, err := os.Create(<span class="string">&quot;eccPrivate.pem&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	pem.Encode(file, &amp;block)</span><br><span class="line">	file.Close()</span><br><span class="line">	<span class="comment">//3. 将公钥写入磁盘</span></span><br><span class="line">	<span class="comment">//- 从私钥中得到公钥</span></span><br><span class="line">	publicKey := privateKey.PublicKey</span><br><span class="line">	<span class="comment">//- 使用x509进行序列化</span></span><br><span class="line">	derText, err = x509.MarshalPKIXPublicKey(&amp;publicKey)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//- 将得到的切片字符串放入pem.Block结构体中</span></span><br><span class="line">	block = pem.Block&#123;</span><br><span class="line">		Type : <span class="string">&quot;ecdsa public key&quot;</span>,</span><br><span class="line">		Bytes : derText,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//- 使用pem编码</span></span><br><span class="line">	file, err = os.Create(<span class="string">&quot;eccPublic.pem&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	pem.Encode(file, &amp;block)</span><br><span class="line">	file.Close()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ecc签名 - 私钥</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">EccSignature</span><span class="params">(plainText []<span class="keyword">byte</span>, privName <span class="keyword">string</span>)</span>  <span class="params">(rText, sText []<span class="keyword">byte</span>)</span></span>&#123;</span><br><span class="line">	<span class="comment">//1. 打开私钥文件, 将内容读出来 -&gt;[]byte</span></span><br><span class="line">	file, err := os.Open(privName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	info, err := file.Stat()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">	file.Read(buf)</span><br><span class="line">	file.Close()</span><br><span class="line">	<span class="comment">//2. 使用pem进行数据解码 -&gt; pem.Decode()</span></span><br><span class="line">	block, _ := pem.Decode(buf)</span><br><span class="line">	<span class="comment">//3. 使用x509, 对私钥进行还原</span></span><br><span class="line">	privateKey, err := x509.ParseECPrivateKey(block.Bytes)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//4. 对原始数据进行哈希运算 -&gt; 散列值</span></span><br><span class="line">	hashText := sha1.Sum(plainText)</span><br><span class="line">	<span class="comment">//5. 进行数字签名</span></span><br><span class="line">	r, s, err := ecdsa.Sign(rand.Reader, privateKey, hashText[:])</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 6. 对r, s内存中的数据进行格式化 -&gt; []byte</span></span><br><span class="line">	rText, err = r.MarshalText()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	sText, err = s.MarshalText()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ecc签名认证</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">EccVerify</span><span class="params">(plainText, rText, sText []<span class="keyword">byte</span>, pubFile <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">//1. 打开公钥文件, 将里边的内容读出 -&gt; []byte</span></span><br><span class="line">	file, err := os.Open(pubFile)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	info, err := file.Stat()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">	file.Read(buf)</span><br><span class="line">	file.Close()</span><br><span class="line">	<span class="comment">//2. pem解码 -&gt; pem.Decode()</span></span><br><span class="line">	block, _ := pem.Decode(buf)</span><br><span class="line">	<span class="comment">//3. 使用x509对公钥还原</span></span><br><span class="line">	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//4. 将接口 -&gt; 公钥</span></span><br><span class="line">	publicKey := pubInterface.(*ecdsa.PublicKey)</span><br><span class="line">	<span class="comment">//5. 对原始数据进行哈希运算 -&gt; 得到散列值</span></span><br><span class="line">	hashText := sha1.Sum(plainText)</span><br><span class="line">	<span class="comment">// 将rText, sText -&gt; int数据</span></span><br><span class="line">	<span class="keyword">var</span> r, s big.Int</span><br><span class="line">	r.UnmarshalText(rText)</span><br><span class="line">	s.UnmarshalText(sText)</span><br><span class="line">	<span class="comment">//6. 签名的认证 - &gt; ecdsa  (问题,api的设计为什么在这个地方要传地址,直接传值比较不是更好吗?)</span></span><br><span class="line">	bl := ecdsa.Verify(publicKey, hashText[:], &amp;r, &amp;s)</span><br><span class="line">	<span class="keyword">return</span> bl</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/" class="post-title-link" itemprop="url">消息认证码</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-24 15:48:51 / 修改時間：15:59:11" itemprop="dateCreated datePublished" datetime="2021-08-24T15:48:51+08:00">2021-08-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="消息认证码"><a href="#消息认证码" class="headerlink" title="消息认证码"></a>消息认证码</h1><h2 id="消息认证"><a href="#消息认证" class="headerlink" title="消息认证"></a>消息认证</h2><blockquote>
-<p><strong>消息认证码（message authentication code）是一种确认完整性并进行认证的技术，取三个单词的首字母，简称为MAC。</strong></p>
-</blockquote>
-<p><img src="/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/1539176665517.png" alt="1539176665517"></p>
-<ul>
-<li><p>思考改进方案?</p>
-<p>从哈希函数入手</p>
-<p>需要将要发送的数据进行哈希运算, 将哈希值和原始数据一并发送</p>
-<p>需要在进行哈希运算的时候引入加密的步骤</p>
-<ul>
-<li>在alice对数据进行哈希运算的时候引入一个秘钥, 让其参与哈希运算, 生成散列值</li>
-<li>bob对数据校验<ul>
-<li>bob收到原始和散列值之后, <ul>
-<li>处理原始数据: 通过秘钥和哈希算法对原始数据生成散列值</li>
-<li>散列值比较: 生成的散列值 和  接收到的散列值进行比对</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="消息认证码的使用步骤"><a href="#消息认证码的使用步骤" class="headerlink" title="消息认证码的使用步骤"></a>消息认证码的使用步骤</h2><p><img src="/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/1539177690828.png" alt="1539177690828"></p>
-<blockquote>
-<p>前提条件:</p>
-<ul>
-<li>在消息认证码生成的一方和校验的一方, 必须有一个秘钥</li>
-<li>双方约定好使用同样的哈希函数对数据进行运算</li>
-</ul>
-<p>流程:</p>
-<p>发送者: </p>
-<ul>
-<li>发送原始法消息</li>
-<li>将原始消息生成消息认证码<ul>
-<li>((原始消息) + 秘钥)  *   函数函数 = 散列值(消息认证码)</li>
-</ul>
-</li>
-<li>将消息认证码发送给对方</li>
-</ul>
-<p>接收者:</p>
-<ul>
-<li>接收原始数据</li>
-<li>接收消息认证码</li>
-<li>校验: <ul>
-<li>( 接收的消息  +  秘钥 ) * 哈希函数   = 新的散列值</li>
-<li>通过新的散列值和接收的散列值进行比较</li>
-</ul>
-</li>
-</ul>
-</blockquote>
-<h2 id="go中对消息认证码的使用"><a href="#go中对消息认证码的使用" class="headerlink" title="go中对消息认证码的使用"></a>go中对消息认证码的使用</h2><blockquote>
-<p>有一个包: crypto/hmac</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(h <span class="keyword">func</span>()</span> <span class="title">hash</span>.<span class="title">Hash</span>, <span class="title">key</span> []<span class="title">byte</span>) <span class="title">hash</span>.<span class="title">Hash</span></span></span><br><span class="line">- 返回值: hash接口</span><br><span class="line">- 参数<span class="number">1</span>: 哈希函数的函数名</span><br><span class="line">	sha1.<span class="built_in">new</span></span><br><span class="line">	md5.<span class="built_in">new</span></span><br><span class="line">	sha256.<span class="built_in">new</span></span><br><span class="line">- 参数<span class="number">2</span>: 秘钥</span><br><span class="line"></span><br><span class="line">第二步: 添加数据</span><br><span class="line"><span class="keyword">type</span> Hash <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// 通过嵌入的匿名io.Writer接口的Write方法向hash中添加更多数据，永远不返回错误</span></span><br><span class="line">    io.Writer</span><br><span class="line">    <span class="comment">// 返回添加b到当前的hash值后的新切片，不会改变底层的hash状态</span></span><br><span class="line">    Sum(b []<span class="keyword">byte</span>) []<span class="keyword">byte</span></span><br><span class="line">    <span class="comment">// 重设hash为无数据输入的状态</span></span><br><span class="line">    Reset()</span><br><span class="line">    <span class="comment">// 返回Sum会返回的切片的长度</span></span><br><span class="line">    Size() <span class="keyword">int</span></span><br><span class="line">    <span class="comment">// 返回hash底层的块大小；Write方法可以接受任何大小的数据，</span></span><br><span class="line">    <span class="comment">// 但提供的数据是块大小的倍数时效率更高</span></span><br><span class="line">    BlockSize() <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Writer <span class="keyword">interface</span> &#123;</span><br><span class="line">    Write(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err error)</span><br><span class="line">&#125;</span><br><span class="line">第三步: 计算散列值</span><br></pre></td></tr></table></figure>
-
-<p>实例：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/hmac&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/sha1&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span> <span class="params">()</span></span> &#123;</span><br><span class="line">	src := []<span class="keyword">byte</span>(<span class="string">&quot;在消息认证码中，需要发送者和接收者之间共享密钥，而这个密钥不能被主动攻击者Mallory获取。&quot;</span> +</span><br><span class="line">		<span class="string">&quot;如果这个密钥落入Mallory手中，则Mallory也可以计算出MAC值，从而就能够自由地进行篡改和伪装攻击，&quot;</span> +</span><br><span class="line">		<span class="string">&quot;这样一来消息认证码就无法发挥作用了。&quot;</span>)</span><br><span class="line">	key := []<span class="keyword">byte</span>(<span class="string">&quot;helloworld&quot;</span>)</span><br><span class="line">	hamc1 := GenerateHamc(src, key)</span><br><span class="line">	bl := VerifyHamc(src, key, hamc1)</span><br><span class="line">	<span class="comment">//fmt.Printf(&quot;校验结果: %t\n&quot;, bl)</span></span><br><span class="line">	fmt.Println(bl)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 生成消息认证码</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GenerateHamc</span><span class="params">(plainText, key []<span class="keyword">byte</span>)</span>[]<span class="title">byte</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1.创建哈希接口, 需要指定使用的哈希算法, 和秘钥</span></span><br><span class="line">	myhash := hmac.New(sha1.New, key)</span><br><span class="line">	<span class="comment">// 2. 给哈希对象添加数据</span></span><br><span class="line">	myhash.Write(plainText)</span><br><span class="line">	<span class="comment">// 3. 计算散列值</span></span><br><span class="line">	hashText := myhash.Sum(<span class="literal">nil</span>)</span><br><span class="line">	<span class="keyword">return</span> hashText</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 验证消息认证码</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">VerifyHamc</span><span class="params">(plainText, key, hashText []<span class="keyword">byte</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1.创建哈希接口, 需要指定使用的哈希算法, 和秘钥</span></span><br><span class="line">	myhash := hmac.New(sha1.New, key)</span><br><span class="line">	<span class="comment">// 2. 给哈希对象添加数据</span></span><br><span class="line">	myhash.Write(plainText)</span><br><span class="line">	<span class="comment">// 3. 计算散列值</span></span><br><span class="line">	hamc1 := myhash.Sum(<span class="literal">nil</span>)</span><br><span class="line">	<span class="comment">// 4. 两个散列值比较</span></span><br><span class="line">	<span class="keyword">return</span> hmac.Equal(hashText, hamc1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<h2 id="消息认证码的问题"><a href="#消息认证码的问题" class="headerlink" title="消息认证码的问题"></a>消息认证码的问题</h2><ol>
-<li>弊端<ul>
-<li>有秘钥分发困难的问题</li>
-</ul>
-</li>
-<li>无法解决的问题<ul>
-<li>不能进行第三方证明</li>
-<li>不能防止否认</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/18/Go%E8%AF%AD%E8%A8%80sync-Map/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/18/Go%E8%AF%AD%E8%A8%80sync-Map/" class="post-title-link" itemprop="url">Go语言sync.Map</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-18 20:10:29 / 修改時間：20:20:16" itemprop="dateCreated datePublished" datetime="2021-08-18T20:10:29+08:00">2021-08-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Go语言中的 map 在并发情况下，只读是线程安全的，同时读写是线程不安全的。</p>
-<p>样例如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	test := <span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span> &#123;<span class="number">1</span>:<span class="number">1</span>&#125;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		i := <span class="number">0</span></span><br><span class="line">		<span class="keyword">for</span> i &lt; <span class="number">10000</span> &#123;</span><br><span class="line">			test[<span class="number">1</span>]=<span class="number">1</span></span><br><span class="line">			i++</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		i := <span class="number">0</span></span><br><span class="line">		<span class="keyword">for</span> i &lt; <span class="number">10000</span> &#123;</span><br><span class="line">			test[<span class="number">1</span>]=<span class="number">1</span></span><br><span class="line">			i++</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	time.Sleep(<span class="number">2</span>*time.Second)</span><br><span class="line">	fmt.Println(test)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>会发现有这样的报错：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fatal error: concurrent map <span class="built_in">read</span> and map write</span><br></pre></td></tr></table></figure>
-
-<p>根本原因就是：并发的去读写map结构的数据了。</p>
-<p>错误信息显示，并发的 map 读和 map 写，也就是说使用了两个并发函数不断地对 map 进行读和写而发生了竞态问题，map 内部会对这种并发操作进行检查并提前发现。</p>
-<p>需要并发读写时，一般的做法是加锁，但这样性能并不高，Go语言在 1.9 版本中提供了一种效率较高的并发安全的 sync.Map，sync.Map 和 map 不同，不是以语言原生形态提供，而是在 sync 包下的特殊结构。</p>
-<p>sync.Map 有以下特性：</p>
-<ul>
-<li>无须初始化，直接声明即可。</li>
-<li>sync.Map 不能使用 map 的方式进行取值和设置等操作，而是使用 sync.Map 的方法进行调用，Store 表示存储，Load 表示获取，Delete 表示删除。</li>
-<li>使用 Range 配合一个回调函数进行遍历操作，通过回调函数返回内部遍历出来的值，Range 参数中回调函数的返回值在需要继续迭代遍历时，返回 true，终止迭代遍历时，返回 false。</li>
-</ul>
-<p>并发安全的 sync.Map 演示代码如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;sync&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> scene sync.Map</span><br><span class="line">	<span class="comment">// 将键值对保存到sync.Map</span></span><br><span class="line">	scene.Store(<span class="string">&quot;greece&quot;</span>, <span class="number">97</span>)</span><br><span class="line">	scene.Store(<span class="string">&quot;london&quot;</span>, <span class="number">100</span>)</span><br><span class="line">	scene.Store(<span class="string">&quot;egypt&quot;</span>, <span class="number">200</span>)</span><br><span class="line">	<span class="comment">// 从sync.Map中根据键取值</span></span><br><span class="line">	fmt.Println(scene.Load(<span class="string">&quot;london&quot;</span>))</span><br><span class="line">	<span class="comment">// 根据键删除对应的键值对</span></span><br><span class="line">	scene.Delete(<span class="string">&quot;london&quot;</span>)</span><br><span class="line">	<span class="comment">// 遍历所有sync.Map中的键值对</span></span><br><span class="line">	scene.Range(<span class="function"><span class="keyword">func</span><span class="params">(k, v <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;iterate:&quot;</span>, k, v)</span><br><span class="line">		<span class="comment">//return false   返回false立即停止遍历</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>sync.Map 没有提供获取 map 数量的方法，替代方法是在获取 sync.Map 时遍历自行计算数量，sync.Map 为了保证并发安全有一些性能损失，因此在非并发情况下，使用 map 相比使用 sync.Map 会有更好的性能。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一頁"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一頁"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一頁"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一頁"></i></a>
   </nav>
 
 </div>

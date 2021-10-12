@@ -6,7 +6,7 @@
   <link href="http://zhudalao243.github.io/atom.xml" rel="self"/>
   
   <link href="http://zhudalao243.github.io/"/>
-  <updated>2021-09-08T08:43:35.134Z</updated>
+  <updated>2021-09-15T01:58:44.421Z</updated>
   <id>http://zhudalao243.github.io/</id>
   
   <author>
@@ -15,6 +15,85 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>对sync.Map的理解</title>
+    <link href="http://zhudalao243.github.io/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/"/>
+    <id>http://zhudalao243.github.io/2021/09/15/%E5%AF%B9sync-Map%E7%9A%84%E7%90%86%E8%A7%A3/</id>
+    <published>2021-09-15T00:21:42.000Z</published>
+    <updated>2021-09-15T01:58:44.421Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;并发报错的map&quot;&gt;&lt;a href=&quot;#并发报错的map&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Golang" scheme="http://zhudalao243.github.io/categories/Golang/"/>
+    
+    
+    <category term="Golang" scheme="http://zhudalao243.github.io/tags/Golang/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux下4G虚拟地址空间的分布</title>
+    <link href="http://zhudalao243.github.io/2021/09/13/Linux%E4%B8%8B4G%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%86%E5%B8%83/"/>
+    <id>http://zhudalao243.github.io/2021/09/13/Linux%E4%B8%8B4G%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%86%E5%B8%83/</id>
+    <published>2021-09-13T08:46:59.000Z</published>
+    <updated>2021-09-13T09:07:29.962Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;所编写的源代码并不是程序，从C代码（.c/.cpp)—-&amp;gt;链接程序（.exe）是要经过以下几个过程才能真正的运行链接的；&lt;/p&gt;
+&lt;p&gt;C源程序—&amp;gt;预编译处理（.c/.cpp）–&amp;gt;编译，优化程序（.s）—&amp;gt;汇编程序(.o)—&amp;gt;链接(.exe)&lt;</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    <category term="C++" scheme="http://zhudalao243.github.io/tags/C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>题目01</title>
+    <link href="http://zhudalao243.github.io/2021/09/11/%E9%A2%98%E7%9B%AE/"/>
+    <id>http://zhudalao243.github.io/2021/09/11/%E9%A2%98%E7%9B%AE/</id>
+    <published>2021-09-11T14:27:44.000Z</published>
+    <updated>2021-09-11T14:51:36.507Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;ol&gt;
+&lt;li&gt;UNIX操作系统，是一个强大的多用户、多任务操作系统，支持多种处理器架构按照操作系统的分类，属于分时操作系统。&lt;br&gt;UNIX系统是一个多用户，多任务的分时操作系统。&lt;br&gt;UNIX的系统结构可分为三部分：&lt;pre&gt;&lt;code&gt;操作系统内核（是UNIX系统核心管</summary>
+        
+      
+    
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+  </entry>
   
   <entry>
     <title>const修饰指针and引用</title>
@@ -230,7 +309,7 @@
     <link href="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/"/>
     <id>http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/</id>
     <published>2021-08-28T15:27:51.000Z</published>
-    <updated>2021-08-29T09:02:53.753Z</updated>
+    <updated>2021-09-11T14:26:19.578Z</updated>
     
     
       
@@ -449,83 +528,6 @@
     
     
     <category term="密码学" scheme="http://zhudalao243.github.io/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>数字签名</title>
-    <link href="http://zhudalao243.github.io/2021/08/24/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/"/>
-    <id>http://zhudalao243.github.io/2021/08/24/%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/</id>
-    <published>2021-08-24T08:00:55.000Z</published>
-    <updated>2021-08-24T08:30:57.658Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;数字签名&quot;&gt;&lt;a href=&quot;#数字签名&quot; class=&quot;headerlink&quot; title=&quot;数字签名&quot;&gt;&lt;/a&gt;数字签名&lt;/h1&gt;&lt;h2 id=&quot;签名的生成和验证&quot;&gt;&lt;a href=&quot;#签名的生成和验证&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>消息认证码</title>
-    <link href="http://zhudalao243.github.io/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/"/>
-    <id>http://zhudalao243.github.io/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/</id>
-    <published>2021-08-24T07:48:51.000Z</published>
-    <updated>2021-08-24T07:59:11.621Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;消息认证码&quot;&gt;&lt;a href=&quot;#消息认证码&quot; class=&quot;headerlink&quot; title=&quot;消息认证码&quot;&gt;&lt;/a&gt;消息认证码&lt;/h1&gt;&lt;h2 id=&quot;消息认证&quot;&gt;&lt;a href=&quot;#消息认证&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-    
-    <category term="密码学" scheme="http://zhudalao243.github.io/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go语言sync.Map</title>
-    <link href="http://zhudalao243.github.io/2021/08/18/Go%E8%AF%AD%E8%A8%80sync-Map/"/>
-    <id>http://zhudalao243.github.io/2021/08/18/Go%E8%AF%AD%E8%A8%80sync-Map/</id>
-    <published>2021-08-18T12:10:29.000Z</published>
-    <updated>2021-08-18T12:20:16.079Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;Go语言中的 map 在并发情况下，只读是线程安全的，同时读写是线程不安全的。&lt;/p&gt;
-&lt;p&gt;样例如下：&lt;/p&gt;
-&lt;figure class=&quot;highlight go&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span</summary>
-        
-      
-    
-    
-    
-    <category term="Golang" scheme="http://zhudalao243.github.io/categories/Golang/"/>
-    
-    
-    <category term="Golang" scheme="http://zhudalao243.github.io/tags/Golang/"/>
     
   </entry>
   

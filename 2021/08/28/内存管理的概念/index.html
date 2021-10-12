@@ -20,12 +20,12 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
-<meta name="description" content="一、内存管理的概念    二、覆盖与交换1. 覆盖技术将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存 2. 交换技术内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成  应该在外存（磁盘）的什么位置保存被换出的进程？   1.具有对换功能的操作系统中，通常把磁盘空间分为文件区和对换区两部分">
+<meta name="description" content="一、内存管理的概念    二、覆盖与交换1. 覆盖技术将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存 覆盖技术是早期 在单一连续存储管理中使用的扩大存储器容量的一种技术。 2. 交换技术内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成  应该在外存（磁盘）的什么位置保存被换出的进程？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="内存管理的概念">
 <meta property="og:url" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/index.html">
 <meta property="og:site_name" content="上善若水">
-<meta property="og:description" content="一、内存管理的概念    二、覆盖与交换1. 覆盖技术将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存 2. 交换技术内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成  应该在外存（磁盘）的什么位置保存被换出的进程？   1.具有对换功能的操作系统中，通常把磁盘空间分为文件区和对换区两部分">
+<meta property="og:description" content="一、内存管理的概念    二、覆盖与交换1. 覆盖技术将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存 覆盖技术是早期 在单一连续存储管理中使用的扩大存储器容量的一种技术。 2. 交换技术内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成  应该在外存（磁盘）的什么位置保存被换出的进程？">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/image-20210828232818560.png">
 <meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227131925434.png">
@@ -63,7 +63,7 @@
 <meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132322294.png">
 <meta property="og:image" content="http://zhudalao243.github.io/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227132328319.png">
 <meta property="article:published_time" content="2021-08-28T15:27:51.000Z">
-<meta property="article:modified_time" content="2021-08-29T09:02:53.753Z">
+<meta property="article:modified_time" content="2021-09-11T14:26:19.578Z">
 <meta property="article:author" content="zzy">
 <meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
@@ -201,7 +201,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -283,7 +283,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新於</span>
-        <time title="修改時間：2021-08-29 17:02:53" itemprop="dateModified" datetime="2021-08-29T17:02:53+08:00">2021-08-29</time>
+        <time title="修改時間：2021-09-11 22:26:19" itemprop="dateModified" datetime="2021-09-11T22:26:19+08:00">2021-09-11</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -310,6 +310,7 @@
 <img src="/2021/08/28/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E6%A6%82%E5%BF%B5/20201227131925434.png" alt="img " style="zoom:100%;">
 
 <h2 id="二、覆盖与交换"><a href="#二、覆盖与交换" class="headerlink" title="二、覆盖与交换"></a>二、覆盖与交换</h2><h3 id="1-覆盖技术"><a href="#1-覆盖技术" class="headerlink" title="1. 覆盖技术"></a>1. 覆盖技术</h3><p>将程序分成多个段，常用的段常驻内存的固定区，不常用的段放在内存的覆盖区，在需要的时 候调入内存</p>
+<p><font color="red">覆盖技术是早期 在单一连续存储管理中使用的扩大存储器容量的一种技术。</font></p>
 <h3 id="2-交换技术"><a href="#2-交换技术" class="headerlink" title="2. 交换技术"></a>2. 交换技术</h3><p>内存空间紧张时，系统将内存中某些进程暂时换出外存，把外存中某些已具备运行条件的进程 换入内存，使用中级调度来完成</p>
 <ul>
 <li>应该在外存（磁盘）的什么位置保存被换出的进程？</li>
