@@ -4130,4 +4130,70 @@ UNIX系统大部分是由C语言编写的。</li>
         <tag>Golang</tag>
       </tags>
   </entry>
+  <entry>
+    <title>李白的中国诗歌史</title>
+    <url>/2021/10/13/%E6%9D%8E%E7%99%BD%E7%9A%84%E4%B8%AD%E5%9B%BD%E8%AF%97%E6%AD%8C%E5%8F%B2/</url>
+    <content><![CDATA[<div align="center"><font face="楷体">《古风》</font></div><div align="center"><font face="楷体">大雅久不作，吾衰竟谁陈。</font></div><font face="楷体">    <center>王风委蔓草，战国多荆榛。</center><center>龙虎相啖食，兵戈逮狂秦。</center><center>正声何微茫，哀怨起骚人。</center><center>扬马激颓波，开流荡无垠。</center><center>废兴虽万变，宪章亦已沦。</center><center>自从建安来，绮丽不足珍。</center><center>圣代复元古，垂衣贵清真。</center><center>群才属休明，乘运共跃鳞。</center><center>文质相炳焕，衆星罗秋旻。</center><center>我志在删述，垂辉映千春。</center><center>希圣如有立，绝笔于获麟。</center></font>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>哲学</category>
+        <category>唐诗新思路</category>
+      </categories>
+      <tags>
+        <tag>哲学</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>大学</title>
+    <url>/2021/11/06/%E5%A4%A7%E5%AD%A6/</url>
+    <content><![CDATA[<h1 id="大學"><a href="#大學" class="headerlink" title="大學"></a>大學</h1><h2 id="大學經綸章：初學入德之門"><a href="#大學經綸章：初學入德之門" class="headerlink" title="大學經綸章：初學入德之門"></a>大學經綸章：初學入德之門</h2><p>​       大學之道，在明明德，在親民，在止於至善。知止而後有定，定而後能靜，靜而後能安，安而後能慮，慮而後能得。物有本末，事有終始，知有先後，則近道矣。古之欲明明德於天下者，先治其國。欲治其國者，先齊其家。欲齊其家者，先修其身。欲修其身者，先正其心。欲正其心者，先誠其意。欲誠其意者，先致其知。致知在格物。格物而後知至。知至而後意誠。意誠而後心正。心正而後身修。身修而後家齊。家齊而後國治。國治而後天下平。自天子以至於庶人，壹是皆以修身為本。其本亂，而未治者，否矣。其所厚者薄，而其所薄者厚，未之有也。此謂知本，此謂知之至也。</p>
+<h2 id="康诰盘铭、邦畿章：将美好得品德发扬光大"><a href="#康诰盘铭、邦畿章：将美好得品德发扬光大" class="headerlink" title="康诰盘铭、邦畿章：将美好得品德发扬光大"></a>康诰盘铭、邦畿章：将美好得品德发扬光大</h2><p>​       </p>
+]]></content>
+      <categories>
+        <category>哲学</category>
+        <category>大學</category>
+      </categories>
+      <tags>
+        <tag>哲学</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>c++注意点</title>
+    <url>/2021/11/06/c-%E6%B3%A8%E6%84%8F%E7%82%B9/</url>
+    <content><![CDATA[<ol>
+<li>不可以在函数内部返回局部变量的引用。</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回局部变量引用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span>&amp; <span class="title">test01</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>; <span class="comment">//局部变量</span></span><br><span class="line">	<span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//返回静态变量引用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span>&amp; <span class="title">test02</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">int</span> a = <span class="number">20</span>;</span><br><span class="line">	<span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="comment">//不能返回局部变量的引用</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref = <span class="built_in">test01</span>();</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref = &quot;</span> &lt;&lt; ref &lt;&lt; endl;  <span class="comment">// ref = 10</span></span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref = &quot;</span> &lt;&lt; ref &lt;&lt; endl;  <span class="comment">// ref = 1479064544  此处会出现错误，避免该错误不要返回局部变量的引用。  因为局部变量保存在栈区，函数结束，内存也就释放了</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//如果函数做左值，那么必须返回引用</span></span><br><span class="line">    <span class="comment">// 局部静态变量保存在全局区，不会随着函数结束而内存释放，所以不会出现上述问题。</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref2 = <span class="built_in">test02</span>();  </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;   </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	<span class="built_in">test02</span>() = <span class="number">1000</span>;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+      </tags>
+  </entry>
 </search>

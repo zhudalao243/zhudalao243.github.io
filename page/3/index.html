@@ -159,13 +159,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">分類</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -200,6 +200,674 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/" class="post-title-link" itemprop="url">Golang协程调度器原理与GMP设计思想</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-24 20:22:00 / 修改時間：21:51:29" itemprop="dateCreated datePublished" datetime="2021-08-24T20:22:00+08:00">2021-08-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="一-Golang“调度器器”由来"><a href="#一-Golang“调度器器”由来" class="headerlink" title="一. Golang“调度器器”由来"></a>一. Golang“调度器器”由来</h1><p>多进程、多线程的问题？</p>
+<blockquote>
+<p>设计变得复杂，进程/线程的数量越多，切换成本就越大，也就越浪费</p>
+<p>多进程、多线程的壁垒,高内存占用，进程占用内存（虚拟内存4GB（32bit OS）），线程占用约4MB</p>
+</blockquote>
+<h2 id="线程池的缺陷"><a href="#线程池的缺陷" class="headerlink" title="线程池的缺陷"></a>线程池的缺陷</h2><p>​        在高并发应用中频繁创建线程会造成不必要的开销，所以有了线程池。线程池中预先保存一定数量的线程，而新任务将不再以创建线程的方式去执行，而是将任务发布到任务队列，线程池中的线程不断地从任务队列中取出任务并执行，可以有效的减少线程创建和销毁所带来的开销。</p>
+<p><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/m_b499f154d0135854b725ce27a6b7a009_r.png" alt="img"></p>
+<p>我们把任务队列中的每一个任务称作G，而G往往代表一个函数。线程池中的worker线程不断地从任务队列中取出任务并执行。而worker线程的调度则交给操作系统进行调度。</p>
+<p>如果worker线程执行的G任务中发生系统调用，则操作系统会将该线程置为阻塞状态，也意味着该线程在怠工，也意味着消费任务队列的worker线程变少了，也就是说线程池消费任务队列的能力变弱了。</p>
+<p>如果任务队列中的大部分任务都会进行系统调用，则会让这种状态恶化，大部分worker线程进入阻塞状态，从而任务队列中的任务产生堆积。</p>
+<p>解决这个问题的一个思路就是重新审视线程池中线程的数量，增加线程池中线程数量可以一定程度上提高消费能力，但随着线程数量增多，由于过多线程争抢CPU，消费能力会有上限，甚至出现消费能力下降。 </p>
+<p>调度器器的优化:</p>
+<blockquote>
+<p>Goroutine的优化: 内存仅占用几KB，可以大量开辟。灵活调用，切换成本低。</p>
+</blockquote>
+<p>早期的Go的调度器器：</p>
+<blockquote>
+<p>基本的全局Go队列列和⽐比较传统的轮询利利⽤用多个thread去调度。</p>
+<p>弊端：</p>
+<ol>
+<li>创建、销毁、调度G都需要每个M获取锁，这就形成了了激烈烈的锁竞争。</li>
+<li> M转移G会造成延迟和额外的系统负载。</li>
+<li>系统调用(CPU在M之间的切换)导致频繁的线程阻塞和取消阻塞操作增加了了系统开销。    </li>
+</ol>
+</blockquote>
+<h1 id="GMP模型的设计思想"><a href="#GMP模型的设计思想" class="headerlink" title="GMP模型的设计思想"></a>GMP模型的设计思想</h1><h2 id="Goroutine主要概念如下："><a href="#Goroutine主要概念如下：" class="headerlink" title="Goroutine主要概念如下："></a>Goroutine主要概念如下：</h2><ul>
+<li><p>G（Goroutine）: 即Go协程，每个go关键字都会创建一个协程。</p>
+</li>
+<li><p>M（Machine）： 工作线程，在Go中称为Machine。</p>
+</li>
+<li><p>P(Processor): 处理器（Go中定义的一个摡念，不是指CPU），包含运行Go代码的必要资源，也有调度goroutine的能力。</p>
+</li>
+</ul>
+<img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824210046445.png" alt="image-20210824210046445 " style="zoom:67%;">
+
+<p>M是交给操作系统调度的线程，M持有一个P，P将G调度进M中执行。P同时还维护着一个包含G的队列（图中灰色部分），可以按照一定的策略将G调度到M中执行。</p>
+<p>P的个数在程序启动时决定，默认情况下等同于CPU的核数，由于M必须持有一个P才可以运行Go代码，所以同时运行的M个数，也即线程数一般等同于CPU的个数，以达到尽可能的使用CPU而又不至于产生过多的线程切换开销。</p>
+<p>程序中可以使用<code>runtime.GOMAXPROCS()</code>设置P的个数，在某些IO密集型的场景下可以在一定程度上提高性能。</p>
+<blockquote>
+<p>全局队列:  存放等待运⾏行行的G</p>
+<p>P的本地队列: 存放等待运行的G, 数量限制 (不超过256G),优先将新创建的G放在P的本地队列中，如果满了会放在全局队列中。</p>
+<p>P列表：程序启动时创建， 最多有GOMAXPROCS个(可配置)</p>
+<p>M列表： 当前操作系统分配到当前Go程序的内核线程数。</p>
+<p>P的数量：</p>
+<ul>
+<li>环境变量量$GOMAXPROCS</li>
+<li>在程序中通过runtime.GOMAXPROCS() 来设置</li>
+</ul>
+<p>M的数量：</p>
+<ul>
+<li>Go语⾔言本身 是限定M的最⼤大量量是10000(忽略略)</li>
+<li>runtime/debug包中的SetMaxThreads函数来设置</li>
+<li>有一个M阻塞，会创建一个新的M</li>
+<li>如果有M空闲，那么就会回收或者睡眠</li>
+</ul>
+</blockquote>
+<h2 id="调度器的设计策略"><a href="#调度器的设计策略" class="headerlink" title="调度器的设计策略"></a>调度器的设计策略</h2><ol>
+<li><p>复用线程 避免频繁的创建、销毁线程，而是对线程的复用。</p>
+<ul>
+<li><p>work stealing机制</p>
+<p>当本线程无可运行的G时，尝试从其他线程绑定的P偷取G，而不是销毁线程。</p>
+</li>
+<li><p>hand off机制</p>
+<p>当本线程因为G进行系统调用阻塞时，线程释放绑定的P，把P转移给其他空闲的线程执行。</p>
+</li>
+</ul>
+</li>
+<li><p>利用并行 </p>
+<p>GOMAXPROCS设置P的数量，最多有GOMAXPROCS个线程分布在多个CPU上同时运行。</p>
+</li>
+<li><p>抢占</p>
+<p>在Go中，一个goroutine最多占用CPU 10ms，防止其他goroutine被饿死.</p>
+</li>
+<li><p>全局G队列列 </p>
+<p>当M执行work stealing从其他P偷不到G时，它可以从全局G队列列获取G。</p>
+</li>
+</ol>
+<p>每个P维护着一个包含G的队列，不考虑G进入系统调用或IO操作的情况下，P周期性的将G调度到M中执行，执行一小段时间，将上下文保存下来，然后将G放到队列尾部，然后从队列中重新取出一个G进行调度。</p>
+<p>除了每个P维护的G队列以外，还有一个全局的队列，每个P会周期性地查看全局队列中是否有G待运行并将其调度到M中执行，全局队列中G的来源，主要有从系统调用中恢复的G。之所以P会周期性地查看全局队列，也是为了防止全局队列中的G被饿死。</p>
+<h2 id="“go-func-”-经历了了什什么过程"><a href="#“go-func-”-经历了了什什么过程" class="headerlink" title="“go func()” 经历了了什什么过程"></a>“go func()” 经历了了什什么过程</h2><p>流程：</p>
+<blockquote>
+<ol>
+<li>我们通过 go func()来创建⼀一个goroutine</li>
+<li>有两个存储G的队列，一个是局部调度器P的本地队列、一个是全局G队列。新创建的G会先保存在P的本地队列中，如果P的本地队列已经满了就会保存在全局的队列中；</li>
+<li>G只能运行在M中，一个M必须持有一个P，M与P是1：1的关系。M会从P的本地队列弹出一个可执行状态的G来执行，如果P的本地队列为空，就会想其他的MP组合偷取一个可执行的G来执行；</li>
+<li>一个M调度G执行的过程是一个循环机制；</li>
+<li>当M执行某一个G时候如果发生了syscall或其余阻塞操作，M会阻塞，如果当前有一些G在执行，runtime会把这个线程M从P中摘除(detach)，然后再创建一个新的操作系统的线程(如果有空闲的线程可用就复用空闲线程)来服务于这个P</li>
+<li>当M系统调用结束时候，这个G会尝试获取一个空闲的P执行，并放入到这个P的本地队列。如果获取不到P，那么这个线程M变成休眠状态， 加入到空闲线程中，然后这个G会被放入全局队列列中。</li>
+</ol>
+</blockquote>
+<p>调度器器的生命周期?</p>
+<blockquote>
+<p>M0</p>
+<p>M0是启动程序后的编号为0的主线程，这个M对应的实例会在全局变量runtime.m0中，不需要在heap上分配，M0负责执行初始化操作和启动第一个G， 在之后M0就和其他的M一样了。</p>
+<p>G0</p>
+<p>G0是每次启动一个M都会第一个创建的gourtine，G0仅用于负责调度的G，G0不指向任何可执行的函数,每个M都会有一个自己的G0。在调度或系统调用时会使用G0的栈空间, 全局变量的G0是M0的G0。</p>
+</blockquote>
+<h1 id="GOMAXPROCS设置对性能的影响"><a href="#GOMAXPROCS设置对性能的影响" class="headerlink" title="GOMAXPROCS设置对性能的影响"></a>GOMAXPROCS设置对性能的影响</h1><p>一般来讲，程序运行时就将GOMAXPROCS大小设置为CPU核数，可让Go程序充分利用CPU。<br>在某些IO密集型的应用里，这个值可能并不意味着性能最好。<br>理论上当某个Goroutine进入系统调用时，会有一个新的M被启用或创建，继续占满CPU。<br>但由于Go调度器检测到M被阻塞是有一定延迟的，也即旧的M被阻塞和新的M得到运行之间是有一定间隔的，所以在IO密集型应用中不妨把GOMAXPROCS设置的大一些，或许会有好的效果。</p>
+<h1 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h1><h2 id="场景一"><a href="#场景一" class="headerlink" title="场景一"></a>场景一</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212038512.png" alt="image-20210824212038512" style="zoom:67%;">
+
+<blockquote>
+<p>P拥有G1，M1获取P后开始运行G1，G1使用go func()创建了G2，为了局部性G2优先加入到P1的本地队列。</p>
+</blockquote>
+<h2 id="场景二"><a href="#场景二" class="headerlink" title="场景二"></a>场景二</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212307079.png" alt="image-20210824212307079" style="zoom:67%;">
+
+<blockquote>
+<p>G1运行完成后(函数：goexit)，M上运行的goroutine切换为G0，G0负责调度时协程的切换（函数：schedule）。从P的本地队列取G2，从G0切换到G2，并开始运行G2(函数：execute)。实现了了线程M1的复用。</p>
+</blockquote>
+<h2 id="场景3、4、5"><a href="#场景3、4、5" class="headerlink" title="场景3、4、5"></a>场景3、4、5</h2><center><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212818637.png" alt="image-20210824212818637" style="zoom:50%;"><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212858320.png" alt="image-20210824212858320" style="zoom:50%;"><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824212951443.png" alt="image-20210824212951443" style="zoom:50%;"></center>
+
+<h2 id="场景六"><a href="#场景六" class="headerlink" title="场景六"></a>场景六</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824213232136.png" alt="image-20210824213232136" style="zoom:67%;">
+
+<blockquote>
+<p>规定：在创建G时，运行的G会尝试唤醒其他空闲的P和M组合去执行。</p>
+<p>假定G2唤醒了M2，M2绑定了P2，并运行G0，但P2本地队列没有G，M2此时为<strong>自旋线程</strong>（没有G但为运行<br>状态的线程，不断寻找G）。</p>
+</blockquote>
+<h2 id="场景七"><a href="#场景七" class="headerlink" title="场景七"></a>场景七</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824213556496.png" alt="image-20210824213556496" style="zoom:67%;">
+
+<blockquote>
+<p>M2自旋线程，首先尝试从全局队列获取G。M2尝试从全局队列(简称“GQ”)取一批G放到P2的本地队列（函数：findrunnable()）。M2从全局队列取的G数量量符合下面的公式：</p>
+<p>​                            <strong>n = min(len(GQ)/GOMAXPROCS + 1, len(GQ/2))</strong></p>
+</blockquote>
+<h2 id="场景八"><a href="#场景八" class="headerlink" title="场景八"></a>场景八</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824214007571.png" alt="image-20210824214007571" style="zoom:50%;">
+
+<blockquote>
+<p>全局队列已经没有G，那m就要执行work stealing(偷取)：从其他有G的P哪里偷取一半G过来，放到自己的P本地队列。P2从P1的本地队列尾部取一半的G，本例中一半则只有1个G8，放到P2的本地队列并执行。</p>
+</blockquote>
+<h2 id="场景九"><a href="#场景九" class="headerlink" title="场景九"></a>场景九</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824214402203.png" alt="image-20210824214402203" style="zoom:50%;">
+
+<blockquote>
+<p>最多有GOMAXPROCS个自旋的线程(当前例子中的GOMAXPROCS=4，所以一共4个P)，多余的没事做线程会让他们休眠。</p>
+</blockquote>
+<h2 id="场景十"><a href="#场景十" class="headerlink" title="场景十"></a>场景十</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824214727895.png" alt="image-20210824214727895" style="zoom:67%;">
+
+<blockquote>
+<p>假定当前除了M3和M4为自旋线程，还有M5和M6为空闲的线程(没有得到P的绑定，注意我们这里最多就只能够存在4个P，所以P的数量应该永远是M&gt;=P, 大部分都是M在抢占需要运行的P)，G8进行了阻塞的系统调用，M2和P2立即解绑，P2会执行以下判断：如果P2本地队列有G、全局队列有G或有空闲的M，P2都会立马唤醒1个M和它绑定，否则P2则会加入到空闲P列表，等待M来获取可用的p。本场景中，P2本地队列有G9，可以和其他空闲的线程M5绑定。</p>
+</blockquote>
+<h2 id="场景十一"><a href="#场景十一" class="headerlink" title="场景十一"></a>场景十一</h2><img src="/2021/08/24/Golang%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%99%A8%E5%8E%9F%E7%90%86%E4%B8%8EGMP%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3/image-20210824215013595.png" alt="image-20210824215013595" style="zoom:50%;">
+
+<blockquote>
+<p>M2和P2会解绑，但M2会记住P2，然后G8和M2进入系统调用状态。当G8和M2退出系统调用时，会尝试获取P2，如果无法获取，则获取空闲的P，如果依然没有，G8会被记为可运行状态，并加入到全局队列,M2因为没有P的绑定而变成休眠状态(长时间休眠等待GC回收销毁)。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/SSL-TLS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/24/SSL-TLS/" class="post-title-link" itemprop="url">SSL/TLS and HTTPS</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-24 17:20:09 / 修改時間：17:48:38" itemprop="dateCreated datePublished" datetime="2021-08-24T17:20:09+08:00">2021-08-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="SSL-TLS"><a href="#SSL-TLS" class="headerlink" title="SSL/TLS"></a>SSL/TLS</h2><p><img src="/2021/08/24/SSL-TLS/1539271432019.png" alt="1539271432019"></p>
+<blockquote>
+<ul>
+<li><strong>SSL</strong>：（Secure Socket Layer，安全套接字层），为Netscape所研发，用以保障在Internet上数据传输之安全，利用数据加密(Encryption)技术，可确保数据在网络上之传输过程中不会被截取。当前版本为3.0。它已被广泛地用于Web浏览器与服务器之间的身份认证和加密数据传输。<br>SSL协议位于TCP/IP协议与各种应用层协议之间，为数据通讯提供安全支持。SSL协议可分为两层： SSL记录协议（SSL Record Protocol）：它建立在可靠的传输协议（如TCP）之上，为高层协议提供数据封装、压缩、加密等基本功能的支持。 SSL握手协议（SSL Handshake Protocol）：它建立在SSL记录协议之上，用于在实际的数据传输开始前，通讯双方进行身份认证、协商加密算法、交换加密密钥等。</li>
+<li><strong>TLS</strong>：(Transport Layer Security，传输层安全协议)，用于两个应用程序之间提供保密性和数据完整性。<br>TLS 1.0是IETF（Internet Engineering Task Force，Internet工程任务组）制定的一种新的协议，它建立在SSL 3.0协议规范之上，是SSL 3.0的后续版本，可以理解为SSL 3.1，它是写入了 <a target="_blank" rel="noopener" href="http://tools.ietf.org/html/rfc5246">RFC</a> 的。该协议由两层组成： TLS 记录协议（TLS Record）和 TLS 握手协议（TLS Handshake）。较低的层为 TLS 记录协议，位于某个可靠的传输协议（例如 TCP）上面。</li>
+</ul>
+<p>SSL/TLS协议提供的服务主要有：</p>
+<ol>
+<li>认证用户和服务器，确保数据发送到正确的客户机和服务器；</li>
+<li>加密数据以防止数据中途被窃取；</li>
+<li>维护数据的完整性，确保数据在传输过程中不被改变。</li>
+</ol>
+</blockquote>
+<p><img src="/2021/08/24/SSL-TLS/image-20210824173412361.png" alt="image-20210824173412361"></p>
+<blockquote>
+<p>客户端与服务端需要经过一个握手的过程才能完成身份认证，建立一个安全的连接。握手的过程如下：</p>
+<ol>
+<li><p>客户端访问服务器（比如：<a target="_blank" rel="noopener" href="https://www.12306.cn/">https://www.12306.cn</a>）,发送ssl版本、客户端支持的加密算法等消息。</p>
+</li>
+<li><p>服务器向客户端发送ssl版本、加密算法、证书（证书出现了）等消息。</p>
+</li>
+<li><p>客户端收到消息后，判断证书是否可信, 若可信，则继续通信，发送消息：</p>
+<p><font color="red">客户端生成一个随机数，从证书中获取服务器端的公钥，对随机数加密；</font></p>
+<p>随后信息都将使用双方协定的加密方法和密钥发送, 客户端握手结束。</p>
+</li>
+<li><p>服务器端对数据解密得到随机数, 使用协商好的加密算法和秘钥进行通信</p>
+</li>
+</ol>
+</blockquote>
+<p>描述的是客户端和服务器刚建立连接之后做的事情:</p>
+<blockquote>
+<p>第一次</p>
+<ul>
+<li>客户端连接服务器<ul>
+<li>客户端使用的ssl版本, 客户端支持的加密算法</li>
+</ul>
+</li>
+<li>服务器<ul>
+<li>先将自己支持ssl版本和客户端的支持的版本比较<ul>
+<li>支持的不一样, 连接断开</li>
+<li>支持的一样, 继续</li>
+</ul>
+</li>
+<li>根据得到的客户端支持 的加密算法, 找一个服务器端也同样支持算法, 发送给客户端</li>
+<li>需要发送服务器的证书给客户端</li>
+</ul>
+</li>
+</ul>
+<p>第二次:</p>
+<p>客户端:</p>
+<ul>
+<li>接收服务器的证书</li>
+<li>校验证书的信息<ul>
+<li>校验证书的签发机构</li>
+<li>证书的有效期</li>
+<li>证书中支持 的域名和访问的域名是否一致</li>
+</ul>
+</li>
+<li>校验有问题, 浏览器会给提示</li>
+</ul>
+</blockquote>
+<h2 id="https-gt-单向认证"><a href="#https-gt-单向认证" class="headerlink" title="https -&gt; 单向认证"></a>https -&gt; 单向认证</h2><p><img src="/SSL-TLS/https1.png" alt="https1"></p>
+<ol>
+<li>服务器要准备的<ul>
+<li>生成密钥对</li>
+<li>将公钥发送给ca, 由ca签发证书</li>
+<li>将ca签发的证书和非对称加密的私钥部署到当前的web服务器</li>
+</ul>
+</li>
+<li>通信流程<ol>
+<li>客户端连接服务器, 通过一个域名<ul>
+<li>域名和IP地址的关系<ul>
+<li>域名要绑定IP地址<ul>
+<li>一个域名只能绑定一个IP地址</li>
+</ul>
+</li>
+<li>IP地址需要被域名绑定<ul>
+<li>一个IP地址可以被多个域名绑定</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>客户端访问的域名会解析成IP地址, 通过IP地址访问web服务器</li>
+</ul>
+</li>
+<li>服务器收到了客户端的请求<ul>
+<li>服务器将CA签发的证书发送给浏览器(客户端)</li>
+</ul>
+</li>
+<li>客户端拿到了服务器的公钥证书<ul>
+<li>读这个公钥 证书<ul>
+<li>验证域名</li>
+<li>有效期</li>
+<li>ca签发机构</li>
+<li>服务器的公钥</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>客户会生成一个随机数 (作为对称加密的秘钥来使用的)<ul>
+<li>使用服务器的公钥对这个随机数进行加密</li>
+<li>将这个加密之后 秘钥发送给服务器</li>
+</ul>
+</li>
+<li>服务器对收到的密文解密<ul>
+<li>使用服务器的是要解密, 得到对称加密的秘钥</li>
+</ul>
+</li>
+<li>数据的传输<ul>
+<li>使用对称加密的方式对数据进行加密</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/%E8%AF%81%E4%B9%A6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/24/%E8%AF%81%E4%B9%A6/" class="post-title-link" itemprop="url">证书</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-24 16:42:45 / 修改時間：17:19:26" itemprop="dateCreated datePublished" datetime="2021-08-24T16:42:45+08:00">2021-08-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="证书"><a href="#证书" class="headerlink" title="证书"></a>证书</h1><blockquote>
+<p>公钥证书（Public-Key Certificate，PKC)其实和驾照很相似，里面记有姓名、组织、邮箱地址等<font color="red">个人信息</font>，以及属于<font color="red">此人的公钥, 并由认证机构（Certification Authority、Certifying Authority, CA）施加数字签名</font>。只要看到公钥证书，我们就可以知道认证机构认定该公钥的确属于此人。公钥证书也简称为证书（certificate）。</p>
+</blockquote>
+<h2 id="证书的应用场景"><a href="#证书的应用场景" class="headerlink" title="证书的应用场景"></a>证书的应用场景</h2><img src="/2021/08/24/%E8%AF%81%E4%B9%A6/1539265302304.png" alt="1539265302304" style="zoom:130%;">
+
+<blockquote>
+<ol>
+<li><p><font color="red" size="4">Bob生成密钥对</font></p>
+<ul>
+<li><p>可以将bob看成百度, 提供是web服务器</p>
+</li>
+<li><p>生成一个密钥对</p>
+<ul>
+<li>公钥  -&gt; 分发</li>
+<li>私钥 -&gt; 百度留着</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Bob在认证机构Trent注册自己的公钥</font></p>
+<ul>
+<li>百度找了一大家都信赖的机构, 来证明这个公钥是百度的</li>
+<li>认证机构会生成一个证书, 写明了公钥属于百度<ul>
+<li>认证机构也有一个非对称加密的密钥对</li>
+<li>认证机构使用自己的私钥对百度的公钥进行签名, 生成了证书</li>
+<li>认证机构将证书发送给百度</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">认证机构Trent用自己的私钥对Bob的公钥施加数字签名并生成证书</font></p>
+</li>
+<li><p><font color="red" size="4">Alice得到带有认证机构Trent的数字签名的Bob的公钥（证书）</font></p>
+<ul>
+<li>alice可以看做一个客户 -&gt; 浏览器</li>
+<li>客户端访问的百度 -&gt; 得到了百度的证书<ul>
+<li>证书中有百度的公钥</li>
+</ul>
+</li>
+<li>客户端需要使用认证机构的公钥对证书进行验证<ul>
+<li>客户端怎么会有认证机构的公钥<ul>
+<li>window会预装, 或者用户自己安装</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Alice使用认证机构Trent的公钥验证数字签名，确认Bob的公钥的合法性</font></p>
+<ul>
+<li>使用认证机构的公钥解除百度证书中签名的数据<ul>
+<li>百度的公钥</li>
+<li>百度的域名</li>
+<li>百度证书的有效期</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Alice用Bob的公钥加密消息并发送给Bob</font></p>
+<ul>
+<li>非对称加密</li>
+<li>使用公钥加密 -&gt; 对称加密秘钥分发</li>
+</ul>
+</li>
+<li><p><font color="red" size="4">Bob用自己的私钥解密密文得到Alice的消息</font></p>
+<ul>
+<li>服务器使用私钥解密 -&gt; 得到对称加密的秘钥</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<h2 id="证书规范和格式-–-x509-了解"><a href="#证书规范和格式-–-x509-了解" class="headerlink" title="证书规范和格式 – x509(了解)"></a>证书规范和格式 – x509(了解)</h2><blockquote>
+<p><strong>X.509</strong>是一种非常通用的证书格式。所有的证书都符合ITU-T X.509国际标准，因此(理论上)为一种应用创建的证书可以用于任何其他符合X.509标准的应用。X.509证书的结构是用ASN1(Abstract Syntax Notation One)进行描述数据结构，并使用ASN.1语法进行编码。 </p>
+<p>X.509规范中一般推荐使用PEM(Privacy Enhanced Mail）格式来存储证书相关的文件。</p>
+<ul>
+<li>证书文件的文件名后缀一般为 .crt 或 .cer </li>
+<li>对应私钥文件的文件名后缀一般为 .key</li>
+<li>证书请求文件的文件名后綴为 .csr </li>
+<li>有时候也统一用pem作为文件名后缀。</li>
+</ul>
+</blockquote>
+<h2 id="CA证书"><a href="#CA证书" class="headerlink" title="CA证书"></a>CA证书</h2><blockquote>
+<p>CA证书顾名思义就是由CA（Certification Authority）机构发布的数字证书。要对CA证书完全理解及其作用，首先要理解SSL。SSL（security sockets layer，安全套接层）是为网络通信提供安全及数据完整性的一种安全协议。<strong>SSL3.0版本以后又被称为TLS。SSL位于TCP与各应用层之间，是操作系统向外提供的API。</strong>SSL如何保证网络通信的安全和数据的完整性呢？就是采用了两种手段：身份认证和数据加密。首先身份认证就需要用到CA证书了。</p>
+</blockquote>
+<ol>
+<li><p>证书的获取和身份的认证（重点）</p>
+<blockquote>
+<p>客户端与服务端需要经过一个握手的过程才能完成身份认证，建立一个安全的连接。握手的过程如下：</p>
+<ol>
+<li><p>客户端访问服务器（比如：<a target="_blank" rel="noopener" href="https://www.12306.cn/">https://www.12306.cn</a>）,发送ssl版本、客户端支持的加密算法等消息。</p>
+</li>
+<li><p>服务器向客户端发送ssl版本、加密算法、证书（证书出现了）等消息。</p>
+</li>
+<li><p>客户端收到消息后，判断证书是否可信, 若可信，则继续通信，发送消息：</p>
+<p><font color="red">客户端生成一个随机数，从证书中获取服务器端的公钥，对随机数加密；</font></p>
+<p>随后信息都将使用双方协定的加密方法和密钥发送, 客户端握手结束。</p>
+</li>
+<li><p>服务器端对数据解密得到随机数, 使用协商好的加密算法和秘钥进行通信</p>
+</li>
+</ol>
+</blockquote>
+</li>
+<li><p>客户端如何验证CA证书是可信任的?（了解）</p>
+<blockquote>
+<ol>
+<li><p>查看证书的方式:</p>
+<p>Internet选项 -&gt; 内容 -&gt; 证书, 打开证书窗口查看已经安装的证书</p>
+<p>只要电脑上安装了该证书, 就说明该证书是受信任的。使用https协议访问时，服务器发送证书向浏览器时，首先查找该证书是否已在信任列表中，然后对证书进行校验，校验成功，那么就证明证书是可信的。</p>
+<p>下图中<code>受信任的根证书颁发机构</code>下的证书都是根证书。</p>
+<p>证书验证的机制是只要根证书是受信任的，那么它的子证书都是可信的。比如说，我们使用https协议访问了需要百度证书的网站，即使我们不安装百度证书，那么网站也不会提示证书不安全，因为，生成百度证书的根证书<code>Globalsign Root CA - R1</code>证书，在受信任的证书列表中。如果一个证书的根证书是不可信的，那么这个证书肯定也是不可信任的。</p>
+<p>由以上可知，根证书在证书验证中极其重要，而且，根证书是无条件信任的，只要我们将根证书安装上，就说明我们对根证书是信任的。比如我们安装12306的根证书，是出于我们对国家的信任，对网站的信任，我们才放心安装这个根证书。对于一些不安全的网站的证书，一定要慎重安装。</p>
+<p>另外需要知道的是，【<code>受信任的根证书颁发机构</code>】中的证书是windows预先安装的一些证书，都是国际上很有权威的证书机构，他们证书的生成都有很严格的流程，因此他们的证书被认为是安全，就像我们相信银行是安全，所以把钱存入到银行</p>
+<p><img src="/2021/08/24/%E8%AF%81%E4%B9%A6/1539272408707.png" alt="1539272408707"></p>
+</li>
+<li><p>证书的颁发机构 -&gt; CA</p>
+<ul>
+<li>发布根证书</li>
+<li>中间证书</li>
+<li>个人</li>
+</ul>
+</li>
+<li><p>证书的信任链 -&gt; 证书签发机构的信任链</p>
+<p>A是一个可信赖证书签发机构, A信任B, B就有资格去签发证书</p>
+<p>从等级上A比B高一级</p>
+</li>
+</ol>
+</blockquote>
+</li>
+<li><p>有哪些CA机构?</p>
+</li>
+</ol>
+<blockquote>
+<p>世界上较早的数字认证中心是美国的verisign<code>威瑞信</code>公司，在windows的证书窗口中可以看到好多verisign公司生成的证书, 美国的<em>DigiCert</em></p>
+<p>另外还有加拿大的ENTRUST公司，也是很著名的证书机构。</p>
+<p>中国的安全认证体系分为金融CA和非金融CA。</p>
+<ul>
+<li>在金融CA方面，根证书由中国人民银行管理，</li>
+<li>非金融CA方面，由中国电信负责。<ul>
+<li>行业性CA<ul>
+<li>中国金融认证中心</li>
+<li>中国电信认证中心</li>
+</ul>
+</li>
+<li>区域性CA, 区域性CA主要是以政府为背景，以企业机制运行<ul>
+<li>广东CA中心</li>
+<li>上海CA中心</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>沃通 – <a target="_blank" rel="noopener" href="http://www.wosign.com/products/ssl.htm">www.wosign.com/products/ssl.htm</a></p>
+</blockquote>
+<h2 id="公钥基础设施-PKI（了解）"><a href="#公钥基础设施-PKI（了解）" class="headerlink" title="公钥基础设施 - PKI（了解）"></a>公钥基础设施 - PKI（了解）</h2><p>PKI组成的要素</p>
+<ul>
+<li>用户<ul>
+<li>申请证书的人 -&gt; web服务器端<ul>
+<li>申请证书<ul>
+<li>生成密钥对 , 或者委托ca生成</li>
+<li>将公钥发送给CA</li>
+<li>ca使用自己的私钥对得到公钥签名</li>
+<li>将证书发送给用户</li>
+</ul>
+</li>
+<li>发送证书<ul>
+<li>当客户端访问服务器的时候发送证书给客户端</li>
+</ul>
+</li>
+<li>注销证书<ul>
+<li>当发现私钥泄露之后</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>使用证书的人 -&gt; 客户端<ul>
+<li>接收证书</li>
+<li>验证对方的身份信息</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CA认证机构<ul>
+<li>可以生产密钥对(可选)</li>
+<li>对公钥签名</li>
+<li>吊销证书</li>
+</ul>
+</li>
+<li>仓库<ul>
+<li>存储证书 -&gt; 公钥</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1643,778 +2311,6 @@
 <h3 id="六合"><a href="#六合" class="headerlink" title="六合"></a>六合</h3><img src="/2021/08/17/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A802/image-20210818000444347.png" alt="image-20210818000444347" style="zoom:40%;">
 
 <img src="/2021/08/17/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A802/image-20210902200534887.png" alt="image-20210902200534887" style="zoom:50%;">
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/17/Go%E5%AE%9E%E7%8E%B0%E5%AF%B9%E7%A7%B0%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/17/Go%E5%AE%9E%E7%8E%B0%E5%AF%B9%E7%A7%B0%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">Go实现对称算法</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-17 11:40:00 / 修改時間：15:23:22" itemprop="dateCreated datePublished" datetime="2021-08-17T11:40:00+08:00">2021-08-17</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="Go中对DES的操作"><a href="#Go中对DES的操作" class="headerlink" title="Go中对DES的操作"></a>Go中对DES的操作</h2><p>最后一个分组添加填充数据和移除添加数据代码</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 填充函数，如果最后一个分组字节数不够, 填充</span></span><br><span class="line"><span class="comment">// 使用pks5的方式填充</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">PKCS5Padding</span><span class="params">(ciphertext []<span class="keyword">byte</span>, blockSize <span class="keyword">int</span>)</span> []<span class="title">byte</span></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 计算最后一个分组缺多少个字节</span></span><br><span class="line">	padding := blockSize - (<span class="built_in">len</span>(ciphertext)%blockSize)</span><br><span class="line">	<span class="comment">// 2. 创建一个大小为padding的切片, 每个字节的值为padding</span></span><br><span class="line">	padText := bytes.Repeat([]<span class="keyword">byte</span>&#123;<span class="keyword">byte</span>(padding)&#125;, padding)</span><br><span class="line">	<span class="comment">// 3. 将padText添加到原始数据的后边, 将最后一个分组缺少的字节数补齐</span></span><br><span class="line">	newText := <span class="built_in">append</span>(ciphertext, padText...)</span><br><span class="line">	<span class="keyword">return</span> newText</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除pks5填充的尾部数据</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">PKCS5UnPadding</span><span class="params">(origData []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 计算数据的总长度</span></span><br><span class="line">	length := <span class="built_in">len</span>(origData)</span><br><span class="line">	<span class="comment">// 2. 根据填充的字节值得到填充的次数</span></span><br><span class="line">	number := <span class="keyword">int</span>(origData[length<span class="number">-1</span>])</span><br><span class="line">	<span class="comment">// 3. 将尾部填充的number个字节去掉</span></span><br><span class="line">	<span class="keyword">return</span> origData[:(length-number)]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="加解密实现思路"><a href="#加解密实现思路" class="headerlink" title="加解密实现思路"></a>加解密实现思路</h3><ul>
-<li><strong>加密 - CBC分组模式</strong></li>
-</ul>
-<blockquote>
-<ol>
-<li>创建并返回一个使用DES算法的cipher.Block接口<ul>
-<li><strong>秘钥长度为64bit, 即 64/8 = 8字节(byte)</strong></li>
-</ul>
-</li>
-<li>对最后一个明文分组进行数据填充<ul>
-<li>DES是以64比特的明文（比特序列）为一个单位来进行加密的</li>
-<li>最后一组不够64bit, 则需要进行数据填充</li>
-</ul>
-</li>
-<li>创建一个密码分组为链接模式的, 底层使用DES加密的BlockMode接口</li>
-<li>加密连续的数据块</li>
-</ol>
-</blockquote>
-<ul>
-<li><p>解密：</p>
-<blockquote>
-<ol>
-<li>创建并返回一个使用DES算法的cipher.Block接口</li>
-<li>创建一个密码分组为链接模式的, 底层使用DES解密的BlockMode接口</li>
-<li>数据块解密</li>
-<li>去掉最后一组的填充数据</li>
-</ol>
-</blockquote>
-</li>
-</ul>
-<h3 id="加解密的代码实现"><a href="#加解密的代码实现" class="headerlink" title="加解密的代码实现"></a>加解密的代码实现</h3><p>在Go中使用DES需要导入的包:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/des&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;bytes&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>DES加密代码:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src -&gt; 要加密的明文</span></span><br><span class="line"><span class="comment">// key -&gt; 秘钥, 大小为: 8byte</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DesEncrypt_CBC</span><span class="params">(src, key []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 创建并返回一个使用DES算法的cipher.Block接口</span></span><br><span class="line">	block, err := des.NewCipher(key)</span><br><span class="line">	<span class="comment">// 2. 判断是否创建成功</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 3. 对最后一个明文分组进行数据填充</span></span><br><span class="line">	src = PKCS5Padding(src, block.BlockSize())</span><br><span class="line">	<span class="comment">// 4. 创建一个密码分组为链接模式的, 底层使用DES加密的BlockMode接口</span></span><br><span class="line">	<span class="comment">//    参数iv的长度, 必须等于b的块尺寸</span></span><br><span class="line">	tmp := []<span class="keyword">byte</span>(<span class="string">&quot;helloAAA&quot;</span>)</span><br><span class="line">	blackMode := cipher.NewCBCEncrypter(block, tmp)</span><br><span class="line">	<span class="comment">// 5. 加密连续的数据块</span></span><br><span class="line">	dst := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(src))</span><br><span class="line">	blackMode.CryptBlocks(dst, src)</span><br><span class="line"></span><br><span class="line">	fmt.Println(<span class="string">&quot;加密之后的数据: &quot;</span>, dst)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 6. 将加密数据返回</span></span><br><span class="line">	<span class="keyword">return</span> dst</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p> DES解密代码:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src -&gt; 要解密的密文</span></span><br><span class="line"><span class="comment">// key -&gt; 秘钥, 和加密秘钥相同, 大小为: 8byte</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DesDecrypt_CBC</span><span class="params">(src, key []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 创建并返回一个使用DES算法的cipher.Block接口</span></span><br><span class="line">	block, err := des.NewCipher(key)</span><br><span class="line">	<span class="comment">// 2. 判断是否创建成功</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 3. 创建一个密码分组为链接模式的, 底层使用DES解密的BlockMode接口</span></span><br><span class="line">	tmp := []<span class="keyword">byte</span>(<span class="string">&quot;helloAAA&quot;</span>)</span><br><span class="line">	blockMode := cipher.NewCBCDecrypter(block, tmp)</span><br><span class="line">	<span class="comment">// 4. 解密数据</span></span><br><span class="line">	dst := src</span><br><span class="line">	blockMode.CryptBlocks(src, dst)</span><br><span class="line">	<span class="comment">// 5. 去掉最后一组填充的数据</span></span><br><span class="line">	dst = PKCS5UnPadding(dst)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 6. 返回结果</span></span><br><span class="line">	<span class="keyword">return</span> dst</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>测试函数:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DESText</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 加密</span></span><br><span class="line">	key := []<span class="keyword">byte</span>(<span class="string">&quot;11111111&quot;</span>)</span><br><span class="line">	result := DesEncrypt_CBC([]<span class="keyword">byte</span>(<span class="string">&quot;床前明月光, 疑是地上霜. 举头望明月, 低头思故乡.&quot;</span>), key)</span><br><span class="line">	fmt.Println(base64.StdEncoding.EncodeToString(result))</span><br><span class="line">	<span class="comment">// 解密</span></span><br><span class="line">	result = DesDecrypt_CBC(result, key)</span><br><span class="line">	fmt.Println(<span class="string">&quot;解密之后的数据: &quot;</span>, <span class="keyword">string</span>(result))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重要的函数说明:</p>
-<ol>
-<li><p>生成一个底层使用DES加/解密的Block接口对象</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/des&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCipher</span><span class="params">(key []<span class="keyword">byte</span>)</span> <span class="params">(cipher.Block, error)</span></span></span><br><span class="line">	- 参数 key: des对称加密使用的密码, 密码长度为<span class="number">64</span>bit, 即<span class="number">8</span><span class="keyword">byte</span></span><br><span class="line">	- 返回值 cipher.Block: 创建出的使用DES加/解密的Block接口对象</span><br></pre></td></tr></table></figure></li>
-<li><p>创建一个密码分组为CBC模式, 底层使用b加密的BlockMode接口对象</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCBCEncrypter</span><span class="params">(b Block, iv []<span class="keyword">byte</span>)</span> <span class="title">BlockMode</span></span></span><br><span class="line">    - 参数 b: 使用des.NewCipher函数创建出的Block接口对象</span><br><span class="line">    - 参数 iv: 事先准备好的一个长度为一个分组长度的比特序列, 每个分组为<span class="number">64</span>bit, 即<span class="number">8</span><span class="keyword">byte</span></span><br><span class="line">    - 返回值: 得到的BlockMode接口对象</span><br></pre></td></tr></table></figure></li>
-<li><p>使用cipher包的BlockMode接口对象对数据进行加/解密</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">接口对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="keyword">type</span> BlockMode <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// 返回加密字节块的大小</span></span><br><span class="line">    BlockSize() <span class="keyword">int</span></span><br><span class="line">    <span class="comment">// 加密或解密连续的数据块，src的尺寸必须是块大小的整数倍，src和dst可指向同一内存地址</span></span><br><span class="line">    CryptBlocks(dst, src []<span class="keyword">byte</span>)</span><br><span class="line">&#125;</span><br><span class="line">接口中的 CryptBlocks(dst, src []<span class="keyword">byte</span>) 方法:</span><br><span class="line">    - 参数 dst: 传出参数, 存储加密或解密运算之后的结果 </span><br><span class="line">    - 参数 src: 传入参数, 需要进行加密或解密的数据切片(字符串)</span><br></pre></td></tr></table></figure></li>
-<li><p>创建一个密码分组为CBC模式, 底层使用b解密的BlockMode接口对象</p>
-</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCBCDecrypter</span><span class="params">(b Block, iv []<span class="keyword">byte</span>)</span> <span class="title">BlockMode</span></span></span><br><span class="line">    - 参数 b: 使用des.NewCipher函数创建出的Block接口对象</span><br><span class="line">    - 参数 iv: 事先准备好的一个长度为一个分组长度的比特序列, 每个分组为<span class="number">64</span>bit, 即<span class="number">8</span><span class="keyword">byte</span>, </span><br><span class="line">               该序列的值需要和NewCBCEncrypter函数的第二个参数iv值相同</span><br><span class="line">    - 返回值: 得到的BlockMode接口对象</span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li><p>自定义函数介绍</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">对称加密加密需要对数据进行分组, 保证每个分组的数据长度相等, 如果最后一个分组长度不够, 需要进行填充</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">PKCS5Padding</span><span class="params">(ciphertext []<span class="keyword">byte</span>, blockSize <span class="keyword">int</span>)</span> []<span class="title">byte</span></span></span><br><span class="line">    - 参数 ciphertext: 需要加密的原始数据</span><br><span class="line">    - 参数 blockSize: 每个分组的长度, 跟使用的加密算法有关系</span><br><span class="line">		* des：<span class="number">64</span>bit， <span class="number">8</span><span class="keyword">byte</span></span><br><span class="line">		* <span class="number">3</span>des：<span class="number">64</span>bit， <span class="number">8</span><span class="keyword">byte</span></span><br><span class="line">		* aes： <span class="number">128</span>bit， <span class="number">16</span><span class="keyword">byte</span></span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="Go中对3DES的操作"><a href="#Go中对3DES的操作" class="headerlink" title="Go中对3DES的操作"></a>Go中对3DES的操作</h2><h3 id="加解密实现思路-1"><a href="#加解密实现思路-1" class="headerlink" title="加解密实现思路"></a>加解密实现思路</h3><p><strong>加密 - CBC分组模式</strong></p>
-<blockquote>
-<ol>
-<li>创建并返回一个使用3DES算法的cipher.Block接口<ul>
-<li><strong>秘钥长度为64bit*3=192bit, 即 192/8 = 24字节(byte)</strong></li>
-</ul>
-</li>
-<li>对最后一个明文分组进行数据填充<ul>
-<li>3DES是以64比特的明文（比特序列）为一个单位来进行加密的</li>
-<li>最后一组不够64bit, 则需要进行数据填充</li>
-</ul>
-</li>
-<li>创建一个密码分组为链接模式的, 底层使用3DES加密的BlockMode接口</li>
-<li>加密连续的数据块</li>
-</ol>
-</blockquote>
-<p><strong>解密</strong></p>
-<blockquote>
-<ol>
-<li>创建并返回一个使用3DES算法的cipher.Block接口</li>
-<li>创建一个密码分组为链接模式的, 底层使用3DES解密的BlockMode接口</li>
-<li>数据块解密</li>
-<li>去掉最后一组的填充数据</li>
-</ol>
-</blockquote>
-<h3 id="加解密的代码实现-1"><a href="#加解密的代码实现-1" class="headerlink" title="加解密的代码实现"></a>加解密的代码实现</h3><p>3DES加密代码:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 3DES加密</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TripleDESEncrypt</span><span class="params">(src, key []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 创建并返回一个使用3DES算法的cipher.Block接口</span></span><br><span class="line">	block, err := des.NewTripleDESCipher(key)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. 对最后一组明文进行填充</span></span><br><span class="line">	src = PKCS5Padding(src, block.BlockSize())</span><br><span class="line">	<span class="comment">// 3. 创建一个密码分组为链接模式, 底层使用3DES加密的BlockMode模型</span></span><br><span class="line">	blockMode := cipher.NewCBCEncrypter(block, key[:<span class="number">8</span>])</span><br><span class="line">	<span class="comment">// 4. 加密数据</span></span><br><span class="line">	dst := src</span><br><span class="line">	blockMode.CryptBlocks(dst, src)</span><br><span class="line">	<span class="keyword">return</span> dst</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>3DES解密代码:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 3DES解密</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TripleDESDecrypt</span><span class="params">(src, key []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 创建3DES算法的Block接口对象</span></span><br><span class="line">	block, err := des.NewTripleDESCipher(key)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. 创建密码分组为链接模式, 底层使用3DES解密的BlockMode模型</span></span><br><span class="line">	blockMode := cipher.NewCBCDecrypter(block, key[:<span class="number">8</span>])</span><br><span class="line">	<span class="comment">// 3. 解密</span></span><br><span class="line">	dst := src</span><br><span class="line">	blockMode.CryptBlocks(dst, src)</span><br><span class="line">	<span class="comment">// 4. 去掉尾部填充的数据</span></span><br><span class="line">	dst = PKCS5UnPadding(dst)</span><br><span class="line">	<span class="keyword">return</span> dst</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重要的函数说明:</p>
-<ol>
-<li> 生成一个底层使用3DES加/解密的Block接口对象</li>
-</ol>
-   <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/des&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewTripleDESCipher</span><span class="params">(key []<span class="keyword">byte</span>)</span> <span class="params">(cipher.Block, error)</span></span></span><br><span class="line">	- 参数 key: <span class="number">3</span>des对称加密使用的密码, 密码长度为(<span class="number">64</span>*<span class="number">3</span>)bit, 即(<span class="number">8</span>*<span class="number">3</span>)<span class="keyword">byte</span></span><br><span class="line">	- 返回值 cipher.Block: 创建出的使用DES加/解密的Block接口对象</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li><p>创建一个密码分组为CBC模式, 底层使用b加密的BlockMode接口对象</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCBCEncrypter</span><span class="params">(b Block, iv []<span class="keyword">byte</span>)</span> <span class="title">BlockMode</span></span></span><br><span class="line">    - 参数 b: 使用des.NewTripleDESCipher 函数创建出的Block接口对象</span><br><span class="line">    - 参数 iv: 事先准备好的一个长度为一个分组长度的比特序列, 每个分组为<span class="number">64</span>bit, 即<span class="number">8</span><span class="keyword">byte</span></span><br><span class="line">    - 返回值: 得到的BlockMode接口对象</span><br></pre></td></tr></table></figure></li>
-<li><p>使用cipher包的BlockMode接口对象对数据进行加/解密</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">接口对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="keyword">type</span> BlockMode <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// 返回加密字节块的大小</span></span><br><span class="line">    BlockSize() <span class="keyword">int</span></span><br><span class="line">    <span class="comment">// 加密或解密连续的数据块，src的尺寸必须是块大小的整数倍，src和dst可指向同一内存地址</span></span><br><span class="line">    CryptBlocks(dst, src []<span class="keyword">byte</span>)</span><br><span class="line">&#125;</span><br><span class="line">接口中的 CryptBlocks(dst, src []<span class="keyword">byte</span>) 方法:</span><br><span class="line">    - 参数 dst: 传出参数, 存储加密或解密运算之后的结果 </span><br><span class="line">    - 参数 src: 传入参数, 需要进行加密或解密的数据切片(字符串)</span><br></pre></td></tr></table></figure></li>
-<li><p>创建一个密码分组为CBC模式, 底层使用b解密的BlockMode接口对象</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCBCDecrypter</span><span class="params">(b Block, iv []<span class="keyword">byte</span>)</span> <span class="title">BlockMode</span></span></span><br><span class="line">    - 参数 b: 使用des.NewTripleDESCipher 函数创建出的Block接口对象</span><br><span class="line">    - 参数 iv: 事先准备好的一个长度为一个分组长度的比特序列, 每个分组为<span class="number">64</span>bit, 即<span class="number">8</span><span class="keyword">byte</span>, </span><br><span class="line">               该序列的值需要和NewCBCEncrypter函数的第二个参数iv值相同</span><br><span class="line">    - 返回值: 得到的BlockMode接口对象</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="Go中对AES的使用"><a href="#Go中对AES的使用" class="headerlink" title="Go中对AES的使用"></a>Go中对AES的使用</h2><h3 id="加解密实现思路-2"><a href="#加解密实现思路-2" class="headerlink" title="加解密实现思路"></a>加解密实现思路</h3><ul>
-<li><strong>加密 - CBC分组模式</strong></li>
-</ul>
-<blockquote>
-<ol>
-<li>创建并返回一个使用AES算法的cipher.Block接口<ul>
-<li><strong>秘钥长度为128bit, 即 128/8 = 16字节(byte)</strong></li>
-</ul>
-</li>
-<li>对最后一个明文分组进行数据填充<ul>
-<li>AES是以128比特的明文（比特序列）为一个单位来进行加密的</li>
-<li>最后一组不够128bit, 则需要进行数据填充</li>
-</ul>
-</li>
-<li>创建一个密码分组为链接模式的, 底层使用AES加密的BlockMode接口</li>
-<li>加密连续的数据块</li>
-</ol>
-</blockquote>
-<ul>
-<li><strong>解密</strong></li>
-</ul>
-<blockquote>
-<ol>
-<li>创建并返回一个使用AES算法的cipher.Block接口</li>
-<li>创建一个密码分组为链接模式的, 底层使用AES解密的BlockMode接口</li>
-<li>数据块解密</li>
-<li>去掉最后一组的填充数据</li>
-</ol>
-</blockquote>
-<h3 id="加解密的代码实现-2"><a href="#加解密的代码实现-2" class="headerlink" title="加解密的代码实现"></a>加解密的代码实现</h3><p>AES加密代码：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AES加密</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">AESEncrypt</span><span class="params">(src, key []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 创建一个使用AES加密的块对象</span></span><br><span class="line">	block, err := aes.NewCipher(key)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. 最后一个分组进行数据填充</span></span><br><span class="line">	src = PKCS5Padding(src, block.BlockSize())</span><br><span class="line">	<span class="comment">// 3. 创建一个分组为链接模式, 底层使用AES加密的块模型对象</span></span><br><span class="line">	blockMode := cipher.NewCBCEncrypter(block, key[:block.BlockSize()])</span><br><span class="line">	<span class="comment">// 4. 加密</span></span><br><span class="line">	dst := src</span><br><span class="line">	blockMode.CryptBlocks(dst, src)</span><br><span class="line">	<span class="keyword">return</span> dst</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>AES解密:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AES解密</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">AESDecrypt</span><span class="params">(src, key []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 创建一个使用AES解密的块对象</span></span><br><span class="line">	block, err := aes.NewCipher(key)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. 创建分组为链接模式, 底层使用AES的解密模型对象</span></span><br><span class="line">	blockMode := cipher.NewCBCDecrypter(block, key[:block.BlockSize()])</span><br><span class="line">	<span class="comment">// 3. 解密</span></span><br><span class="line">	dst := src</span><br><span class="line">	blockMode.CryptBlocks(dst, src)</span><br><span class="line">	<span class="comment">// 4. 去掉尾部填充的字</span></span><br><span class="line">	dst = PKCS5UnPadding(dst)</span><br><span class="line">	<span class="keyword">return</span> dst</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重要的函数说明:</p>
-<ol>
-<li><p>生成一个底层使用AES加/解密的Block接口对象</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/aes&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCipher</span><span class="params">(key []<span class="keyword">byte</span>)</span> <span class="params">(cipher.Block, error)</span></span></span><br><span class="line">	- 参数 key: aes对称加密使用的密码, 密码长度为<span class="number">128</span>bit, 即<span class="number">16</span><span class="keyword">byte</span></span><br><span class="line">	- 返回值 cipher.Block: 创建出的使用AES加/解密的Block接口对象</span><br></pre></td></tr></table></figure></li>
-<li><p>创建一个密码分组为CBC模式, 底层使用b加密的BlockMode接口对象</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCBCEncrypter</span><span class="params">(b Block, iv []<span class="keyword">byte</span>)</span> <span class="title">BlockMode</span></span></span><br><span class="line">    - 参数 b: 使用aes.NewCipher函数创建出的Block接口对象</span><br><span class="line">    - 参数 iv: 事先准备好的一个长度为一个分组长度的比特序列, 每个分组为<span class="number">64</span>bit, 即<span class="number">8</span><span class="keyword">byte</span></span><br><span class="line">    - 返回值: 得到的BlockMode接口对象</span><br></pre></td></tr></table></figure></li>
-<li><p>使用cipher包的BlockMode接口对象对数据进行加/解密</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">接口对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="keyword">type</span> BlockMode <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// 返回加密字节块的大小</span></span><br><span class="line">    BlockSize() <span class="keyword">int</span></span><br><span class="line">    <span class="comment">// 加密或解密连续的数据块，src的尺寸必须是块大小的整数倍，src和dst可指向同一内存地址</span></span><br><span class="line">    CryptBlocks(dst, src []<span class="keyword">byte</span>)</span><br><span class="line">&#125;</span><br><span class="line">接口中的 CryptBlocks(dst, src []<span class="keyword">byte</span>) 方法:</span><br><span class="line">    - 参数 dst: 传出参数, 存储加密或解密运算之后的结果 </span><br><span class="line">    - 参数 src: 传入参数, 需要进行加密或解密的数据切片(字符串)</span><br></pre></td></tr></table></figure></li>
-<li><p>创建一个密码分组为CBC模式, 底层使用b解密的BlockMode接口对象</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">函数对应的包: <span class="keyword">import</span> <span class="string">&quot;crypto/cipher&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCBCDecrypter</span><span class="params">(b Block, iv []<span class="keyword">byte</span>)</span> <span class="title">BlockMode</span></span></span><br><span class="line">    - 参数 b: 使用des.NewCipher函数创建出的Block接口对象</span><br><span class="line">    - 参数 iv: 事先准备好的一个长度为一个分组长度的比特序列, 每个分组为<span class="number">128</span>bit, 即<span class="number">16</span><span class="keyword">byte</span>, </span><br><span class="line">               该序列的值需要和NewCBCEncrypter函数的第二个参数iv值相同</span><br><span class="line">    - 返回值: 得到的BlockMode接口对象</span><br></pre></td></tr></table></figure>
-
-<h2 id="应选择哪种对称加密"><a href="#应选择哪种对称加密" class="headerlink" title="应选择哪种对称加密"></a>应选择哪种对称加密</h2><blockquote>
-<p>前面我们介绍了DES、三重DES和AES等对称密码，那么我们到底应该使用哪一种对称密码算法呢？</p>
-<ol>
-<li><strong>今后最好不要将DES用于新的用途，因为随着计算机技术的进步，现在用暴力破解法已经能够在现实的时间内完成对DES的破译。但是，在某些情况下也需要保持与旧版本软件的兼容性。</strong></li>
-<li><strong>出于兼容性的因素三重DES在今后还会使用一段时间，但会逐渐被AES所取代。</strong></li>
-<li><strong>今后大家应该使用的算法是AES（Rijndael），因为它安全、快速，而且能够在各种平台上工作。此外，由于全世界的密码学家都在对AES进行不断的验证，因此即便万一发现它有什么缺陷，也会立刻告知全世界并修复这些缺陷。</strong></li>
-</ol>
-<p>一般来说，我们不应该使用任何自制的密码算法，而是应该使用AES。因为AES在其选定过程中，经过了全世界密码学家所进行的高品质的验证工作，而对于自制的密码算法则很难进行这样的验证。 </p>
-</blockquote>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">分组密码的模式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-17 10:45:08 / 修改時間：11:38:12" itemprop="dateCreated datePublished" datetime="2021-08-17T10:45:08+08:00">2021-08-17</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;分组密码的模式 -- 分组密码是如何迭代的&quot;</span></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>DES和AES都属于分组密码，只能加密固定长度的明文。如果需要加密任意长度的明文，就需要对分组密码进行迭代，而分组密码的迭代方法就称为分组密码的“模式”。</p>
-<p>分组密码有很多种模式，如果模式的选择不恰当，就无法保证机密性。例如，如果使用ECB模式，明文中的一些规律就可以通过密文被识别出来。</p>
-<p>分组密码的主要模式（ECB、CBC、CFB、OFB、CTR）</p>
-</blockquote>
-<h2 id="分组密码"><a href="#分组密码" class="headerlink" title="分组密码"></a>分组密码</h2><blockquote>
-<p><strong>分组密码（blockcipher）</strong>是每次只能处理特定长度的一块数据的一类密码算法，这里的一块”就称为分组（block）。此外，一个分组的比特数就称为分组长度（blocklength）。</p>
-<p>例如，<strong>DES和三重DES的分组长度都是64比特</strong>。这些密码算法一次只能加密64比特的明文．并生成64比特的密文。</p>
-<p><strong>AES的分组长度可以从128比特、192比特和256比特中进行选择。当选择128比特的分组长度时，AES一次可加密128比特的明文，并生成128比特的密文。</strong></p>
-</blockquote>
-<h2 id="模式"><a href="#模式" class="headerlink" title="模式"></a>模式</h2><blockquote>
-<p><strong>分组密码算法只能加密固定长度的分组，但是我们需要加密的明文长度可能会超过分组密码的分组长度，这时就需要对分组密码算法进行迭代，以便将一段很长的明文全部加密。而迭代的方法就称为分组密码的模式（mode）</strong>。</p>
-</blockquote>
-<blockquote>
-<p>模式有很多种类，分组密码的主要模式有以下5种：</p>
-<ul>
-<li><strong>ECB模式</strong>：Electronic Code Book mode（电子密码本模式）</li>
-<li><strong>CBC模式</strong>：Cipher Block Chaining mode（密码分组链接模式）</li>
-<li><strong>CFB模式</strong>：Cipher FeedBack mode（密文反馈模式）</li>
-<li><strong>OFB模式</strong>：Output FeedBack mode（输出反馈模式）</li>
-<li><strong>CTR模式</strong>：CounTeR mode（计数器模式）</li>
-</ul>
-</blockquote>
-<h3 id="明文分组和密文分组"><a href="#明文分组和密文分组" class="headerlink" title="明文分组和密文分组"></a>明文分组和密文分组</h3><blockquote>
-<p>**明文分组: **是指分组密码算法中作为加密对象的明文。明文分组的长度与分组密码算法的分组长度是相等的。</p>
-<p>**密文分组: **是指使用分组密码算法将明文分组加密之后所生成的密文。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817105748588.png" alt="image-20210817105748588" style="zoom:67%;">
-
-<h2 id="ECB-模式"><a href="#ECB-模式" class="headerlink" title="ECB 模式"></a>ECB 模式</h2><p>ECB(Electronic Code Book, 电子密码本)模式是最简单的加密模式，<font color="red">明文消息被分成固定大小的块（分组），并且每个块被单独加密。</font>  每个块的加密和解密都是独立的，且使用相同的方法进行加密，所以可以进行并行计算，但是这种方法一旦有一个块被破解，使用相同的方法可以解密所有的明文数据，<font color="red">安全性比较差。  适用于数据较少的情形，加密前需要把明文数据填充到块大小的整倍数。</font></p>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817105913728.png" alt="image-20210817105913728 " style="zoom:67%;">
-
-<blockquote>
-<p>使用ECB模式加密时，相同的明文分组会被转换为相同的密文分组，也就是说，我们可以将其理解为是一个巨大的“明文分组–&gt;密文分组”的对应表，因此ECB模式也称为电子密码本模式<strong>当最后一个明文分组的内容小于分组长度时，需要用一特定的数据进行填充（padding），让值一个分组长度等于分组长度</strong>。</p>
-<p>ECB模式是所有模式中最简单的一种。ECB模式中，明文分组与密文分组是一一对应的关系，因此，如果明文中存在多个相同的明文分组，则这些明文分组最终都将被转换为相同的密文分组。这样一来，只要观察一下密文，就可以知道明文中存在怎样的重复组合，并可以以此为线索来破译密码，因此ECB模式是存在一定风险的。</p>
-</blockquote>
-<h2 id="CBC模式"><a href="#CBC模式" class="headerlink" title="CBC模式"></a>CBC模式</h2><h3 id="XOR"><a href="#XOR" class="headerlink" title="XOR"></a>XOR</h3><blockquote>
-<p>异或操作： </p>
-<p>1$\bigoplus$0=1  </p>
-<p>0$\bigoplus$1=1</p>
-<p>1$\bigoplus$1=0 </p>
-<p>0$\bigoplus$0=0</p>
-</blockquote>
-<center><img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110350744.png" alt="image-20210817110350744" style="zoom:80%;"><img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110416665.png" alt="image-20210817110416665" style="zoom:80%;"></center>
-
-<blockquote>
-<p>可能大家已经发现了，上面的计算和加密、解密的步骤非常相似。</p>
-<ul>
-<li><p>将明文A用密钥B进行加密，得到密文A⊕B</p>
-</li>
-<li><p>将密文A⊕B用密钥B进行解密，得到明文A</p>
-</li>
-</ul>
-<p>实际上，只要选择一个合适的B，仅仅使用XOR就可以实现一个高强度的密码。</p>
-<p>对同一个比特序列进行两次XOR之后就会回到最初的状态。</p>
-</blockquote>
-<h3 id="CBC"><a href="#CBC" class="headerlink" title="CBC"></a>CBC</h3><blockquote>
-<p>CBC(Cipher Block Chaining, 密码块链)<font color="red">模式中每一个分组要先和前一个分组加密后的数据进行XOR异或操作，然后再进行加密</font>。  这样每个密文块依赖该块之前的所有明文块，为了保持每条消息都具有唯一性，<font color="red">第一个数据块进行加密之前需要用初始化向量IV进行异或操作</font>。  <font color="red">CBC模式是一种最常用的加密模式，它主要缺点是加密是连续的，不能并行处理，并且与ECB一样消息块必须填充到块大小的整倍数。</font></p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110639241.png" alt="image-20210817110639241" style="zoom:67%;">
-
-<blockquote>
-<p> 如果将一个分组的加密过程分离出来，我们就可以很容易地比较出ECB模式和CBC模式的区别 。ECB模式只进行了加密，而CBC模式则在加密之前进行了一次XOR。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817110715286.png" alt="image-20210817110715286" style="zoom:50%;">
-
-<h3 id="初始化向量"><a href="#初始化向量" class="headerlink" title="初始化向量"></a>初始化向量</h3><blockquote>
-<p><strong>当加密第一个明文分组时，由于不存在“前一个密文分组”，因此<font color="red">需要事先准备一个长度为一个分组的比特序列来代替“前一个密文分组</font>“，这个比特序列称为初始化向量（initialization vector）</strong> 通常缩写为 IV </p>
-</blockquote>
-<h2 id="CFB-模式"><a href="#CFB-模式" class="headerlink" title="CFB 模式"></a>CFB 模式</h2><blockquote>
-<p>CFB模式的全称是Cipher FeedBack模式（密文反馈模式）。在CFB模式中，<font color="red">前一个分组的密文加密后和当前分组的明文XOR异或操作生成当前分组的密文</font>。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111048158.png" alt="image-20210817111048158" style="zoom:67%;">
-
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111109864.png" alt="image-20210817111109864" style="zoom:67%;">
-
-<blockquote>
-<p>在ECB模式和CBC模式中，明文分组都是通过密码算法进行加密的，然而，在CFB模式中，明文分组并没有通过密码算法来直接进行加密。</p>
-<p>从上图可以看出，明文分组和密文分组之间并没有经过”加密”这一步骤。在CFB模式中，明文分和密文分组之间只有一个XOR。</p>
-<p>我们将CBC模式与CFB模式对比一下，就可以看出其中的差异了（如下图）。在CBC模式中，明文分组和密文分组之间有XOR和密码算法两个步骤，而在CFB模式中，明文分组和密文分组之间则只有XOR。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111235512.png" alt="image-20210817111235512" style="zoom:50%;">
-
-<h3 id="初始化向量-1"><a href="#初始化向量-1" class="headerlink" title="初始化向量"></a>初始化向量</h3><blockquote>
-<p><font color="red">在生成第一个密文分组时，由于不存在前一个输出的数据，因此需要使用初始化向量（IV）来代替</font>，这一点和CBC模式是相同的。一般来说，我们需要在每次加密时生成一个不同的随机比特序列用作初始化向量。</p>
-</blockquote>
-<h3 id="CFB模式与流密码"><a href="#CFB模式与流密码" class="headerlink" title="CFB模式与流密码"></a>CFB模式与流密码</h3><blockquote>
-<p>CFB模式是通过将“明文分组”与“密码算法的输出”进行XOR运算来生成“密文分组”的。</p>
-<p>在CFB模式中，密码算法的输出相当于一个随机比特序列。由于密码算法的输出是通过计算得到的，并不是真正的随机数，因此CFB模式不可能具各理论上不可破译的性质。</p>
-<p><font color="red">CFB模式中由加密算法所生成的比特序列称为密钥流（key stream）</font>。在CFB模式中，密码算法就相当于用来生成密钥流的伪随机数生成器，而初始化向量相当于伪随机数生成器的“种子“。</p>
-<p>在CFB模式中，<font color="red">明文数据可以被逐比特加密</font>，因此我们<font color="red">可以将CFB模式看做是一种使用分组密码来实现流密码的方式</font>。</p>
-</blockquote>
-<h2 id="OFB-模式"><a href="#OFB-模式" class="headerlink" title="OFB 模式"></a>OFB 模式</h2><blockquote>
-<p>OFB模式并不是通过密码算法对明文直接进行加密的，而是通过将 “明文分组” 和 “密码算法的输出” 进行XOR来产生 “密文分组” 的，在这一点上OFB模式和CFB模式非常相似。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817111629522.png" alt="image-20210817111629522" style="zoom:67%;">
-
-<h3 id="初始化向量-2"><a href="#初始化向量-2" class="headerlink" title="初始化向量"></a>初始化向量</h3><blockquote>
-<p>和CBC模式、CFB模式一样，OFB模式中也需要使用初始化向量（IV）。</p>
-</blockquote>
-<h3 id="CFB模式和OFB模式对比"><a href="#CFB模式和OFB模式对比" class="headerlink" title="CFB模式和OFB模式对比"></a>CFB模式和OFB模式对比</h3><blockquote>
-<p>OFB模式和CFB模式的区别仅仅在于密码算法的输入。</p>
-<p>CFB式中，密码算法的输人是前一个密文分组，也就是将密文分组反馈到密算法中，因此就有了“密文反馈模式”这个名字。</p>
-<p>相对地，OFB模式中，密码算法的输入则是密码算法的前一个输出，也就是将输出反馈给密码算法，因此就有了“输出反馈模式”这个名字。</p>
-<p>如果将一个分组抽出来对CFB模式和OFB模式进行一个对比．就可以很容易看出它们之间的差异（下图）。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112004499.png" alt="image-20210817112004499" style="zoom:67%;">
-
-<blockquote>
-<p>由于CFB模式中是对密文分组进行反馈的，因此必须从第一个明文分组开始按顺序进行加密，也就是说无法跳过明文分组1而先对明文分组2进行加密。</p>
-<p>相对地，在OFB模式中，XOR所需要的比特序列（密钥流）可以事先通过密码算法生成，和明文分组无关。只要提前准备好所需的密钥流，则在实际从明文生成密文的过程中，就完全不需要动用密码算法了。只要将明文与密钥流进行XOR就可以了。和AES等密码算法相比，XOR运算的速度是非常快的。这就意味着只要提前准备好密钥流就可以快速完成加密。换个角度来看，生成密钥流的操作和进行XOR运算的操作是可以并行的。</p>
-</blockquote>
-<h2 id="CTR-模式"><a href="#CTR-模式" class="headerlink" title="CTR 模式"></a>CTR 模式</h2><blockquote>
-<p>CTR模式的全称是CounTeR模式（计数器模式）。<font color="red">CTR摸式是一种通过将逐次累加的计数器进行加密来生成密钥流的流密码</font>（下图）。</p>
-<p>CTR模式中，每个分组对应一个逐次累加的计数器，并通过对计数器进行加密来生成密钥流。也就是说，最终的密文分组是通过将计数器加密得到的比特序列，与明文分组进行XOR而得到的。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112246534.png" alt="image-20210817112246534" style="zoom:50%;">
-
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112306254.png" alt="image-20210817112306254" style="zoom:50%;">
-
-<h3 id="计数器的生成方法"><a href="#计数器的生成方法" class="headerlink" title="计数器的生成方法"></a>计数器的生成方法</h3><blockquote>
-<p>每次加密时都会生成一个不同的值（nonce）来作为计数器的初始值。当分组长度为128比特（16字节）时，计数器的初始值可能是像下面这样的形式。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112459058.png" alt="image-20210817112459058" style="zoom:80%;">
-
-<blockquote>
-<p>其中前8个字节为nonce（随机数），这个值在每次加密时必须都是不同的，后8个字节为分组序号，这个部分是会逐次累加的。在加密的过程中，计数器的值会产生如下变化：</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112557257.png" alt="image-20210817112557257" style="zoom:80%;">
-
-<blockquote>
-<p>按照上述生成方法，可以保证计数器的值每次都不同。由于计数器的值每次都不同，因此每个分组中将计数器进行加密所得到的密钥流也是不同的。也是说，这种方法就是用分组密码来模拟生成随机的比特序列。</p>
-</blockquote>
-<h3 id="OFB模式与CTR模式对比"><a href="#OFB模式与CTR模式对比" class="headerlink" title="OFB模式与CTR模式对比"></a>OFB模式与CTR模式对比</h3><blockquote>
-<p>CTR模式和OFB模式一样，都属于流密码。如果我们将单个分组的加密过程拿出来，那么OFB模式和CTR模式之间的差异还是很容易理解的（下图）。OFB模式是将加密的输出反愦到输入，而CTR模式则是将计数器的值用作输入。</p>
-</blockquote>
-<img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112653539.png" alt="image-20210817112653539" style="zoom:67%;">
-
-<h3 id="CTR模式的特点"><a href="#CTR模式的特点" class="headerlink" title="CTR模式的特点"></a>CTR模式的特点</h3><blockquote>
-<p>CTR模式的加密和解密使用了完全相同的结构，因此在程序实现上比较容易。这一特点和同为流密码的OFB模式是一样的。</p>
-<p>此外，CTR模式中可以以任意顺序对分组进行加密和解密，因此在加密和解密时需要用到的“计数器”的值可以由nonce和分组序号直接计算出来。这一性质是OFB模式所不具备的。</p>
-<p>能够以任意顺序处理分组，就意味着能够实现并行计算。在支持并行计算的系统中，CTR模式的速度是非常快的。</p>
-</blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><img src="/2021/08/17/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E7%9A%84%E6%A8%A1%E5%BC%8F/image-20210817112810129.png" alt="image-20210817112810129 " style="zoom:80%;">
-
-<ol>
-<li><p>ECB - Electronic Code Book, 电子密码本模式</p>
-<ul>
-<li>特点: 简单, 效率高, 密文有规律, 容易被破解</li>
-<li>最后一个明文分组必须要填充<ul>
-<li>des/3des -&gt; 最后一个分组填充满8字节</li>
-<li>aes -&gt; 最后一个分组填充满16字节</li>
-</ul>
-</li>
-<li>不需要初始化向量</li>
-</ul>
-</li>
-<li><p>CBC - Cipher Block Chaining, 密码块链模式</p>
-<ul>
-<li>特点: 密文没有规律, 经常使用的加密方式</li>
-<li>最后一个明文分组需要填充<ul>
-<li>des/3des -&gt; 最后一个分组填充满8字节</li>
-<li>aes -&gt; 最后一个分组填充满16字节</li>
-</ul>
-</li>
-<li>需要一个初始化向量 - 一个数组<ul>
-<li>数组的长度: 与明文分组相等</li>
-<li>数据来源: 负责加密的人的提供的</li>
-<li>加解密使用的初始化向量值必须相同</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>CFB - Cipher FeedBack, 密文反馈模式</p>
-<ul>
-<li>特点: 密文没有规律,  明文分组是和一个数据流进行的按位异或操作, 最终生成了密文</li>
-<li>需要一个初始化向量 - 一个数组<ul>
-<li>数组的长度: 与明文分组相等</li>
-<li>数据来源: 负责加密的人的提供的</li>
-<li>加解密使用的初始化向量值必须相同</li>
-</ul>
-</li>
-<li>不需要填充</li>
-</ul>
-</li>
-<li><p>OFB - Output-Feedback, 输出反馈模式</p>
-<ul>
-<li>特点: 密文没有规律,  明文分组是和一个数据流进行的按位异或操作, 最终生成了密文</li>
-<li>需要一个初始化向量 - 一个数组<ul>
-<li>数组的长度: 与明文分组相等</li>
-<li>数据来源: 负责加密的人的提供的</li>
-<li>加解密使用的初始化向量值必须相同</li>
-</ul>
-</li>
-<li>不需要填充</li>
-</ul>
-</li>
-<li><p>CTR - CounTeR, 计数器模式</p>
-<ul>
-<li>特点: 密文没有规律,  明文分组是和一个数据流进行的按位异或操作, 最终生成了密文</li>
-<li>不需要初始化向量<ul>
-<li>go接口中的iv可以理解为随机数种子, iv的长度 == 明文分组的长度</li>
-</ul>
-</li>
-<li>不需要填充</li>
-</ul>
-</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/" class="post-title-link" itemprop="url">对称加密</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-
-      <time title="創建時間：2021-08-16 22:33:06" itemprop="dateCreated datePublished" datetime="2021-08-16T22:33:06+08:00">2021-08-16</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新於</span>
-        <time title="修改時間：2021-08-17 10:50:01" itemprop="dateModified" datetime="2021-08-17T10:50:01+08:00">2021-08-17</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h1><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><ol>
-<li><p>常用的两种加密方式 </p>
-<p>对称加密</p>
-<ul>
-<li>秘钥: 加密解密使用的是同一个秘钥, 秘钥有一个</li>
-<li>特点<ul>
-<li>双方向保证机密性</li>
-<li>加密效率高, 适合加密大数据, 大文件</li>
-<li>加密强度不高, 相对于非对称加密</li>
-</ul>
-</li>
-</ul>
-<p>非对称加密</p>
-<ul>
-<li>秘钥: 加密解密使用的不同的秘钥, 秘钥有两个, 需要使用秘钥生成算法, 得到密钥对<ul>
-<li>公钥 - 可以公开的秘钥<ul>
-<li>公钥加密数据, 解密需要使用私钥</li>
-</ul>
-</li>
-<li>私钥 - 需要妥善保管的秘钥, 知道的人越少越好<ul>
-<li>私钥加密, 公钥解密</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>特点:<ul>
-<li>数据的机密性只能单方向保证</li>
-<li>加密效率低, 适合加密少量数据</li>
-<li>加密强度高, 相对于对称加密</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>密码信息安全常识 </p>
-<ul>
-<li><p>不要使用保密的密码算法（普通公司和个人）</p>
-</li>
-<li><p>使用低强度的密码比不进行任何加密更危险</p>
-</li>
-<li><p>任何密码总有一天都会被破解</p>
-</li>
-<li><p>密码只是信息安全的一部分                </p>
-</li>
-</ul>
-</li>
-<li><p>密码信息威胁 </p>
-<img src="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210816230646529.png" alt="image-20210816230646529" style="zoom:70%;"></li>
-</ol>
-<h2 id="对称加密-1"><a href="#对称加密-1" class="headerlink" title="对称加密"></a>对称加密</h2><blockquote>
-<p>“对称加密: 也称为对称密码, 是指在加密和解码时使用同一秘钥的加密方式”</p>
-</blockquote>
-<img src="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210816231137633.png" alt="image-20210816231137633" style="zoom:50%;">
-
-<h3 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h3><blockquote>
-<p>现代的密码都是建立在计算机的基础之上的，这是因为现代的密码所处理的数据量非常大，而且密码算法也非常复杂，不借助计算机的力量就无法完成加密和解密的操作。</p>
-<p>计算机的操作对象并不是文字，而是由0和1排列而成的<strong>比特序列</strong>。无论是文字、图像、声音、视频还是程序，在计算机中都是用比特序列来表示的。执行加密操作的程序，就是将表示明文的比特序列转换为表示密文的比特序列。</p>
-<p>将现实世界中的东西映射为比特序列的操作称为<strong>编码（encoding）</strong>。例如midnight（深夜）这个词，我们可以对其中的每个字母逐一进行编码，这种编码规则叫作<strong>ASCII</strong>。</p>
-</blockquote>
-<img src="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210816231349119.png" alt="image-20210816231349119" style="zoom:67%;">
-
-<blockquote>
-<p>注意这里的m –&gt; 01101101这一转换并不是加密而是编码。尽管在人类看来0和1的序列跟密码没什么两样，但计算机却可以“看懂”这些比特序列，并很快地反应出其所对应的字符 <strong>midnight</strong></p>
-</blockquote>
-<h3 id="DES"><a href="#DES" class="headerlink" title="DES"></a>DES</h3><h4 id="加密和解密"><a href="#加密和解密" class="headerlink" title="加密和解密"></a>加密和解密</h4><blockquote>
-<p>DES是一种将64比特的明文加密成64比特的密文的对称密码算法，==它的密钥长度是56比特==。尽管<font color="red">从规格上来说，DES的密钥长度是64比特，但由于每隔7比特会设置一个用于错误检查的比特，因此实质上其密钥长度是56比特</font>。</p>
-<p><font color="red">DES是以64比特的明文（比特序列）为一个单位来进行加密的</font>，<strong>这个64比特的单位称为分组</strong>。一般来说，以分组为单位进行处理的密码算法称为<strong>分组密码（blockcipher）</strong>，DES就是分组密码的一种。</p>
-<p>DES每次只能加密64比特的数据，如果要加密的明文比较长，就需要对DES加密进行迭代（反复），而迭代的具体方式就称为模式（mode）。</p>
-<p>大B -&gt; bit</p>
-<p>小b -&gt; byte</p>
-<p>秘钥长度(56bit + 8bit)/8 = 8byte   12345678</p>
-</blockquote>
-<h4 id="DES的加密与解密-图例"><a href="#DES的加密与解密-图例" class="headerlink" title="DES的加密与解密 - 图例"></a>DES的加密与解密 - 图例</h4><img src="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210816231818006.png" alt="image-20210816231818006" style="zoom:80%;">
-
-<h4 id="DES小结"><a href="#DES小结" class="headerlink" title="DES小结"></a>DES小结</h4><ul>
-<li>现在使用DES方式加密，数据还安全吗？<ul>
-<li>不安全, 已经被破解了  </li>
-</ul>
-</li>
-<li>是不是分组密码？<ul>
-<li>是, 先对数据进行分组, 然后在加密或解密</li>
-</ul>
-</li>
-<li>DES的分组长度?<ul>
-<li>8byte == 64bit</li>
-</ul>
-</li>
-<li>DES的秘钥长度?<ul>
-<li>56bit秘钥长度+8bit错误检测标志位 = 64bit == 8byte</li>
-</ul>
-</li>
-</ul>
-<h3 id="3DES-–-Triple-DES"><a href="#3DES-–-Triple-DES" class="headerlink" title="3DES  –   Triple-DES"></a>3DES  –   Triple-DES</h3><blockquote>
-<p>现在DES已经可以在现实的时间内被暴力破解，因此我们需要一种用来替代DES的分组密码，三重DES就是出于这个目的被开发出来的。</p>
-<p><strong>三重DES（triple-DES）是为了增加DES的强度，==将DES重复3次所得到的一种密码算法==，通常缩写为3DES</strong>。</p>
-</blockquote>
-<h4 id="加密和解密-1"><a href="#加密和解密-1" class="headerlink" title="加密和解密"></a>加密和解密</h4><blockquote>
-<p>三重DES的加解密机制如图所示：</p>
-<p>加-&gt;解-&gt;加 -&gt; 目的是为了兼容des</p>
-<p>3des秘钥长度24字节 = 1234567a 1234567b 1234567a</p>
-</blockquote>
-<center><img src="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210817102851239.png" alt="image-20210817102851239" style="zoom:50%;">!<img src="/2021/08/16/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210817102916694.png" alt="image-20210817102916694 " style="zoom:50%;"></center>
-
-<blockquote>
-<p>明文经过三次DES处理才能变成最后的密文，由于<strong>DES密钥的长度实质上是56比特</strong>，因此<font color="red">三重DES的密钥长度就是56×3=168比特, 加上用于错误检测的标志位8x3, 共192bit</font>。</p>
-<p>从上图我们可以发现，三重DES并不是进行三次DES加密（加密–&gt;加密–&gt;加密），而是<font color="red"><strong>加密–&gt;解密–&gt;加密</strong></font>的过程。在加密算法中加人解密操作让人感觉很不可思议，实际上这个方法是IBM公司设计出来的，目的是为了让三重DES能够兼容普通的DES。</p>
-<p><font color="red">当三重DES中所有的密钥都相同时，三重DES也就等同于普通的DES了</font>。这是因为在前两步加密–&gt;解密之后，得到的就是最初的明文。因此，以前用DES加密的密文，就可以通过这种方式用三重DES来进行解密。也就是说，三重DES对DES具备向下兼容性。</p>
-<p>如果密钥1和密钥3使用相同的密钥，而密钥2使用不同的密钥（也就是只使用两个DES密钥），这种三重DES就称为DES-EDE2。EDE表示的是加密（Encryption) –&gt;解密（Decryption)–&gt;加密（Encryption）这个流程。</p>
-<p>密钥1、密钥2、密钥3全部使用不同的比特序列的三重DES称为DES-EDE3。</p>
-<p>尽管三重DES目前还被银行等机构使用，但其处理速度不高，而且在安全性方面也逐渐显现出了一些问题。</p>
-</blockquote>
-<h4 id="3DES小结"><a href="#3DES小结" class="headerlink" title="3DES小结"></a>3DES小结</h4><ul>
-<li>3DES安全吗?<ul>
-<li>安全, 但是效率低</li>
-</ul>
-</li>
-<li>算法描述?<ul>
-<li>进行了3次des加密</li>
-</ul>
-</li>
-<li>是不是分组密码?<ul>
-<li>是</li>
-</ul>
-</li>
-<li>3DES分组长度?<ul>
-<li>8字节</li>
-</ul>
-</li>
-<li>3DES秘钥长度?<ul>
-<li>24字节, 在算法内部会被平均分成3份</li>
-</ul>
-</li>
-<li>3DES加密过程?<ul>
-<li>秘钥1 -&gt; 加密, 秘钥2 -&gt; 解密, 秘钥3 -&gt; 加密</li>
-</ul>
-</li>
-<li>3DES解密过程?<ul>
-<li>秘钥1 -&gt; 解密, 秘钥2 -&gt; 加密, 秘钥3 -&gt; 解密</li>
-</ul>
-</li>
-</ul>
-<h3 id="AES"><a href="#AES" class="headerlink" title="AES"></a>AES</h3><blockquote>
-<p>AES（Advanced Encryption Standard）是取代其前任标准（DES）而成为新标准的一种对称密码算法。全世界的企业和密码学家提交了多个对称密码算法作为AES的候选，最终在2000年从这些候选算法中选出了一种名为==<strong>Rijndael</strong>==的对称密码算法，并将其确定为了AES。</p>
-</blockquote>
-<blockquote>
-<p>**==Rijndael的分组长度为128比特==**，密钥长度可以以32比特为单位在128比特到256比特的范围内进行选择（不过==<strong>在AES的规格中，密钥长度只有128、192和256比特三种</strong>==）。</p>
-<p>128bit = 16字节</p>
-<p>192bit = 24字节</p>
-<p>256bit = 32字节</p>
-<p>在go提供的接口中秘钥长度只能是16字节</p>
-</blockquote>
-<h4 id="AES小结"><a href="#AES小结" class="headerlink" title="AES小结"></a>AES小结</h4><ul>
-<li>AES安全吗?<ul>
-<li>安全, 效率高, 推荐使用的</li>
-</ul>
-</li>
-<li>是不是分组密码?<ul>
-<li>是</li>
-</ul>
-</li>
-<li>AES分组长度?<ul>
-<li>128bit = 16字节</li>
-</ul>
-</li>
-<li>AES秘钥长度?<ul>
-<li>128bit = 16字节</li>
-<li>192bit = 24字节</li>
-<li>256bit = 32字节</li>
-<li>go中的秘钥长度只能是16字节</li>
-</ul>
-</li>
-</ul>
-
       
     </div>
 
