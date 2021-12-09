@@ -4184,7 +4184,10 @@ UNIX系统大部分是由C语言编写的。</li>
 </ol>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回局部变量引用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span>&amp; <span class="title">test01</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>; <span class="comment">//局部变量</span></span><br><span class="line">	<span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//返回静态变量引用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span>&amp; <span class="title">test02</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">int</span> a = <span class="number">20</span>;</span><br><span class="line">	<span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="comment">//不能返回局部变量的引用</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref = <span class="built_in">test01</span>();</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref = &quot;</span> &lt;&lt; ref &lt;&lt; endl;  <span class="comment">// ref = 10</span></span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref = &quot;</span> &lt;&lt; ref &lt;&lt; endl;  <span class="comment">// ref = 1479064544  此处会出现错误，避免该错误不要返回局部变量的引用。  因为局部变量保存在栈区，函数结束，内存也就释放了</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//如果函数做左值，那么必须返回引用</span></span><br><span class="line">    <span class="comment">// 局部静态变量保存在全局区，不会随着函数结束而内存释放，所以不会出现上述问题。</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref2 = <span class="built_in">test02</span>();  </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;   </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	<span class="built_in">test02</span>() = <span class="number">1000</span>;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-
+<ol start="2">
+<li>c++继承方式</li>
+</ol>
+<img src="/2021/11/06/c-%E6%B3%A8%E6%84%8F%E7%82%B9/image-20211107091913409.png" alt="image-20211107091913409 " style="zoom:50%;"> 
 
 
 
@@ -4195,5 +4198,51 @@ UNIX系统大部分是由C语言编写的。</li>
       <tags>
         <tag>C++</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>goNote01</title>
+    <url>/2021/11/20/goNote01/</url>
+    <content><![CDATA[<h3 id="gofmt-格式化命令"><a href="#gofmt-格式化命令" class="headerlink" title="gofmt 格式化命令"></a>gofmt 格式化命令</h3><img src="/2021/11/20/goNote01/image-20211120101130947.png" alt="image-20211120101130947" style="zoom:80%;">
+
+<h3 id="Golang-环境变量配置及其作用"><a href="#Golang-环境变量配置及其作用" class="headerlink" title="Golang 环境变量配置及其作用"></a>Golang 环境变量配置及其作用</h3><p>GOROOT: 指定 go sdk 安装目录。<br>Path: 指令 sdk\bin 目录：go.exe godoc.exe gofmt.exe<br>GOPATH: 就是 golang 工作目录：我们的所有项目的源码都这个目录下。</p>
+<img src="/2021/11/20/goNote01/image-20211120211125271.png" alt="image-20211120211125271" style="zoom:80%;">
+
+<p>go语言总值类型包括：基本数据类型 int 系列, float 系列, bool, string 、数组和 结构体 struct</p>
+<p>引用类型：指针、slice 切片、map、管道 chan、interface 等都是引用类型</p>
+<h3 id="值类型和引用类型的使用特点"><a href="#值类型和引用类型的使用特点" class="headerlink" title="值类型和引用类型的使用特点"></a>值类型和引用类型的使用特点</h3><ol>
+<li>值类型：变量直接存储值，内存通常在栈中分配<br>示意图：</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211120225507401.png" alt="image-20211120225507401" style="zoom:80%;">
+
+<ol start="2">
+<li>引用类型：变量存储的是一个地址，这个地址对应的空间才真正存储数据(值)，内存通常在堆<br>上分配，当没有任何变量引用这个地址时，该地址对应的数据空间就成为一个垃圾，由 GC 来回收</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211120225539343.png" alt="image-20211120225539343" style="zoom:80%;">
+
+<p>如果变量名、函数名、常量名首字母大写，则可以被其他的包访问；如果首字母小写，则只能<br>在本包中使用 ( 注：可以简单的理解成， 首字母大写是公开的， 首字母小写是私有的) ,在 golang 没 有<br>public , private 等关键字。</p>
+<p>Type Switch：switch 语句还可以被用于 type-switch 来判断某个 interface 变量中实际指向的<br>变量类型</p>
+<img src="/2021/11/20/goNote01/image-20211121124942312.png" alt="image-20211121124942312" style="zoom:80%;">
+
+<p>如果我们的字符串含有中文，那么传统的遍历字符串方式，就是错误，会出现乱码。原因是传统的<br>对字符串的遍历是按照 字节来遍历，而一个汉字在 utf8 编码是对应 3 个字节。</p>
+<p>如何解决 需要要将 str 转成 []rune 切片.=&gt; 体验一把</p>
+<img src="/2021/11/20/goNote01/image-20211121131133556.png" alt="image-20211121131133556" style="zoom:80%;">
+
+<p>对应 for-range 遍历方式而言，是按照字符方式遍历。因此如果有字符串有中文，也是 ok</p>
+<img src="/2021/11/20/goNote01/image-20211121131146498.png" alt="image-20211121131146498" style="zoom:80%;">
+
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><img src="/2021/11/20/goNote01/image-20211121212757065.png" alt="image-20211121212757065" style="zoom:80%;">
+
+<h3 id="自定义错误"><a href="#自定义错误" class="headerlink" title="自定义错误"></a>自定义错误</h3><p>Go 程序中，也支持自定义错误， 使用 errors.New 和 panic 内置函数。</p>
+<ol>
+<li>errors.New(“错误说明”) , 会返回一个 error 类型的值，表示一个错误</li>
+<li>panic 内置函数 ,接收一个 interface{}类型的值（也就是任何值了）作为参数。可以接收 error 类<br>型的变量， 输出错误信息，</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211121213410011.png" alt="image-20211121213410011" style="zoom:80%;">
+
+<p>如果使用 netstat –an 可以查看本机有哪些端口在监听</p>
+]]></content>
+      <categories>
+        <category>Golang</category>
+      </categories>
   </entry>
 </search>

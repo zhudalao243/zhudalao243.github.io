@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-count">36</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -209,6 +209,123 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/11/20/goNote01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/11/20/goNote01/" class="post-title-link" itemprop="url">goNote01</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+
+      <time title="創建時間：2021-11-20 10:09:44" itemprop="dateCreated datePublished" datetime="2021-11-20T10:09:44+08:00">2021-11-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新於</span>
+        <time title="修改時間：2021-11-24 15:20:55" itemprop="dateModified" datetime="2021-11-24T15:20:55+08:00">2021-11-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="gofmt-格式化命令"><a href="#gofmt-格式化命令" class="headerlink" title="gofmt 格式化命令"></a>gofmt 格式化命令</h3><img src="/2021/11/20/goNote01/image-20211120101130947.png" alt="image-20211120101130947" style="zoom:80%;">
+
+<h3 id="Golang-环境变量配置及其作用"><a href="#Golang-环境变量配置及其作用" class="headerlink" title="Golang 环境变量配置及其作用"></a>Golang 环境变量配置及其作用</h3><p>GOROOT: 指定 go sdk 安装目录。<br>Path: 指令 sdk\bin 目录：go.exe godoc.exe gofmt.exe<br>GOPATH: 就是 golang 工作目录：我们的所有项目的源码都这个目录下。</p>
+<img src="/2021/11/20/goNote01/image-20211120211125271.png" alt="image-20211120211125271" style="zoom:80%;">
+
+<p>go语言总值类型包括：基本数据类型 int 系列, float 系列, bool, string 、数组和 结构体 struct</p>
+<p>引用类型：指针、slice 切片、map、管道 chan、interface 等都是引用类型</p>
+<h3 id="值类型和引用类型的使用特点"><a href="#值类型和引用类型的使用特点" class="headerlink" title="值类型和引用类型的使用特点"></a>值类型和引用类型的使用特点</h3><ol>
+<li>值类型：变量直接存储值，内存通常在栈中分配<br>示意图：</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211120225507401.png" alt="image-20211120225507401" style="zoom:80%;">
+
+<ol start="2">
+<li>引用类型：变量存储的是一个地址，这个地址对应的空间才真正存储数据(值)，内存通常在堆<br>上分配，当没有任何变量引用这个地址时，该地址对应的数据空间就成为一个垃圾，由 GC 来回收</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211120225539343.png" alt="image-20211120225539343" style="zoom:80%;">
+
+<p>如果变量名、函数名、常量名首字母大写，则可以被其他的包访问；如果首字母小写，则只能<br>在本包中使用 ( 注：可以简单的理解成， 首字母大写是公开的， 首字母小写是私有的) ,在 golang 没 有<br>public , private 等关键字。</p>
+<p>Type Switch：switch 语句还可以被用于 type-switch 来判断某个 interface 变量中实际指向的<br>变量类型</p>
+<img src="/2021/11/20/goNote01/image-20211121124942312.png" alt="image-20211121124942312" style="zoom:80%;">
+
+<p>如果我们的字符串含有中文，那么传统的遍历字符串方式，就是错误，会出现乱码。原因是传统的<br>对字符串的遍历是按照 字节来遍历，而一个汉字在 utf8 编码是对应 3 个字节。</p>
+<p>如何解决 需要要将 str 转成 []rune 切片.=&gt; 体验一把</p>
+<img src="/2021/11/20/goNote01/image-20211121131133556.png" alt="image-20211121131133556" style="zoom:80%;">
+
+<p>对应 for-range 遍历方式而言，是按照字符方式遍历。因此如果有字符串有中文，也是 ok</p>
+<img src="/2021/11/20/goNote01/image-20211121131146498.png" alt="image-20211121131146498" style="zoom:80%;">
+
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><img src="/2021/11/20/goNote01/image-20211121212757065.png" alt="image-20211121212757065" style="zoom:80%;">
+
+<h3 id="自定义错误"><a href="#自定义错误" class="headerlink" title="自定义错误"></a>自定义错误</h3><p>Go 程序中，也支持自定义错误， 使用 errors.New 和 panic 内置函数。</p>
+<ol>
+<li>errors.New(“错误说明”) , 会返回一个 error 类型的值，表示一个错误</li>
+<li>panic 内置函数 ,接收一个 interface{}类型的值（也就是任何值了）作为参数。可以接收 error 类<br>型的变量， 输出错误信息，</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211121213410011.png" alt="image-20211121213410011" style="zoom:80%;">
+
+<p>如果使用 netstat –an 可以查看本机有哪些端口在监听</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/11/06/c-%E6%B3%A8%E6%84%8F%E7%82%B9/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -232,10 +349,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">發表於</span>
-      
 
-      <time title="創建時間：2021-11-06 19:42:26 / 修改時間：19:51:09" itemprop="dateCreated datePublished" datetime="2021-11-06T19:42:26+08:00">2021-11-06</time>
+      <time title="創建時間：2021-11-06 19:42:26" itemprop="dateCreated datePublished" datetime="2021-11-06T19:42:26+08:00">2021-11-06</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新於</span>
+        <time title="修改時間：2021-11-07 09:19:39" itemprop="dateModified" datetime="2021-11-07T09:19:39+08:00">2021-11-07</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -261,7 +384,10 @@
 </ol>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//返回局部变量引用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span>&amp; <span class="title">test01</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> a = <span class="number">10</span>; <span class="comment">//局部变量</span></span><br><span class="line">	<span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//返回静态变量引用</span></span><br><span class="line"><span class="function"><span class="keyword">int</span>&amp; <span class="title">test02</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">int</span> a = <span class="number">20</span>;</span><br><span class="line">	<span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="comment">//不能返回局部变量的引用</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref = <span class="built_in">test01</span>();</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref = &quot;</span> &lt;&lt; ref &lt;&lt; endl;  <span class="comment">// ref = 10</span></span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref = &quot;</span> &lt;&lt; ref &lt;&lt; endl;  <span class="comment">// ref = 1479064544  此处会出现错误，避免该错误不要返回局部变量的引用。  因为局部变量保存在栈区，函数结束，内存也就释放了</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//如果函数做左值，那么必须返回引用</span></span><br><span class="line">    <span class="comment">// 局部静态变量保存在全局区，不会随着函数结束而内存释放，所以不会出现上述问题。</span></span><br><span class="line">	<span class="keyword">int</span>&amp; ref2 = <span class="built_in">test02</span>();  </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;   </span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	<span class="built_in">test02</span>() = <span class="number">1000</span>;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;ref2 = &quot;</span> &lt;&lt; ref2 &lt;&lt; endl;</span><br><span class="line">	<span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-
+<ol start="2">
+<li>c++继承方式</li>
+</ol>
+<img src="/2021/11/06/c-%E6%B3%A8%E6%84%8F%E7%82%B9/image-20211107091913409.png" alt="image-20211107091913409 " style="zoom:50%;"> 
 
 
 
@@ -1306,124 +1432,6 @@ UNIX系统大部分是由C语言编写的。</li>
 <h2 id="地支与时辰"><a href="#地支与时辰" class="headerlink" title="地支与时辰"></a>地支与时辰</h2><img src="/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902203417019.png" alt="image-20210902203417019" style="zoom:67%;">
 
 <p>P11</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" class="post-title-link" itemprop="url">虚拟内存管理</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-09-01 16:56:22 / 修改時間：17:03:26" itemprop="dateCreated datePublished" datetime="2021-09-01T16:56:22+08:00">2021-09-01</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="虚拟内存的基本概念"><a href="#虚拟内存的基本概念" class="headerlink" title="虚拟内存的基本概念"></a>虚拟内存的基本概念</h2><h3 id="1-传统存储管理方式的缺点"><a href="#1-传统存储管理方式的缺点" class="headerlink" title="1. 传统存储管理方式的缺点"></a>1. 传统存储管理方式的缺点</h3><p>连续分配与非连续分配都属于传统存储管理方式</p>
-<p>(1) 一次性</p>
-<p>作业必须一次性全部装入内存后才能开始运行</p>
-<p>(2) 驻留性</p>
-<p>一旦作业被装入内存，就会一直驻留在内存中直至作业运行结束；但事实上，一个时间段内，只需要作业的一小部分数据即可正常运行</p>
-<h3 id="2-虚拟内存的定义"><a href="#2-虚拟内存的定义" class="headerlink" title="2. 虚拟内存的定义"></a>2. 虚拟内存的定义</h3><p>(1) 程序装入内存时，可以将程序中很快会用到的部分装入内存，暂时用不到的部分留在外存</p>
-<p>(2) 程序运行过程中，所要访问的信息不在内存时，由操作系统负责将所需信息从外存调入内存，然后继续执行程序</p>
-<p>(3) 若内存空间不够，由操作系统负责将内存中暂时用不到的信息换出到外存</p>
-<p>(4) 使得用户感觉有一个比实际内存大得多的内存，实际上物理内存大小并未改变，只是在逻 辑上进行了扩充，这就是虚拟内存</p>
-<h3 id="3-虚拟内存的特征"><a href="#3-虚拟内存的特征" class="headerlink" title="3. 虚拟内存的特征"></a>3. 虚拟内存的特征</h3><p>(1) 多次性 ：作业被分成多次调入内存</p>
-<p>(2) 对换性：作业在运行过程中，可以将作业换入、换出</p>
-<p>(3) 虚拟性：从逻辑上扩充了内存的容量，使用户感觉有一个更大的内存</p>
-<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4.  知识回顾"></a>4.  知识回顾</h3><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132643299.png" alt="img" style="zoom:67%;">
-
-<h2 id="请求分页管理方式"><a href="#请求分页管理方式" class="headerlink" title="请求分页管理方式"></a>请求分页管理方式</h2><p>请求分页管理方式与基本分页管理的主要区别在于增加了请求调页和页面置换两个功能</p>
-<h3 id="1-页表机制"><a href="#1-页表机制" class="headerlink" title="1. 页表机制"></a>1. 页表机制</h3><p>(1) 为了实现请求调页，操作系统需要通过状态位知道每个页面是否已经调入内存；如果还没 有调入，也需要知道该页面在外存中存放的位置</p>
-<p>(2) 为了实现页面置换，操作系统需要决定将哪个页面换出到外存：有的页面没有被修改过， 就不必浪费时间写回外存；有的页面被修改过，就需要将外存中的旧数据覆盖；因此，操 作系统还需要记录每个页面是否被修改过的信息<br><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132658444.png" alt="img" style="zoom:110%;"></p>
-<h3 id="2-缺页中断机构"><a href="#2-缺页中断机构" class="headerlink" title="2. 缺页中断机构"></a>2. 缺页中断机构</h3><p>(1) 在请求分页系统中，每当要访问的页面不在内存时，便产生一个缺页中断，然后由操作系 统的缺页中断处理程序处理中断；此时缺页的进程阻塞，放入阻塞队列中，调页完成后再 将其唤醒，放回就绪队列</p>
-<p>(2) 如果内存中有空闲块，则为进程分配一个空闲块，将所缺页面装入该块，并修改页表中相 应的页表项</p>
-<p>(3) 如果内存中没有空闲块，则由页面置换算法选择一个页面淘汰，若该页面在内存期间被修 改过，则要将其写回外存；未修改过的页面不用写回外存</p>
-<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132707611.png" alt="img" style="zoom:80%;">
-
-<h2 id="三、页面置换算法"><a href="#三、页面置换算法" class="headerlink" title="三、页面置换算法"></a>三、页面置换算法</h2><p>使用页面置换算法决定将哪个页面换出，好的页面置换算法应当追求更少的缺页率，即换入、换出 的次数尽可能的少</p>
-<h3 id="1-最佳置换算法-OPT"><a href="#1-最佳置换算法-OPT" class="headerlink" title="1. 最佳置换算法(OPT)"></a>1. 最佳置换算法(OPT)</h3><p>每次选择淘汰的页面是以后永不使用或者最长时间内不再被访问的页面，以保证最低的缺页率</p>
-<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132717866.png" alt="img" style="zoom:67%;">
-
-<p>操作系统无法预判页面访问顺序，故最佳置换算法无法实现</p>
-<h3 id="2-先进先出置换算法-FIFO"><a href="#2-先进先出置换算法-FIFO" class="headerlink" title="2. 先进先出置换算法(FIFO)"></a>2. 先进先出置换算法(FIFO)</h3><p>每次选择淘汰的页面是最早进入内存的页面</p>
-<p>实现方法：每次向内存中调入页面时，将页面添加到一个队列的队尾，需要换出页面时换出队 头的页面即可，队列的最大长度取决于内存块的个数</p>
-<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132724177.png" alt="img" style="zoom:80%;">
-
-<p>注意：FIFO算法会产生Belady异常，即为进程分配的内存块增多时，缺页次数不减反增的现象，因此，FIFO算法性能较差</p>
-<h3 id="3-最近最久未使用置换算法-LRU"><a href="#3-最近最久未使用置换算法-LRU" class="headerlink" title="3. 最近最久未使用置换算法(LRU)"></a>3. 最近最久未使用置换算法(LRU)</h3><p>每次选择淘汰的页面是最近最久未使用的页面</p>
-<p>实现方法：赋予每个页面对应的页表项中，用访问字段记录该页面自上次被访问以来所经历的 时间t，当需要淘汰一个页面时，选择现有页面中t值最大的</p>
-<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132730300.png" alt="img" style="zoom:150%;">
-
-<h3 id="4-最不常用算法（LFU）"><a href="#4-最不常用算法（LFU）" class="headerlink" title="4.最不常用算法（LFU）"></a>4.最不常用算法（LFU）</h3><p>当缺页中断时，选择访问次数最少的那个页面，淘汰之<br>这样新页很吃亏啊<br>取决于程序访问特征</p>
-<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132735208.png" alt="img" style="zoom:150%;">
-
-
-
-
-
-
-
 
       
     </div>

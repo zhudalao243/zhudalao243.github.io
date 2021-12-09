@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-count">36</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -200,6 +200,124 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" class="post-title-link" itemprop="url">虚拟内存管理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-09-01 16:56:22 / 修改時間：17:03:26" itemprop="dateCreated datePublished" datetime="2021-09-01T16:56:22+08:00">2021-09-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="虚拟内存的基本概念"><a href="#虚拟内存的基本概念" class="headerlink" title="虚拟内存的基本概念"></a>虚拟内存的基本概念</h2><h3 id="1-传统存储管理方式的缺点"><a href="#1-传统存储管理方式的缺点" class="headerlink" title="1. 传统存储管理方式的缺点"></a>1. 传统存储管理方式的缺点</h3><p>连续分配与非连续分配都属于传统存储管理方式</p>
+<p>(1) 一次性</p>
+<p>作业必须一次性全部装入内存后才能开始运行</p>
+<p>(2) 驻留性</p>
+<p>一旦作业被装入内存，就会一直驻留在内存中直至作业运行结束；但事实上，一个时间段内，只需要作业的一小部分数据即可正常运行</p>
+<h3 id="2-虚拟内存的定义"><a href="#2-虚拟内存的定义" class="headerlink" title="2. 虚拟内存的定义"></a>2. 虚拟内存的定义</h3><p>(1) 程序装入内存时，可以将程序中很快会用到的部分装入内存，暂时用不到的部分留在外存</p>
+<p>(2) 程序运行过程中，所要访问的信息不在内存时，由操作系统负责将所需信息从外存调入内存，然后继续执行程序</p>
+<p>(3) 若内存空间不够，由操作系统负责将内存中暂时用不到的信息换出到外存</p>
+<p>(4) 使得用户感觉有一个比实际内存大得多的内存，实际上物理内存大小并未改变，只是在逻 辑上进行了扩充，这就是虚拟内存</p>
+<h3 id="3-虚拟内存的特征"><a href="#3-虚拟内存的特征" class="headerlink" title="3. 虚拟内存的特征"></a>3. 虚拟内存的特征</h3><p>(1) 多次性 ：作业被分成多次调入内存</p>
+<p>(2) 对换性：作业在运行过程中，可以将作业换入、换出</p>
+<p>(3) 虚拟性：从逻辑上扩充了内存的容量，使用户感觉有一个更大的内存</p>
+<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4.  知识回顾"></a>4.  知识回顾</h3><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132643299.png" alt="img" style="zoom:67%;">
+
+<h2 id="请求分页管理方式"><a href="#请求分页管理方式" class="headerlink" title="请求分页管理方式"></a>请求分页管理方式</h2><p>请求分页管理方式与基本分页管理的主要区别在于增加了请求调页和页面置换两个功能</p>
+<h3 id="1-页表机制"><a href="#1-页表机制" class="headerlink" title="1. 页表机制"></a>1. 页表机制</h3><p>(1) 为了实现请求调页，操作系统需要通过状态位知道每个页面是否已经调入内存；如果还没 有调入，也需要知道该页面在外存中存放的位置</p>
+<p>(2) 为了实现页面置换，操作系统需要决定将哪个页面换出到外存：有的页面没有被修改过， 就不必浪费时间写回外存；有的页面被修改过，就需要将外存中的旧数据覆盖；因此，操 作系统还需要记录每个页面是否被修改过的信息<br><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132658444.png" alt="img" style="zoom:110%;"></p>
+<h3 id="2-缺页中断机构"><a href="#2-缺页中断机构" class="headerlink" title="2. 缺页中断机构"></a>2. 缺页中断机构</h3><p>(1) 在请求分页系统中，每当要访问的页面不在内存时，便产生一个缺页中断，然后由操作系 统的缺页中断处理程序处理中断；此时缺页的进程阻塞，放入阻塞队列中，调页完成后再 将其唤醒，放回就绪队列</p>
+<p>(2) 如果内存中有空闲块，则为进程分配一个空闲块，将所缺页面装入该块，并修改页表中相 应的页表项</p>
+<p>(3) 如果内存中没有空闲块，则由页面置换算法选择一个页面淘汰，若该页面在内存期间被修 改过，则要将其写回外存；未修改过的页面不用写回外存</p>
+<h3 id="3-知识回顾"><a href="#3-知识回顾" class="headerlink" title="3. 知识回顾"></a>3. 知识回顾</h3><img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132707611.png" alt="img" style="zoom:80%;">
+
+<h2 id="三、页面置换算法"><a href="#三、页面置换算法" class="headerlink" title="三、页面置换算法"></a>三、页面置换算法</h2><p>使用页面置换算法决定将哪个页面换出，好的页面置换算法应当追求更少的缺页率，即换入、换出 的次数尽可能的少</p>
+<h3 id="1-最佳置换算法-OPT"><a href="#1-最佳置换算法-OPT" class="headerlink" title="1. 最佳置换算法(OPT)"></a>1. 最佳置换算法(OPT)</h3><p>每次选择淘汰的页面是以后永不使用或者最长时间内不再被访问的页面，以保证最低的缺页率</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132717866.png" alt="img" style="zoom:67%;">
+
+<p>操作系统无法预判页面访问顺序，故最佳置换算法无法实现</p>
+<h3 id="2-先进先出置换算法-FIFO"><a href="#2-先进先出置换算法-FIFO" class="headerlink" title="2. 先进先出置换算法(FIFO)"></a>2. 先进先出置换算法(FIFO)</h3><p>每次选择淘汰的页面是最早进入内存的页面</p>
+<p>实现方法：每次向内存中调入页面时，将页面添加到一个队列的队尾，需要换出页面时换出队 头的页面即可，队列的最大长度取决于内存块的个数</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132724177.png" alt="img" style="zoom:80%;">
+
+<p>注意：FIFO算法会产生Belady异常，即为进程分配的内存块增多时，缺页次数不减反增的现象，因此，FIFO算法性能较差</p>
+<h3 id="3-最近最久未使用置换算法-LRU"><a href="#3-最近最久未使用置换算法-LRU" class="headerlink" title="3. 最近最久未使用置换算法(LRU)"></a>3. 最近最久未使用置换算法(LRU)</h3><p>每次选择淘汰的页面是最近最久未使用的页面</p>
+<p>实现方法：赋予每个页面对应的页表项中，用访问字段记录该页面自上次被访问以来所经历的 时间t，当需要淘汰一个页面时，选择现有页面中t值最大的</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132730300.png" alt="img" style="zoom:150%;">
+
+<h3 id="4-最不常用算法（LFU）"><a href="#4-最不常用算法（LFU）" class="headerlink" title="4.最不常用算法（LFU）"></a>4.最不常用算法（LFU）</h3><p>当缺页中断时，选择访问次数最少的那个页面，淘汰之<br>这样新页很吃亏啊<br>取决于程序访问特征</p>
+<img src="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/20201227132735208.png" alt="img" style="zoom:150%;">
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1861,139 +1979,6 @@
 <li>间接消息传递：消息要先发送到中间实体（信箱）中，因此也称“信箱通信方式”。Eg：计网中的电子邮件系统</li>
 </ul>
 <h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506145419455.png" alt="img" style="zoom:80%;">
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/24/%E9%80%83%E9%80%B8%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">逃逸分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-24 23:22:17 / 修改時間：23:32:04" itemprop="dateCreated datePublished" datetime="2021-08-24T23:22:17+08:00">2021-08-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="逃逸分析"><a href="#逃逸分析" class="headerlink" title="逃逸分析"></a>逃逸分析</h2><p>所谓逃逸分析（Escape analysis）是指由编译器决定内存分配的位置，不需要程序员指定。</p>
-<p>函数中申请一个新的对象：</p>
-<blockquote>
-<ul>
-<li>如果分配在栈中，则函数执行结束可自动将内存回收；</li>
-<li>如果分配在堆中，则函数执行结束可交给GC（垃圾回收）处理；</li>
-</ul>
-</blockquote>
-<p>有了逃逸分析，返回函数局部变量将变得可能，除此之外，逃逸分析还跟闭包息息相关，了解哪些场景下对象会逃逸至关重要。</p>
-<h2 id="逃逸策略"><a href="#逃逸策略" class="headerlink" title="逃逸策略"></a>逃逸策略</h2><p>每当函数中申请新的对象，编译器会根据该对象是否被函数外部引用来决定是否逃逸：</p>
-<ol>
-<li>如果函数外部没有引用，则优先放到栈中；</li>
-<li>如果函数外部存在引用，则必定放到堆中；</li>
-</ol>
-<p>注意，对于函数外部没有引用的对象，也有可能放到堆中，比如内存过大超过栈的存储能力。</p>
-<h2 id="逃逸场景"><a href="#逃逸场景" class="headerlink" title="逃逸场景"></a>逃逸场景</h2><h3 id="指针逃逸"><a href="#指针逃逸" class="headerlink" title="指针逃逸"></a>指针逃逸</h3><p>道Go可以返回局部变量指针，这是一个典型的变量逃逸案例</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">type</span> Student <span class="keyword">struct</span> &#123;</span><br><span class="line">    Name <span class="keyword">string</span></span><br><span class="line">    Age  <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">StudentRegister</span><span class="params">(name <span class="keyword">string</span>, age <span class="keyword">int</span>)</span> *<span class="title">Student</span></span> &#123;</span><br><span class="line">    s := <span class="built_in">new</span>(Student) <span class="comment">//局部变量s逃逸到堆</span></span><br><span class="line">    s.Name = name</span><br><span class="line">    s.Age = age</span><br><span class="line">    <span class="keyword">return</span> s</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    StudentRegister(<span class="string">&quot;Jim&quot;</span>, <span class="number">18</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>函数StudentRegister()内部s为局部变量，其值通过函数返回值返回，s本身为一指针，其指向的内存地址不会是栈而是堆，这就是典型的逃逸案例。</p>
-<p>通过编译参数-gcflag=-m可以查看编译过程中的逃逸分析：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">D:\SourceCode\GoExpert\src&gt;<span class="keyword">go</span> build -gcflags=-m</span><br><span class="line"># _/D_/SourceCode/GoExpert/src</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">8</span>: can inline StudentRegister</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">17</span>: can inline main</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">18</span>: inlining call to StudentRegister</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">8</span>: leaking param: name</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">9</span>: <span class="built_in">new</span>(Student) escapes to heap</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">18</span>: main <span class="built_in">new</span>(Student) does not escape</span><br></pre></td></tr></table></figure>
-
-<p>可见在StudentRegister()函数中，也即代码第9行显示”escapes to heap”，代表该行内存分配发生了逃逸现象。</p>
-<h3 id="栈空间不足逃逸"><a href="#栈空间不足逃逸" class="headerlink" title="栈空间不足逃逸"></a>栈空间不足逃逸</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Slice</span><span class="params">()</span></span> &#123;</span><br><span class="line">    s := <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">1000</span>, <span class="number">1000</span>)</span><br><span class="line">    <span class="keyword">for</span> index, _ := <span class="keyword">range</span> s &#123;</span><br><span class="line">        s[index] = index</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    Slice()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面代码Slice()函数中分配了一个1000个长度的切片，是否逃逸取决于栈空间是否足够大。<br>直接查看编译提示，如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D:\SourceCode\GoExpert\src&gt;<span class="keyword">go</span> build -gcflags=-m</span><br><span class="line"># _/D_/SourceCode/GoExpert/src</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">4</span>: Slice <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">1000</span>, <span class="number">1000</span>) does not escape</span><br></pre></td></tr></table></figure>
-
-<p>我们发现此处并没有发生逃逸。那么把切片长度扩大10倍即10000会如何呢?</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">D:\SourceCode\GoExpert\src&gt;<span class="keyword">go</span> build -gcflags=-m</span><br><span class="line"># _/D_/SourceCode/GoExpert/src</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">4</span>: <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">10000</span>, <span class="number">10000</span>) escapes to heap</span><br></pre></td></tr></table></figure>
-
-<p>发现当切片长度扩大到10000时就会逃逸。</p>
-<p>实际上当栈空间不足以存放当前对象时或无法判断当前切片长度时会将对象分配到堆中。</p>
-<h3 id="动态类型逃逸"><a href="#动态类型逃逸" class="headerlink" title="动态类型逃逸"></a>动态类型逃逸</h3><p>很多函数参数为interface类型，比如fmt.Println(a …interface{})，编译期间很难确定其参数的具体类型，也会产生逃逸。<br>如下代码所示：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    s := <span class="string">&quot;Escape&quot;</span></span><br><span class="line">    fmt.Println(s)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上述代码s变量只是一个string类型变量，调用fmt.Println()时会产生逃逸：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">D:\SourceCode\GoExpert\src&gt;<span class="keyword">go</span> build -gcflags=-m</span><br><span class="line"># _/D_/SourceCode/GoExpert/src</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">7</span>: s escapes to heap</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">7</span>: main ... argument does not escape</span><br></pre></td></tr></table></figure>
-
-<h3 id="闭包引用对象逃逸"><a href="#闭包引用对象逃逸" class="headerlink" title="闭包引用对象逃逸"></a>闭包引用对象逃逸</h3><p>某著名的开源框架实现了某个返回Fibonacci数列的函数：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fibonacci</span><span class="params">()</span> <span class="title">func</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    a, b := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">        a, b = b, a+b</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>该函数返回一个闭包，闭包引用了函数的局部变量a和b，使用时通过该函数获取该闭包，然后每次执行闭包都会依次输出Fibonacci数列。<br>完整的示例程序如下所示</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Fibonacci</span><span class="params">()</span> <span class="title">func</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    a, b := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">        a, b = b, a+b</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    f := Fibonacci()</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">        fmt.Printf(<span class="string">&quot;Fibonacci: %d\n&quot;</span>, f())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Fibonacci()函数中原本属于局部变量的a和b由于闭包的引用，不得不将二者放到堆上，以致产生逃逸：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">D:\SourceCode\GoExpert\src&gt;<span class="keyword">go</span> build -gcflags=-m</span><br><span class="line"># _/D_/SourceCode/GoExpert/src</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">7</span>: can inline Fibonacci.func1</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">7</span>: <span class="function"><span class="keyword">func</span> <span class="title">literal</span> <span class="title">escapes</span> <span class="title">to</span> <span class="title">heap</span></span></span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">7</span>: <span class="function"><span class="keyword">func</span> <span class="title">literal</span> <span class="title">escapes</span> <span class="title">to</span> <span class="title">heap</span></span></span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">8</span>: &amp;a escapes to heap</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">6</span>: moved to heap: a</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">8</span>: &amp;b escapes to heap</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">6</span>: moved to heap: b</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">17</span>: f() escapes to heap</span><br><span class="line">.\main.<span class="keyword">go</span>:<span class="number">17</span>: main ... argument does not escape</span><br></pre></td></tr></table></figure>
-
-<h2 id="逃逸总结"><a href="#逃逸总结" class="headerlink" title="逃逸总结"></a>逃逸总结</h2><blockquote>
-<ul>
-<li>栈上分配内存比在堆中分配内存有更高的效率</li>
-<li>栈上分配的内存不需要GC处理</li>
-<li>堆上分配的内存使用完毕会交给GC处理</li>
-<li>逃逸分析目的是决定内分配地址是栈还是堆</li>
-<li>逃逸分析在编译阶段完成</li>
-</ul>
-</blockquote>
-<h2 id="函数传递指针真的比传值效率高吗？"><a href="#函数传递指针真的比传值效率高吗？" class="headerlink" title="函数传递指针真的比传值效率高吗？"></a>函数传递指针真的比传值效率高吗？</h2><blockquote>
-<p>指针可以减少底层值的拷贝，可以提高效率，但是如果拷贝的数据量小，由于指针传递会产生逃逸，可能会使用堆，也可能会增加GC的负担，所以传递指针不一定是高效的。</p>
-</blockquote>
-
       
     </div>
 

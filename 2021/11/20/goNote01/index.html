@@ -20,35 +20,37 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zhudalao243.github.io","root":"/","images":"/images","scheme":"Mist","version":"8.7.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"b2t":false,"scrollpercent":true},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜尋...","empty":"我們無法找到任何有關 ${query} 的搜索結果","hits_time":"${hits} 找到 ${time} 個結果","hits":"找到 ${hits} 個結果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
-<meta name="description" content="丑土子水 &#x3D;&#x3D;&#x3D;&gt; 合克 寅木亥水 &#x3D;&#x3D;&#x3D;&gt; 合生 卯木戌土 &#x3D;&#x3D;&#x3D;&gt; 合克 辰土酉金 &#x3D;&#x3D;&#x3D;&gt; 合生 午火未土 &#x3D;&#x3D;&#x3D;&gt; 合生 巳火申金 &#x3D;&#x3D;&#x3D;&gt; 合克（在六爻中以合为主）巳与申以合论  地支三合局 寅午戌合火局              寅（木）   午（火） 戌（土）   火局 申子辰合水局              申（金）   子（水） 辰（土）">
+<meta name="description" content="gofmt 格式化命令  Golang 环境变量配置及其作用GOROOT: 指定 go sdk 安装目录。Path: 指令 sdk\bin 目录：go.exe godoc.exe gofmt.exeGOPATH: 就是 golang 工作目录：我们的所有项目的源码都这个目录下。   go语言总值类型包括：基本数据类型 int 系列, float 系列, bool, string 、数组和 结构体">
 <meta property="og:type" content="article">
-<meta property="og:title" content="03地支三合局与相刑相害">
-<meta property="og:url" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/index.html">
+<meta property="og:title" content="goNote01">
+<meta property="og:url" content="http://zhudalao243.github.io/2021/11/20/goNote01/index.html">
 <meta property="og:site_name" content="上善若水">
-<meta property="og:description" content="丑土子水 &#x3D;&#x3D;&#x3D;&gt; 合克 寅木亥水 &#x3D;&#x3D;&#x3D;&gt; 合生 卯木戌土 &#x3D;&#x3D;&#x3D;&gt; 合克 辰土酉金 &#x3D;&#x3D;&#x3D;&gt; 合生 午火未土 &#x3D;&#x3D;&#x3D;&gt; 合生 巳火申金 &#x3D;&#x3D;&#x3D;&gt; 合克（在六爻中以合为主）巳与申以合论  地支三合局 寅午戌合火局              寅（木）   午（火） 戌（土）   火局 申子辰合水局              申（金）   子（水） 辰（土）">
+<meta property="og:description" content="gofmt 格式化命令  Golang 环境变量配置及其作用GOROOT: 指定 go sdk 安装目录。Path: 指令 sdk\bin 目录：go.exe godoc.exe gofmt.exeGOPATH: 就是 golang 工作目录：我们的所有项目的源码都这个目录下。   go语言总值类型包括：基本数据类型 int 系列, float 系列, bool, string 、数组和 结构体">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:image" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902192840745.png">
-<meta property="og:image" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902200048607.png">
-<meta property="og:image" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902200856012.png">
-<meta property="og:image" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902202953530.png">
-<meta property="og:image" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902203056376.png">
-<meta property="og:image" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902203417019.png">
-<meta property="article:published_time" content="2021-09-02T11:22:31.000Z">
-<meta property="article:modified_time" content="2021-09-03T14:10:22.545Z">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211120101130947.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211120211125271.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211120225507401.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211120225539343.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211121124942312.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211121131133556.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211121131146498.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211121212757065.png">
+<meta property="og:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211121213410011.png">
+<meta property="article:published_time" content="2021-11-20T02:09:44.000Z">
+<meta property="article:modified_time" content="2021-11-24T07:20:55.639Z">
 <meta property="article:author" content="zzy">
-<meta property="article:tag" content="哲学">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902192840745.png">
+<meta name="twitter:image" content="http://zhudalao243.github.io/2021/11/20/goNote01/image-20211120101130947.png">
 
 
-<link rel="canonical" href="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/">
+<link rel="canonical" href="http://zhudalao243.github.io/2021/11/20/goNote01/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/","path":"2021/09/02/地支三合局与相刑相害/","title":"03地支三合局与相刑相害"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-TW","comments":true,"permalink":"http://zhudalao243.github.io/2021/11/20/goNote01/","path":"2021/11/20/goNote01/","title":"goNote01"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>03地支三合局与相刑相害 | 上善若水</title>
+<title>goNote01 | 上善若水</title>
   
 
 
@@ -156,7 +158,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80"><span class="nav-number">1.</span> <span class="nav-text">地支三合局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E6%94%AF%E7%9B%B8%E5%88%91"><span class="nav-number">2.</span> <span class="nav-text">地支相刑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E6%94%AF%E7%9B%B8%E5%AE%B3"><span class="nav-number">3.</span> <span class="nav-text">地支相害</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E6%94%AF%E4%B8%8E%E7%94%9F%E8%82%96"><span class="nav-number">4.</span> <span class="nav-text">地支与生肖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E6%94%AF%E4%B8%8E%E6%97%B6%E8%BE%B0"><span class="nav-number">5.</span> <span class="nav-text">地支与时辰</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#gofmt-%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">gofmt 格式化命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang-%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%85%8D%E7%BD%AE%E5%8F%8A%E5%85%B6%E4%BD%9C%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">Golang 环境变量配置及其作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%BC%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B%E7%9A%84%E4%BD%BF%E7%94%A8%E7%89%B9%E7%82%B9"><span class="nav-number">3.</span> <span class="nav-text">值类型和引用类型的使用特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">错误处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%94%99%E8%AF%AF"><span class="nav-number">5.</span> <span class="nav-text">自定义错误</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -223,7 +225,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-TW">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/11/20/goNote01/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/header.jpg">
@@ -236,7 +238,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          03地支三合局与相刑相害
+          goNote01
         </h1>
 
         <div class="post-meta-container">
@@ -247,14 +249,14 @@
       </span>
       <span class="post-meta-item-text">發表於</span>
 
-      <time title="創建時間：2021-09-02 19:22:31" itemprop="dateCreated datePublished" datetime="2021-09-02T19:22:31+08:00">2021-09-02</time>
+      <time title="創建時間：2021-11-20 10:09:44" itemprop="dateCreated datePublished" datetime="2021-11-20T10:09:44+08:00">2021-11-20</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新於</span>
-        <time title="修改時間：2021-09-03 22:10:22" itemprop="dateModified" datetime="2021-09-03T22:10:22+08:00">2021-09-03</time>
+        <time title="修改時間：2021-11-24 15:20:55" itemprop="dateModified" datetime="2021-11-24T15:20:55+08:00">2021-11-24</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -262,11 +264,7 @@
       </span>
       <span class="post-meta-item-text">分類於</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%93%B2%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">哲学</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%93%B2%E5%AD%A6/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/" itemprop="url" rel="index"><span itemprop="name">周易基础及其应用</span></a>
+          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
         </span>
     </span>
 
@@ -280,69 +278,44 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <img src="/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902192840745.png" alt="image-20210902192840745" style="zoom:67%;">
+        <h3 id="gofmt-格式化命令"><a href="#gofmt-格式化命令" class="headerlink" title="gofmt 格式化命令"></a>gofmt 格式化命令</h3><img src="/2021/11/20/goNote01/image-20211120101130947.png" alt="image-20211120101130947" style="zoom:80%;">
 
-<blockquote>
-<p>丑土子水 ===&gt; 合克</p>
-<p>寅木亥水 ===&gt; 合生</p>
-<p>卯木戌土 ===&gt; 合克</p>
-<p>辰土酉金 ===&gt; 合生</p>
-<p>午火未土 ===&gt; 合生</p>
-<p>巳火申金 ===&gt; 合克（在六爻中以合为主）巳与申以合论</p>
-</blockquote>
-<h2 id="地支三合局"><a href="#地支三合局" class="headerlink" title="地支三合局"></a>地支三合局</h2><blockquote>
-<p>寅午戌合火局              寅（木）   午（火） 戌（土）   火局</p>
-<p>申子辰合水局              申（金）   子（水） 辰（土）   水局</p>
-<p>亥卯未合木局</p>
-<p>巳酉丑合金局</p>
-</blockquote>
-<h2 id="地支相刑"><a href="#地支相刑" class="headerlink" title="地支相刑"></a>地支相刑</h2><blockquote>
-<p>三刑</p>
-<p>寅巳申</p>
-<p>丑未戌</p>
-</blockquote>
-<blockquote>
-<p>两刑</p>
-<p>寅刑巳                    巳刑申</p>
-<p>申刑寅                    丑刑未</p>
-<p>未刑戌                    戌刑丑</p>
-<p>子刑卯                    卯刑子   ====&gt; 相互刑     一般乱搞男女关系</p>
-<p>辰午酉亥 ===&gt; 自己刑自己，自己伤害自己</p>
-<p>三刑考虑的较多，两刑考虑的较少。</p>
-</blockquote>
-<h2 id="地支相害"><a href="#地支相害" class="headerlink" title="地支相害"></a>地支相害</h2><blockquote>
-<p>子未相害</p>
-<p>丑午相害</p>
-<p>寅巳相害</p>
-<p>卯辰相害</p>
-<p>申亥相害</p>
-<p>酉戌相害</p>
-</blockquote>
-<img src="/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902200048607.png" alt="image-20210902200048607" style="zoom:67%;">
+<h3 id="Golang-环境变量配置及其作用"><a href="#Golang-环境变量配置及其作用" class="headerlink" title="Golang 环境变量配置及其作用"></a>Golang 环境变量配置及其作用</h3><p>GOROOT: 指定 go sdk 安装目录。<br>Path: 指令 sdk\bin 目录：go.exe godoc.exe gofmt.exe<br>GOPATH: 就是 golang 工作目录：我们的所有项目的源码都这个目录下。</p>
+<img src="/2021/11/20/goNote01/image-20211120211125271.png" alt="image-20211120211125271" style="zoom:80%;">
 
-<p>举例：</p>
-<img src="/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902200856012.png" alt="image-20210902200856012" style="zoom:50%;">
+<p>go语言总值类型包括：基本数据类型 int 系列, float 系列, bool, string 、数组和 结构体 struct</p>
+<p>引用类型：指针、slice 切片、map、管道 chan、interface 等都是引用类型</p>
+<h3 id="值类型和引用类型的使用特点"><a href="#值类型和引用类型的使用特点" class="headerlink" title="值类型和引用类型的使用特点"></a>值类型和引用类型的使用特点</h3><ol>
+<li>值类型：变量直接存储值，内存通常在栈中分配<br>示意图：</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211120225507401.png" alt="image-20211120225507401" style="zoom:80%;">
 
-<blockquote>
-<p>婚外恋：子（妻子）  丑（丈夫） 未（小三），丑未相冲，子未相害。小三向丈夫发起进攻，则害了妻子。</p>
-</blockquote>
-<img src="/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902202953530.png" alt="image-20210902202953530" style="zoom:50%;">
+<ol start="2">
+<li>引用类型：变量存储的是一个地址，这个地址对应的空间才真正存储数据(值)，内存通常在堆<br>上分配，当没有任何变量引用这个地址时，该地址对应的数据空间就成为一个垃圾，由 GC 来回收</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211120225539343.png" alt="image-20211120225539343" style="zoom:80%;">
 
-<blockquote>
-<p>午丑相害（美国侵略朝鲜），敌人的敌人就是朋友！</p>
-</blockquote>
-<img src="/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902203056376.png" alt="image-20210902203056376" style="zoom:50%;">
+<p>如果变量名、函数名、常量名首字母大写，则可以被其他的包访问；如果首字母小写，则只能<br>在本包中使用 ( 注：可以简单的理解成， 首字母大写是公开的， 首字母小写是私有的) ,在 golang 没 有<br>public , private 等关键字。</p>
+<p>Type Switch：switch 语句还可以被用于 type-switch 来判断某个 interface 变量中实际指向的<br>变量类型</p>
+<img src="/2021/11/20/goNote01/image-20211121124942312.png" alt="image-20211121124942312" style="zoom:80%;">
 
-<blockquote>
-<p>敌人的朋友就是敌人。</p>
-</blockquote>
-<h2 id="地支与生肖"><a href="#地支与生肖" class="headerlink" title="地支与生肖"></a>地支与生肖</h2><blockquote>
-<p>子    丑    寅    卯    辰    巳    午    未    申    酉    戌    亥</p>
-<p>鼠    牛    虎    兔    龙    蛇    马    羊    猴    鸡    狗    猪</p>
-</blockquote>
-<h2 id="地支与时辰"><a href="#地支与时辰" class="headerlink" title="地支与时辰"></a>地支与时辰</h2><img src="/2021/09/02/%E5%9C%B0%E6%94%AF%E4%B8%89%E5%90%88%E5%B1%80%E4%B8%8E%E7%9B%B8%E5%88%91%E7%9B%B8%E5%AE%B3/image-20210902203417019.png" alt="image-20210902203417019" style="zoom:67%;">
+<p>如果我们的字符串含有中文，那么传统的遍历字符串方式，就是错误，会出现乱码。原因是传统的<br>对字符串的遍历是按照 字节来遍历，而一个汉字在 utf8 编码是对应 3 个字节。</p>
+<p>如何解决 需要要将 str 转成 []rune 切片.=&gt; 体验一把</p>
+<img src="/2021/11/20/goNote01/image-20211121131133556.png" alt="image-20211121131133556" style="zoom:80%;">
 
-<p>P11</p>
+<p>对应 for-range 遍历方式而言，是按照字符方式遍历。因此如果有字符串有中文，也是 ok</p>
+<img src="/2021/11/20/goNote01/image-20211121131146498.png" alt="image-20211121131146498" style="zoom:80%;">
+
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><img src="/2021/11/20/goNote01/image-20211121212757065.png" alt="image-20211121212757065" style="zoom:80%;">
+
+<h3 id="自定义错误"><a href="#自定义错误" class="headerlink" title="自定义错误"></a>自定义错误</h3><p>Go 程序中，也支持自定义错误， 使用 errors.New 和 panic 内置函数。</p>
+<ol>
+<li>errors.New(“错误说明”) , 会返回一个 error 类型的值，表示一个错误</li>
+<li>panic 内置函数 ,接收一个 interface{}类型的值（也就是任何值了）作为参数。可以接收 error 类<br>型的变量， 输出错误信息，</li>
+</ol>
+<img src="/2021/11/20/goNote01/image-20211121213410011.png" alt="image-20211121213410011" style="zoom:80%;">
+
+<p>如果使用 netstat –an 可以查看本机有哪些端口在监听</p>
 
     </div>
 
@@ -351,22 +324,16 @@
     
 
     <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E5%93%B2%E5%AD%A6/" rel="tag"># 哲学</a>
-          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/09/01/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="prev" title="虚拟内存管理">
-                  <i class="fa fa-chevron-left"></i> 虚拟内存管理
+                <a href="/2021/11/06/c-%E6%B3%A8%E6%84%8F%E7%82%B9/" rel="prev" title="c++注意点">
+                  <i class="fa fa-chevron-left"></i> c++注意点
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/09/03/04%E9%95%BF%E7%94%9F%E6%8E%8C%E5%86%B3/" rel="next" title="04长生掌决">
-                  04长生掌决 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
