@@ -6,7 +6,7 @@
   <link href="http://zhudalao243.github.io/atom.xml" rel="self"/>
   
   <link href="http://zhudalao243.github.io/"/>
-  <updated>2022-05-18T02:51:06.000Z</updated>
+  <updated>2023-04-13T02:26:14.704Z</updated>
   <id>http://zhudalao243.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>中庸</title>
+    <link href="http://zhudalao243.github.io/2023/04/13/%E4%B8%AD%E5%BA%B8/"/>
+    <id>http://zhudalao243.github.io/2023/04/13/%E4%B8%AD%E5%BA%B8/</id>
+    <published>2023-04-13T02:24:55.000Z</published>
+    <updated>2023-04-13T02:26:14.704Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h3 id=&quot;第一章&quot;&gt;&lt;a href=&quot;#第一章&quot; class=&quot;headerlink&quot; title=&quot;第一章&quot;&gt;&lt;/a&gt;第一章&lt;/h3&gt;&lt;p&gt;​        天命之谓性，率性之谓道，修道之谓教。&lt;br&gt;​       </summary>
+        
+      
+    
+    
+    
+    <category term="哲学" scheme="http://zhudalao243.github.io/categories/%E5%93%B2%E5%AD%A6/"/>
+    
+    
+    <category term="哲学" scheme="http://zhudalao243.github.io/tags/%E5%93%B2%E5%AD%A6/"/>
+    
+  </entry>
   
   <entry>
     <title>紫薇命盘实例</title>
@@ -497,31 +522,6 @@
         
         
     <summary type="html">&lt;h2 id=&quot;一、内存管理的概念&quot;&gt;&lt;a href=&quot;#一、内存管理的概念&quot; class=&quot;headerlink&quot; title=&quot;一、内存管理的概念&quot;&gt;&lt;/a&gt;一、内存管理的概念&lt;/h2&gt;&lt;img</summary>
-        
-      
-    
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>死锁</title>
-    <link href="http://zhudalao243.github.io/2021/08/28/%E6%AD%BB%E9%94%81/"/>
-    <id>http://zhudalao243.github.io/2021/08/28/%E6%AD%BB%E9%94%81/</id>
-    <published>2021-08-28T14:12:37.000Z</published>
-    <updated>2021-08-28T15:06:20.000Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;一、死锁的概念&quot;&gt;&lt;a href=&quot;#一、死锁的概念&quot; class=&quot;headerlink&quot; title=&quot;一、死锁的概念&quot;&gt;&lt;/a&gt;一、死锁的概念&lt;/h2&gt;&lt;h3 id=&quot;1-死锁、饥饿、死循环的区别&quot;&gt;&lt;a href=&quot;#1-死锁、饥饿、死循环的区别&quot;</summary>
         
       
     
