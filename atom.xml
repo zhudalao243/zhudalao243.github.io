@@ -6,7 +6,7 @@
   <link href="http://zhudalao243.github.io/atom.xml" rel="self"/>
   
   <link href="http://zhudalao243.github.io/"/>
-  <updated>2021-11-24T07:20:55.639Z</updated>
+  <updated>2022-05-18T02:51:05.242Z</updated>
   <id>http://zhudalao243.github.io/</id>
   
   <author>
@@ -15,6 +15,81 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>紫薇命盘实例</title>
+    <link href="http://zhudalao243.github.io/2022/05/18/%E7%B4%AB%E8%96%87%E5%91%BD%E7%9B%98%E5%AE%9E%E4%BE%8B/"/>
+    <id>http://zhudalao243.github.io/2022/05/18/%E7%B4%AB%E8%96%87%E5%91%BD%E7%9B%98%E5%AE%9E%E4%BE%8B/</id>
+    <published>2022-05-18T01:09:34.000Z</published>
+    <updated>2022-05-18T02:51:05.242Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;算命时间：2022年5月18日    算命人：家良父亲&lt;/p&gt;
+&lt;img src=&quot;/2022/05/18/%E7%B4%AB%E8%96%87%E5%91%BD%E7%9B%98%E5%AE%9E%E4%BE%8B/1652836320140.png&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>阅读笔记01</title>
+    <link href="http://zhudalao243.github.io/2022/05/16/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B001/"/>
+    <id>http://zhudalao243.github.io/2022/05/16/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B001/</id>
+    <published>2022-05-16T05:53:25.000Z</published>
+    <updated>2022-05-17T01:44:19.039Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;​        易學中的同性相生，即陽生陽、陰生陰，生力大；異性相生，即陽生陰、陰生陽，生力小。陰陽同性相剋，即陰剋陰、陽剋陽，剋性大，是真剋，無情之剋；陰陽異性相剋，即陰剋陽、陽剋陰，剋性不大，是有情之剋，衹是適度的管制約束而已。&lt;/p&gt;
+&lt;p&gt;​       </summary>
+        
+      
+    
+    
+    
+    <category term="哲学" scheme="http://zhudalao243.github.io/categories/%E5%93%B2%E5%AD%A6/"/>
+    
+    <category term="紫微斗数精成（大德山人编著）" scheme="http://zhudalao243.github.io/categories/%E5%93%B2%E5%AD%A6/%E7%B4%AB%E5%BE%AE%E6%96%97%E6%95%B0%E7%B2%BE%E6%88%90%EF%BC%88%E5%A4%A7%E5%BE%B7%E5%B1%B1%E4%BA%BA%E7%BC%96%E8%91%97%EF%BC%89/"/>
+    
+    
+    <category term="哲学" scheme="http://zhudalao243.github.io/tags/%E5%93%B2%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go协程泄露</title>
+    <link href="http://zhudalao243.github.io/2021/12/09/Go%E5%8D%8F%E7%A8%8B%E6%B3%84%E9%9C%B2/"/>
+    <id>http://zhudalao243.github.io/2021/12/09/Go%E5%8D%8F%E7%A8%8B%E6%B3%84%E9%9C%B2/</id>
+    <published>2021-12-09T02:20:32.000Z</published>
+    <updated>2021-12-09T02:58:51.858Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;GO协程泄露和修复&quot;&gt;&lt;a href=&quot;#GO协程泄露和修复&quot; class=&quot;headerlink&quot; title=&quot;GO协程泄露和修复&quot;&gt;&lt;/a&gt;GO协程泄露和修复&lt;/h2&gt;&lt;p&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="Golang" scheme="http://zhudalao243.github.io/categories/Golang/"/>
+    
+    
+    <category term="Golang" scheme="http://zhudalao243.github.io/tags/Golang/"/>
+    
+  </entry>
   
   <entry>
     <title>goNote01</title>
@@ -447,82 +522,6 @@
         
         
     <summary type="html">&lt;h2 id=&quot;一、死锁的概念&quot;&gt;&lt;a href=&quot;#一、死锁的概念&quot; class=&quot;headerlink&quot; title=&quot;一、死锁的概念&quot;&gt;&lt;/a&gt;一、死锁的概念&lt;/h2&gt;&lt;h3 id=&quot;1-死锁、饥饿、死循环的区别&quot;&gt;&lt;a href=&quot;#1-死锁、饥饿、死循环的区别&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>进程管理03</title>
-    <link href="http://zhudalao243.github.io/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/"/>
-    <id>http://zhudalao243.github.io/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/</id>
-    <published>2021-08-28T11:15:52.000Z</published>
-    <updated>2021-08-28T12:41:18.003Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;一、进程同步、互斥&quot;&gt;&lt;a href=&quot;#一、进程同步、互斥&quot; class=&quot;headerlink&quot; title=&quot;一、进程同步、互斥&quot;&gt;&lt;/a&gt;一、进程同步、互斥&lt;/h2&gt;&lt;h3 id=&quot;1-进程同步的概念&quot;&gt;&lt;a href=&quot;#1-进程同步的概念&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>进程管理02</title>
-    <link href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/"/>
-    <id>http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/</id>
-    <published>2021-08-27T12:51:21.000Z</published>
-    <updated>2021-08-28T11:14:33.425Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;线程&quot;&gt;&lt;a href=&quot;#线程&quot; class=&quot;headerlink&quot; title=&quot;线程&quot;&gt;&lt;/a&gt;线程&lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;当切换进程时，需要保存 /</summary>
-        
-      
-    
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-    
-    <category term="操作系统" scheme="http://zhudalao243.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>进程管理01</title>
-    <link href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/"/>
-    <id>http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/</id>
-    <published>2021-08-27T10:16:50.000Z</published>
-    <updated>2021-08-27T12:50:39.665Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;进程&quot;&gt;&lt;a href=&quot;#进程&quot; class=&quot;headerlink&quot; title=&quot;进程&quot;&gt;&lt;/a&gt;进程&lt;/h1&gt;&lt;h2 id=&quot;进程的概念&quot;&gt;&lt;a href=&quot;#进程的概念&quot; class=&quot;headerlink&quot;</summary>
         
       
     

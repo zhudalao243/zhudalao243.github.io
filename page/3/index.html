@@ -159,13 +159,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-count">39</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分類</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -200,6 +200,791 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/" class="post-title-link" itemprop="url">进程管理03</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-28 19:15:52 / 修改時間：20:41:18" itemprop="dateCreated datePublished" datetime="2021-08-28T19:15:52+08:00">2021-08-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="一、进程同步、互斥"><a href="#一、进程同步、互斥" class="headerlink" title="一、进程同步、互斥"></a>一、进程同步、互斥</h2><h3 id="1-进程同步的概念"><a href="#1-进程同步的概念" class="headerlink" title="1. 进程同步的概念"></a>1. 进程同步的概念</h3><blockquote>
+<p>进程同步指的是协调多个并发执行进程的工作先后次序</p>
+</blockquote>
+<h3 id="2-进程互斥的概念"><a href="#2-进程互斥的概念" class="headerlink" title="2. 进程互斥的概念"></a>2. 进程互斥的概念</h3><blockquote>
+<p>临界资源：一个时间段内只允许一个进程使用的资源</p>
+<p>进程互斥指的是当一个进程访问某临界资源时，另一个想要访问该临界资源的进程必须等待， 当前访问临界资源的进程访问结束，释放该资源后，另一个进程才能去访问临界资源</p>
+</blockquote>
+<h3 id="3-访问临界资源"><a href="#3-访问临界资源" class="headerlink" title="3. 访问临界资源"></a>3. 访问临界资源</h3><p>对临界资源的互斥访问，可在逻辑上分为如下四个部分：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102144475.png" alt="img" style="zoom:150%;">
+
+<h3 id="4-访问临界资源需要遵循的原则"><a href="#4-访问临界资源需要遵循的原则" class="headerlink" title="4. 访问临界资源需要遵循的原则"></a>4. 访问临界资源需要遵循的原则</h3><ol>
+<li>空闲让进  <ul>
+<li>临界区空闲时，可以允许一个请求进入临界区的进程立即进入临界区</li>
+</ul>
+</li>
+<li>忙则等待 <ul>
+<li> 当已有进程进入临界区时，其他试图进入临界区的进程必须等待</li>
+</ul>
+</li>
+<li>有限等待  <ul>
+<li>对请求访问的进程，应保证能在有限时间内进入临界区 (保证不会饥饿)</li>
+</ul>
+</li>
+<li>让权等待 <ul>
+<li>当进程不能进入临界区，应当立即释放处理机，防止进程忙等待 (不应该让他占用处理机 一直执行循环无法前进，应当得知无法进入临界区时不执行循环，直接切换进程)</li>
+</ul>
+</li>
+</ol>
+<h3 id="5-知识回顾"><a href="#5-知识回顾" class="headerlink" title="5. 知识回顾"></a>5. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102207229.png" alt="img" style="zoom:80%;">
+
+<h2 id="二、进程互斥的软件实现方法"><a href="#二、进程互斥的软件实现方法" class="headerlink" title="二、进程互斥的软件实现方法"></a>二、进程互斥的软件实现方法</h2><h3 id="1-单标志法"><a href="#1-单标志法" class="headerlink" title="1. 单标志法"></a>1. 单标志法</h3><p>思想：一个进程访问完临界区后会把使用临界区的权限交给另一个进程，即每个进程进入临界 区的权限只能被另一个进程赋予</p>
+<p>过程：<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102234925.png" alt="img" style="zoom:150%;"></p>
+<p>若P0要访问临界区，turn变为0，P1会一直在⑤循环，无法向下进行，P0访问完，将 turn改为1，P1跳出循环，P1可访问临界区</p>
+<p>注意：<br>(1) 该算法可以实现同一时刻最多只允许一个进程访问临界区<br>(2) 如果此时允许进入临界区的进程是P0，而P0一直不访问临界区，那么此时虽然临界区 空闲，但一直不允许P1访问，因此，单标志法存在的问题是：违背空闲让进原则</p>
+<h3 id="2-双标志先检查法"><a href="#2-双标志先检查法" class="headerlink" title="2. 双标志先检查法"></a>2. 双标志先检查法</h3><p>思想：设置一个布尔数组flag[]，数组中各元素标记各进程是否想进入临界区，true表示想进入， false表示不想进入；每个进程在进入临界区之前先检查当前有没有别的进程想进入临界 区，如果没有，把自身对应的标志flag[i]改为true，之后开始访问临界区</p>
+<p>过程：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102253393.png" alt="img " style="zoom:150%;">
+
+<p>存在的问题：P0进程进入之后，在修改P0为true之前，切换到P1，P1检查无别的进程 想进入临界区，故会将P1改为true，导致两个进程都为true，会同时访问</p>
+<p>注意：<br>(1) 双标志先检查法存在的问题是：违背忙则等待原则<br>(2) 出现的原因：进入区的检查和上锁不是一气呵成的</p>
+<h3 id="3-双标志后检查法"><a href="#3-双标志后检查法" class="headerlink" title="3. 双标志后检查法"></a>3. 双标志后检查法</h3><p>思想：双标志先检查法的改版，先上锁后检查，谁想进谁直接将自身改为true，不关心其他进 程，改为true之后，再检查有没有其他进程想访问</p>
+<p>过程：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102304319.png" alt="img" style="zoom:150%;">
+
+<blockquote>
+<p>存在的问题：P0想进入，P0改为true，在检查之前切换到P1，P1想进入，改为true，                      </p>
+<p>导致两个进程都为true，谁都无法访问临界区，产生饥饿现象</p>
+</blockquote>
+<p>注意：<br>(1) 双标志后检查法解决了忙则等待的问题，但是又违背了空闲让进和有限等待原则<br>(2) 出现的原因：进入区的检查和上锁不是一气呵成的</p>
+<h3 id="4-Peterson算法"><a href="#4-Peterson算法" class="headerlink" title="4. Peterson算法"></a>4. Peterson算法</h3><p>思想：双标志后检查法的改版，若两个进程都想进入临界区，可以主动让对方优先访问临界区</p>
+<p>过程：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102354672.png" alt="img" style="zoom:120%;">
+
+<p>进入区做了三件事：1. 主动争取 2. 主动谦让 3. 检查对方</p>
+<p>注意：<br>Peterson算法解决了空闲让进，忙则等待，有限等待三个原则，但违背了让权等待原则</p>
+<h3 id="5-知识回顾-1"><a href="#5-知识回顾-1" class="headerlink" title="5. 知识回顾"></a>5. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102412523.png" alt="img" style="zoom:150%;">
+
+<h2 id="三、进程互斥的硬件实现方法"><a href="#三、进程互斥的硬件实现方法" class="headerlink" title="三、进程互斥的硬件实现方法"></a>三、进程互斥的硬件实现方法</h2><h3 id="1-中断屏蔽方法"><a href="#1-中断屏蔽方法" class="headerlink" title="1. 中断屏蔽方法"></a>1. 中断屏蔽方法</h3><p>利用开/关中断指令实现，与原语思想相同，即在某进程开始访问临界区到结束访问为止都不允 许被中断，也就不能发生进程切换，因此也不可能出现两个进程同时访问临界区的情况</p>
+<p>优点：简单、高效</p>
+<p>缺点：不适用于多处理机；只适用于内核进程，不适用于用户进程</p>
+<h3 id="2-TestAndSet指令-TS指令"><a href="#2-TestAndSet指令-TS指令" class="headerlink" title="2. TestAndSet指令(TS指令)"></a>2. TestAndSet指令(TS指令)</h3><p>又称为TestAndSetLock指令(TSL指令)</p>
+<p>TSL指令是用硬件实现的，执行的过程不允许被中断，只能一气呵成，如图：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102423874.png" alt="img" style="zoom:150%;">
+
+<p>若刚开始lock是false(没有进程访问临界区)，则TSL返回值是false，不会卡在while循环，此 进程可以访问临界区；若刚开始是true(有进程在访问临界区)，TSL返回值是true，会卡在while 循环，直到正在访问临界区的进程访问结束，将lock值改为false，此进程才可进入临界区</p>
+<p>优点：实现简单，适用于多处理机环境</p>
+<p>缺点：不满足让权等待原则，暂时无法进入临界区的进程会占用CPU并循环执行TSL指令，从 而导致忙等</p>
+<h3 id="3-Swap指令"><a href="#3-Swap指令" class="headerlink" title="3.Swap指令"></a>3.Swap指令</h3><p>又称为Exchange指令(XCHG指令)</p>
+<p>Swap指令是用硬件实现的，执行的过程不允许被中断，只能一气呵成，如图：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102445294.png" alt="img" style="zoom:150%;">
+
+<p>当lock为false(无进程访问临界区时)才可以跳出循环，访问临界区</p>
+<p>优点：实现简单，适用于多处理机环境</p>
+<p>缺点：不满足让权等待原则，暂时无法进入临界区的进程会占用CPU并循环执行Swap指令， 从而导致忙等</p>
+<h3 id="4-知识回顾"><a href="#4-知识回顾" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102454314.png" alt="img" style="zoom:150%;">
+
+<h2 id="四、信号量机制"><a href="#四、信号量机制" class="headerlink" title="四、信号量机制"></a>四、信号量机制</h2><h3 id="1-产生原因"><a href="#1-产生原因" class="headerlink" title="1. 产生原因"></a>1. 产生原因</h3><p>进程互斥的四种软件实现方法、三种硬件实现方法都无法实现让权等待，也就是进程无法进入 临界区时，会占用处理机一直循环(因为并没有必要一直循环，可以直接切换进程)</p>
+<h3 id="2-介绍"><a href="#2-介绍" class="headerlink" title="2. 介绍"></a>2. 介绍</h3><ol>
+<li>信号量就是一个变量，表示系统中某种资源的数量</li>
+<li>用户进程可以通过使用操作系统提供的一对原语来对信号量进行操作</li>
+<li> 一对原语是：wait(S)原语和signal(S)原语，S是信号量 (将此对原语理解为函数)</li>
+<li> 通常将wait(S)称为P操作，写为P(S)；通常将signal(S)称为V操作，写为V(S)</li>
+</ol>
+<h3 id="3-整型信号量"><a href="#3-整型信号量" class="headerlink" title="3. 整型信号量"></a>3. 整型信号量</h3><p>用一个整数型变量作为信号量，用来表示系统中某种资源的数量，如下：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102523953.png" alt="img" style="zoom:150%;">
+
+<h3 id="4-记录型信号量"><a href="#4-记录型信号量" class="headerlink" title="4. 记录型信号量"></a>4. 记录型信号量</h3><p>在整型信号量(不满足让权等待)的基础上进行改进，使用记录型数据结构表示信号量，如下：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102528780.png" alt="img" style="zoom:150%;">
+
+<p>举个例子：<br>计算机有两台打印机，需要分配给不同的进程使用，value初始值为2，等待队列为空：</p>
+<ol>
+<li>P0进程使用打印机，执行wait，value–，value值成为1</li>
+<li>P1进程使用打印机，执行wait，value–，value值成为0 (无打印机可用)</li>
+<li>P2进程使用打印机，执行wait，value–，value值成为-1，value &lt; 0，执行block，成为等 待队列的队首 (无法使用时，不会占用处理机执行循环，未出现忙等现象)</li>
+<li>P3进程使用打印机，执行wait，value–，value值成为-2，value &lt; 0，执行block，成为等 待队列的第二个进程</li>
+<li>切换到P0，P0使用完打印机，执行signal，value++，value值成为-1，value &lt;= 0，执行 wakeup，唤醒等待队列的队首进程(P2进程)，P2移出等待队列，P2使用打印机</li>
+<li>切换到P2，P2使用完打印机，执行signal，value++，value值成为-1，value &lt;= 0，执行 wakeup，唤醒等待队列的队首进程(P3进程)，P3移出等待队列，P3使用打印机</li>
+</ol>
+<h3 id="5-知识回顾-2"><a href="#5-知识回顾-2" class="headerlink" title="5.知识回顾"></a>5.知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102545233.png" alt="img" style="zoom:150%;">
+
+<h2 id="五、用信号量实现进程互斥、同步、前驱关系"><a href="#五、用信号量实现进程互斥、同步、前驱关系" class="headerlink" title="五、用信号量实现进程互斥、同步、前驱关系"></a>五、用信号量实现进程互斥、同步、前驱关系</h2><h3 id="1-信号量机制实现进程互斥"><a href="#1-信号量机制实现进程互斥" class="headerlink" title="1. 信号量机制实现进程互斥"></a>1. 信号量机制实现进程互斥</h3><p>设置互斥信号量mutex，初值为1，如图：</p>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102555237.png" alt="img" style="zoom:150%;">
+
+<p>注意：<br>(1) 对不同的临界资源需要设置不同的互斥信号量<br>(2) P、V操作必须成对出现，缺少P无法保证互斥访问，缺少V无法唤醒等待进程</p>
+<h3 id="2-信号量机制实现进程同步"><a href="#2-信号量机制实现进程同步" class="headerlink" title="2. 信号量机制实现进程同步"></a>2. 信号量机制实现进程同步</h3><p>实现进程同步，必须保证进程的执行是有先后次序的，即一前一后</p>
+<ol>
+<li>设置同步信号量S，初值为0 (理解为刚开始没有资源，P1进程想使用必须通过P2产生资源)</li>
+<li>在前进程之后执行V(S)</li>
+<li>在后进程之前执行P(S)</li>
+</ol>
+<img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102614435.png" alt="img" style="zoom:150%;">
+
+<h3 id="3-信号量机制实现前驱关系"><a href="#3-信号量机制实现前驱关系" class="headerlink" title="3. 信号量机制实现前驱关系"></a>3. 信号量机制实现前驱关系</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102623827.png" alt="img" style="zoom:150%;">
+
+<h3 id="4-知识回顾-1"><a href="#4-知识回顾-1" class="headerlink" title="4. 知识回顾"></a>4. 知识回顾</h3><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102635850.png" alt="img" style="zoom:150%;">
+
+<h2 id="六、生产者-消费者问题"><a href="#六、生产者-消费者问题" class="headerlink" title="六、生产者 - 消费者问题"></a>六、生产者 - 消费者问题</h2><p>问题分析<br>系统中有一组生产者进程和一组消费者进程，生产者进程每次生产一个产品放入缓冲区，消费 者进程每次从缓冲区中取出一个产品并使用，生产者、消费者共享一个初始为空、大小为n的 缓冲区<br>2. 关系分析</p>
+<p>(1) 同步关系</p>
+<p>i. 缓冲区满时，生产者需要等消费者取走产品<br>ii. 缓冲区空时，消费者需要等生产者放入产品</p>
+<p>(2) 互斥关系</p>
+<p>i. 生产者与消费者要互斥访问缓冲区 (缓冲区是临界资源)<br>ii. 生产者与生产者要互斥访问缓冲区 (两个生产者可能会覆盖数据)<br>iii. 消费者与消费者要互斥访问缓冲区 (两个消费者可能有一个读的是空数据)</p>
+<p>实现<br><img src="/2021/08/28/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8603/20201227102656876.png" alt="img" style="zoom:150%;"></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/" class="post-title-link" itemprop="url">进程管理02</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+
+      <time title="創建時間：2021-08-27 20:51:21" itemprop="dateCreated datePublished" datetime="2021-08-27T20:51:21+08:00">2021-08-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新於</span>
+        <time title="修改時間：2021-08-28 19:14:33" itemprop="dateModified" datetime="2021-08-28T19:14:33+08:00">2021-08-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><blockquote>
+<p>当切换进程时，需要保存 / 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）开销很大</p>
+<p>引入线程后，线程是CPU调度的基本单位</p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/202105061455388.png" alt="img" style="zoom:80%;">
+
+<h2 id="线程的优点和特性"><a href="#线程的优点和特性" class="headerlink" title="线程的优点和特性"></a>线程的优点和特性</h2><ul>
+<li>进程间并发，开销很大<ol>
+<li>当切换进程时，需要保存 / 恢复进程运行环境，还需要切换内存地址空间（更新快表、更新缓存）</li>
+</ol>
+</li>
+<li>线程间并发，开销更小<ol>
+<li>同一进程内的各个线程间并发，不需要切换进程运行环境和内存地址空间，省时省力</li>
+</ol>
+</li>
+</ul>
+<p>引入线程机制后，并发带来的系统开销降低，系统并发性提升</p>
+<blockquote>
+<p><font color="red">注意：从属于不同进程的线程间通信，也必须请求操作系统服务！</font></p>
+</blockquote>
+<p>引入线程前，进程既是资源分配的基本单位，也是调度的基本单位。</p>
+<p>引入线程后，进程是资源分配的基本单位，线程是调度的基本单位。线程也有运行态、就绪态、阻塞态</p>
+<p>在多CPU环境下，各个线程也可以分派到不同的CPU上并行地执行。</p>
+<p>线程几乎不拥有资源，只拥有极少量的资源（线程控制块TCB、寄存器信息、堆栈等）</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145558176.png" alt="img" style="zoom:80%;">
+
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210827205628248.png" alt="image-20210827205628248" style="zoom:80%;">
+
+<h1 id="线程的实现方式多线程模型"><a href="#线程的实现方式多线程模型" class="headerlink" title="线程的实现方式多线程模型"></a>线程的实现方式多线程模型</h1><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145612404.png" alt="img" style="zoom:67%;">
+
+<h2 id="线程的实现方式"><a href="#线程的实现方式" class="headerlink" title="线程的实现方式"></a>线程的实现方式</h2><h3 id="用户级"><a href="#用户级" class="headerlink" title="用户级"></a>用户级</h3><p>历史背景：早期的操作系统（如：早期Unix）只支持进程，不支持线程。当时的“线程”是由线程库实现的</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145625241.png" alt="img" style="zoom:80%;">
+
+<ol>
+<li><p>线程的管理工作由谁来完成？</p>
+<blockquote>
+<p>用户级线程由应用程序通过线程库实现，所有的线程管理工作都由应用程序负责（包括线程切换）</p>
+</blockquote>
+</li>
+<li><p>线程切换是否需要CPU？</p>
+<blockquote>
+<p>用户级线程中，线程切换可以在用户态下即可完成，无需操作系统干预。</p>
+</blockquote>
+</li>
+<li><p>操作系统是否能意识到用户级线程的存在？</p>
+<blockquote>
+<p>在用户看来，是有多个线程。但是在操作系统内核看来，并意识不到线程的存在。“用户级线程”就是“从用户视角看能看到的线程”</p>
+</blockquote>
+</li>
+<li><p>这种线程的实现方式有什么优点和缺点？</p>
+</li>
+</ol>
+<blockquote>
+<p>优点：用户级线程的切换在用户空间即可完成，不需要切换到核心态，线程管理的系统<br>开销小，效率高</p>
+<p>缺点：当一个用户级线程被阻塞后，整个进程都会被阻塞，并发度不高。多个线程不可在多核处理机上并行运行。</p>
+</blockquote>
+<h3 id="内核级"><a href="#内核级" class="headerlink" title="内核级"></a>内核级</h3><p>内核级线程（Kernel-Level Thread, KLT, 又称“内核支持的线程”） 由操作系统支持的线程</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145742221.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>现代操作系统都实现了内核级线程，如Windows、Linux</p>
+</blockquote>
+<ol>
+<li><p>线程的管理工作由谁来完成？</p>
+<blockquote>
+<p>内核级线程的管理工作由操作系统内核完成。</p>
+</blockquote>
+</li>
+<li><p>线程切换是否需要CPU？</p>
+<blockquote>
+<p>线程调度、切换等工作都由内核负责，因此内核级线程的切换必然需要在核心态下才能完成</p>
+</blockquote>
+</li>
+<li><p>操作系统是否能意识到内核级线程的存在？</p>
+<blockquote>
+<p>操作系统会为每个内核级线程建立相应的TCB（Thread Control Block，线程控制块），通过TCB对线程进行管理。“内核级线程”就是“从操作系统内核视角看能看到的线程”</p>
+</blockquote>
+</li>
+<li><p>这种线程的实现方式有什么优点和缺点？</p>
+<blockquote>
+<p>优点：当一个线程被阻塞后，别的线程还可以继续执行，并发能力强。多线程可在多核处理机上并行执行。</p>
+<p>缺点：一个用户进程会占用多个内核级线程，线程切换由操作系统内核完成，需要切换到核心态，因此线程管理的成本高，开销大。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="多线程模型"><a href="#多线程模型" class="headerlink" title="多线程模型"></a>多线程模型</h2><p>在支持内核级线程的系统中，根据用户级线程和内核级线程的映射关系，可以划分为几种多线程模型</p>
+<h3 id="一对一"><a href="#一对一" class="headerlink" title="一对一"></a>一对一</h3><p>一对一模型：一个用户级线程映射到一个内核级线程。每个用户进程有与用户级线程同数量的内核级线程。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145758880.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>优点：当一个线程被阻塞后，别的线程还可以继续执行，并发能力强。多线程可在多核处理机上并行执行。</p>
+<p>缺点：一个用户进程会占用多个内核级线程，线程切换由操作系统内核完成，需要切换到核心态，因此线程管理的成本高，开销大。</p>
+</blockquote>
+<h3 id="多对一"><a href="#多对一" class="headerlink" title="多对一"></a>多对一</h3><p>多对一模型：多个用户级线程映射到一个内核级线程。且一个进程只被分配一个内核级线程。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145815581.png" alt="img " style="zoom:80%;">
+
+<p>优点：用户级线程的切换在用户空间即可完成，不需要切换到核心态，线程管理的系统开销小，效率高</p>
+<p>缺点：当一个用户级线程被阻塞后，整个进程都会被阻塞，并发度不高。多个线程不可在多核处理机上并行运行</p>
+<blockquote>
+<p>操作系统只“看得见”内核级线程，因此只有内核级线程才是处理机分配的单位</p>
+</blockquote>
+<h3 id="多对多"><a href="#多对多" class="headerlink" title="多对多"></a>多对多</h3><p>多对多模型：n 用户及线程映射到m 个内核级线程（n &gt;= m）。</p>
+<p>克服了多对一模型并发度不高的缺点（一个阻塞全体阻塞），又克服了一对一模型中一个用户进程占用太多内核级线程，开销太大的缺点。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145838455.png" alt="img" style="zoom:80%;">
+
+<p>内核级线程中可以运行任意一个有映射关系的用户级线程代码，只有两个内核级线程中正在运行的代码逻辑都阻塞时，这个进程才会阻塞</p>
+<h2 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145853642.png" alt="在这里插入图片描述" style="zoom:80%;">
+
+<h1 id="处理机的调度"><a href="#处理机的调度" class="headerlink" title="处理机的调度"></a>处理机的调度</h1><h2 id="处理机调度概念、层次"><a href="#处理机调度概念、层次" class="headerlink" title="处理机调度概念、层次"></a>处理机调度概念、层次</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145931264.png" alt="在这里插入图片描述" style="zoom:80%;">
+
+<h3 id="调度的基本概念"><a href="#调度的基本概念" class="headerlink" title="调度的基本概念"></a>调度的基本概念</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145942297.png" alt="img" style="zoom:67%;">
+
+<p>当有一堆任务要处理，但由于资源有限，这些事情没法同时处理。这就需要确定某种规则来决定处理这些任务的顺序，这就是“调度”研究的问题。</p>
+<p>在多道程序系统中，进程的数量往往是多于处理机的个数的，这样不可能同时并行地处理各个进程。处理机调度，就是从就绪队列中按照一定的算法选择一个进程并将处理机分配给它运行，以实现进程的并发执行</p>
+<h3 id="调度的三个层次"><a href="#调度的三个层次" class="headerlink" title="调度的三个层次"></a>调度的三个层次</h3><h4 id="高级调度"><a href="#高级调度" class="headerlink" title="高级调度"></a>高级调度</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506145957668.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>由于内存空间有限，有时无法将用户提交的作业全部放入内存，因此就需要确定某种规则来决定将作业调入内存的顺序。</p>
+<p>高级调度（作业调度）。按一定的原则从外存上处于后备队列的作业中挑选一个（或多个）作业，给他们分配内存等必要资源，并建立相应的进程（建立PCB），以使它（们）获得竞争处理机的权利。</p>
+<p>高级调度是辅存（外存）与内存之间的调度。每个作业只调入一次，调出一次。作业调入时会建立相应的PCB，作业调出时才撤销PCB。高级调度主要是指调入的问题，因为只有调入的时机需要操作系统来确定，但调出的时机必然是作业运行结束才调出。</p>
+</blockquote>
+<h4 id="中级调度"><a href="#中级调度" class="headerlink" title="中级调度"></a>中级调度</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150011732.png" alt="img" style="zoom:67%;">
+
+<blockquote>
+<p>引入了虚拟存储技术之后，可将暂时不能运行的进程调至外存等待。等它重新具备了运行条件且内存又稍有空闲时，再重新调入内存。</p>
+<p>这么做的目的是为了<font color="red">提高内存利用率和系统吞吐量</font>。</p>
+<p>暂时调到外存等待的进程状态为<font color="red">挂起状态</font>。值得注意的是，<font color="red">PCB并不会一起调到外存，而是会常驻内存</font>。PCB中会记录进程数据在外存中的存放位置，进程状态等信息，操作系统通过内存中的PCB来保持对各个进程的监控、管理。<font color="red">被挂起的进程PCB会被放到的挂起队列中</font>。</p>
+<p><font color="red">中级调度（内存调度</font>），就是要决定将哪个处于挂起状态的进程重新调入内存。</p>
+<p>一个进程可能会被多次调出、调入内存，因此<font color="red">中级调度发生的频率要比高级调度更高</font>。</p>
+</blockquote>
+<h5 id="补充知识：进程的挂起态与七状态模型"><a href="#补充知识：进程的挂起态与七状态模型" class="headerlink" title="补充知识：进程的挂起态与七状态模型"></a>补充知识：进程的挂起态与七状态模型</h5><p>暂时调到外存等待的进程状态为挂起状态（挂起态，suspend） 挂起态又可以进一步细分为就绪挂起、阻塞挂起两种状态<br>五状态模型 —–&gt; 七状态模型</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615002451.png" alt="img" style="zoom:80%;">
+
+<p>注意“挂起”和“阻塞”的区别，两种就绪挂起 状态都是暂时不能获得CPU的服务，但挂起态是将进程映像调到外存去了，而阻塞态下进程映像还在内存中。</p>
+<p>有的操作系统会把就绪挂起、阻塞挂起分为两个挂起队列，甚至会根据阻塞原因不同再把阻塞挂起进程进一步细分为阻塞挂起 多个队列。</p>
+<h4 id="低级调度"><a href="#低级调度" class="headerlink" title="低级调度"></a>低级调度</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150036446.png" alt="img" style="zoom:80%;">
+
+<p>低级调度（进程调度），其主要任务是按照某种方法和策略从就绪队列中选取一个进程，将处理机分配给它。</p>
+<p>进程调度是操作系统中最基本的一种调度，在一般的操作系统中都必须配置进程调度。进程调度的频率很高，一般几十毫秒一次。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150053987.png" alt="img" style="zoom:80%;">
+
+<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150104532.png" alt="img" style="zoom:80%;">
+
+<h2 id="进程调度的时机切换与过程调度方式"><a href="#进程调度的时机切换与过程调度方式" class="headerlink" title="进程调度的时机切换与过程调度方式"></a>进程调度的时机切换与过程调度方式</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150114745.png" alt="img" style="zoom:80%;">
+
+<h3 id="进程调度的时机"><a href="#进程调度的时机" class="headerlink" title="进程调度的时机"></a>进程调度的时机</h3><p>进程调度（低级调度），就是按照某种算法从就绪队列中选择一个进程为其分配处理机。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615013284.png" alt="img" style="zoom:80%;">
+
+<p>临界资源：一个时间段内只允许一个进程使用的资源。各进程需要互斥地访问临界资源。<br>临界区：访问临界资源的那段代码。</p>
+<p><font color="red">内核程序临界区一般是用来访问某种内核数据结构的，比如进程的就绪队列（由各就绪进程的PCB组成）</font></p>
+<blockquote>
+<p>有的系统中，只允许进程主动放弃处理机有的系统中，进程可以主动放弃处理机，当有更紧急的任务需要处理时，也会强行剥夺处理机（被动放弃）</p>
+</blockquote>
+<p>进程在普通临界区中是可以进行调度、切换的。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828152941229.png" alt="image-20210828152941229" style="zoom:80%;">
+
+<blockquote>
+<p>正在运行的进程如果正在访问就绪队列，会对其进行上锁，如果还没有退出临界区（解锁），就进行进程调度，但是进程调度相关的程序也需要访问就绪队列，但此时就绪队列被锁住了，因此又无法顺利进行调度。</p>
+<p><font color="red">内核程序临界区访问的临界资源如果不尽快释放的话，极有可能影响到操作系统内核的其他管理工作。因此在访问内核程序临界区期间不能进行调度与切换。</font></p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828153416754.png" alt="image-20210828153416754" style="zoom:80%;">
+
+<blockquote>
+<p>进程使用打印机时，会对打印机这一临界资源进行上锁，进程一直处于临界区内，临界资源不会解锁。但是打印机又是慢速设备，此时如果一直不允许进程调度的话就会导致CPU一直空闲。</p>
+<p><font color="red">普通临界区访问的临界资源不会直接影响操作心痛内核的管理工作。因此在访问普通临界区时可以进行调度与切换。</font></p>
+</blockquote>
+<h3 id="进程调度的方式"><a href="#进程调度的方式" class="headerlink" title="进程调度的方式"></a>进程调度的方式</h3><p><font color="red">剥夺调度方式，又称非抢占方式</font>。即，只允许进程主动放弃处理机。在运行过程中即便有更紧迫的任务到达，当前进程依然会继续使用处理机，直到该进程终止或主动要求进入阻塞态。</p>
+<blockquote>
+<p># 实现简单，系统开销小但是无法及时处理紧急任务，适合于早期的批处理系统</p>
+</blockquote>
+<p><font color="red">剥夺调度方式，又称抢占方式</font>。当一个进程正在处理机上执行时，如果有一个更重要或更紧迫的进程需要使用处理机，则立即暂停正在执行的进程，将处理机分配给更重要紧迫的那个进程。</p>
+<blockquote>
+<p># 可以优先处理更紧急的进程，也可实现让各进程按时间片轮流执行的功能（通过时钟中断）。适合于分时操作系统、实时操作系统</p>
+</blockquote>
+<h3 id="进程切换的过程主要完成了："><a href="#进程切换的过程主要完成了：" class="headerlink" title="进程切换的过程主要完成了："></a>进程切换的过程主要完成了：</h3><p>对原来运行进程各种数据的保存</p>
+<p>对新的进程各种数据的恢复<br>（如：程序计数器、程序状态字、各种数据寄存器等处理机现场信息，这些信息一般保存在进程控制块）</p>
+<p>注意：进程切换是有代价的，因此如果过于频繁的进行进程调度、切换，必然会使整个系统的效率降低，使系统大部分时间都花在了进程切换上，而真正用于执行进程的时间减少。</p>
+<h2 id="调度算法的评价指标"><a href="#调度算法的评价指标" class="headerlink" title="调度算法的评价指标"></a>调度算法的评价指标</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150219719.png" alt="img" style="zoom:80%;">
+
+<h3 id="CPU利用率"><a href="#CPU利用率" class="headerlink" title="CPU利用率"></a>CPU利用率</h3><p>CPU利用率：指CPU “忙碌”的时间占总时间的比例。</p>
+<blockquote>
+<p>利 用 率 = 忙 碌 的 时 间 / 总 时 间</p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150229620.png" alt="img" style="zoom:70%;">
+
+<h3 id="系统吞吐量"><a href="#系统吞吐量" class="headerlink" title="系统吞吐量"></a>系统吞吐量</h3><p>对于计算机来说，希望能用尽可能少的时间处理完尽可能多的作业</p>
+<p>系统吞吐量：单位时间内完成作业的数量</p>
+<blockquote>
+<p>系统吞吐量=总共完成了多少道作业/总共花了多少时间</p>
+</blockquote>
+<p>Eg：某计算机系统处理完10道作业，共花费100秒，则系统吞吐量为？ 10/100 = 0.1 道 / 秒</p>
+<h3 id="周转时间"><a href="#周转时间" class="headerlink" title="周转时间"></a>周转时间</h3><p>对于计算机的用户来说，他很关心自己的作业从提交到完成花了多少时间。</p>
+<p>周转时间，是指从作业被提交给系统开始，到作业完成为止的这段时间间隔。</p>
+<p>它包括四个部分：</p>
+<ul>
+<li>作业在外存后备队列上等待作业调度（高级调度）的时间、</li>
+<li>进程在就绪队列上等待进程调度（低级调度）的时间、</li>
+<li>进程在CPU上执行的时间、</li>
+<li>进程等待I/O操作完成的时间。</li>
+</ul>
+<p>后三项在一个作业的整个处理过程中，可能发生多次。对于用户来说，更关心自己的单个作业的周转时间</p>
+<blockquote>
+<p>(作业）周转时间=作业完成时间–作业提交时间</p>
+</blockquote>
+<p>对于操作系统来说，更关心系统的整体表现， 因此更关心所有作业周转时间的平均值</p>
+<blockquote>
+<p>平均周转时间=各作业周转时间之和/作业数</p>
+</blockquote>
+<h3 id="等待时间"><a href="#等待时间" class="headerlink" title="等待时间"></a>等待时间</h3><p>计算机的用户希望自己的作业尽可能少的等待处理机</p>
+<p>等待时间，指进程 / 作业处于等待处理机状态时间之和，等待时间越长，用户满意度越低。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150322912.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p>对于进程来说，等待时间就是指进程建立后等待被服务的时间之和，在等待I/O完成的期间其实进程也是在被服务的，所以不计入等待时间。</p>
+<p>对于作业来说，不仅要考虑建立进程后的等待时间，还要加上作业在外存后备队列中等待的时间。</p>
+<p>一个作业总共需要被CPU服务多久，被I/O设备服务多久一般是确定不变的，因此调度算法其实只会影响作业 / 进程的等待时间。当然，与前面指标类似，也有“平均等待时间”来评价整体性能。</p>
+</blockquote>
+<h3 id="响应时间"><a href="#响应时间" class="headerlink" title="响应时间"></a>响应时间</h3><p>对于计算机用户来说，会希望自己的提交的请求（比如通过键盘输入了一个调试命令）尽早地开始被系统服务、回应。</p>
+<p>响应时间，指从用户提交请求到首次产生响应所用的时间。</p>
+<h3 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150344160.png" alt="img" style="zoom:100%;">
+
+<h2 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20210506150354868.png" alt="img " style="zoom:80%;">
+
+<blockquote>
+<p>Tips：各种调度算法的学习思路</p>
+<ol>
+<li>算法思想</li>
+<li>算法规则</li>
+<li>这种调度算法是用于作业调度还是进程调度？</li>
+<li>抢占式？非抢占式？</li>
+<li>优点和缺点</li>
+<li>是否会导致饥饿</li>
+</ol>
+<p>饥饿:某进程 / 作业长期得不到服务.</p>
+</blockquote>
+<h3 id="先来先服务（FCFS-First-Come-First-Serve）"><a href="#先来先服务（FCFS-First-Come-First-Serve）" class="headerlink" title="先来先服务（FCFS, First Come First Serve）"></a>先来先服务（FCFS, First Come First Serve）</h3><p>按照作业 / 进程到达的先后顺序进行服务</p>
+<p>用于作业 / 进程调度: 用于作业调度时，考虑的是哪个作业先到达后备队列；用于进程调度时，考虑的是哪个进程先到达就绪队列。</p>
+<p>非抢占式的算法</p>
+<p>优点：公平、算法实现简单<br>缺点：排在长作业（进程）后面的短作业需要等待很长时间，带权周转时间很大，对短作业来说用户体验不好。即，FCFS算法对长作业有利，对短作业不利（Eg ：排队买奶茶…）</p>
+<p>不会产生饥饿现象</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2021050615041251.png" alt="img" style="zoom:80%;">
+
+<h3 id="短作业优先（SJF-Shortest-Job-First）"><a href="#短作业优先（SJF-Shortest-Job-First）" class="headerlink" title="短作业优先（SJF, Shortest Job First）"></a>短作业优先（SJF, Shortest Job First）</h3><p>算法思想：追求最少的平均等待时间，最少的平均周转时间、最少的平均平均带权周转时间</p>
+<p>算法规则： 最短的作业 / 进程优先得到服务（所谓“最短”，是指要求服务时间最短）</p>
+<p>即可用于作业调度，也可用于进程调度。用于进程调度时称为“短进程优先（SPF, Shortest Process First）算法”</p>
+<p><font color="red">SJF和SPF是非抢占式的算法。但是也有抢占式的版本——最短剩余时间优先算法（SRTN, Shortest Remaining Time Next）</font></p>
+<p>优缺点：</p>
+<blockquote>
+<p>优点：“最短的”平均等待时间、平均周转时间</p>
+<p>缺点：不公平。对短作业有利，对长作业不利。可能产生饥饿现象。另外，作业/进程的运行时间是由用户提供的，并不一定真实，不一定能做到真正的短作业优先。</p>
+</blockquote>
+<p>是否会产生饥饿？</p>
+<blockquote>
+<p>会。如果源源不断的有短作业/进程到来，可能使长作业/进程长时间得不到服务，产生“饥饿”现象。如果一直得不到服务，则称为“饿死”。</p>
+</blockquote>
+<p>非抢占式：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828161614275.png" alt="image-20210828161614275" style="zoom:80%;">
+
+<p>抢占式：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828161853587.png" alt="image-20210828161853587 " style="zoom:80%;">
+
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828162029637.png" alt="image-20210828162029637" style="zoom:80%;">
+
+<p>先来先服务（FCFS） 和 短作业优先（SJF） 的思考？</p>
+<blockquote>
+<p><font color="red">FCFS算法是在每次调度的时候选择一个等待时间最长的作业（进程）为其服务。但是没有考虑到作业的运行时间，因此对短作业不友好。</font></p>
+<p><font color="red">SJF算法是选择一个执行时间最短的作业为其服务。但是又完全不考虑哥哥作业的等待时间，因此导致对长作业不友好的问题，甚至会产生饥饿问题</font></p>
+</blockquote>
+<p>设计一个算法，既考虑各个作业的等待时间，也能兼顾运行时间？ </p>
+<h3 id="高响应比优先（HRRN，Highest-Response-Ratio-Next）"><a href="#高响应比优先（HRRN，Highest-Response-Ratio-Next）" class="headerlink" title="高响应比优先（HRRN，Highest Response Ratio Next）"></a>高响应比优先（HRRN，Highest Response Ratio Next）</h3><p>算法思想：综合考虑作业/进程的等待时间和要求服务的时间。</p>
+<p>算法规则： 在每次调度时先计算各个作业/进程的响应比，选择相应比最高的作业/进程为其服务。</p>
+<blockquote>
+<p>响应比=（等待时间+要求服务时间）/ 要求服务时间</p>
+</blockquote>
+<p>是否可抢占？</p>
+<blockquote>
+<p>非抢占式的算法。因此只有当前运行的作业/进程主动放弃处理机时，才需要调度，才需要计算响应比</p>
+</blockquote>
+<p>优缺点：</p>
+<blockquote>
+<p>综合考虑了等待时间和运行时间（要求服务时间）等待时间相同时，要求服务时间短的优先。要求服务时间相同时，等待时间长的优先。对于长作业来说，随着等待时间越来越久，其响应比也会越来越大，从而避免了长作业饿死的问题。</p>
+</blockquote>
+<p>不会导致饥饿。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828163921731.png" alt="image-20210828163921731" style="zoom:80%;">
+
+
+
+
+
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/image-20210828164332921.png" alt="image-20210828164332921" style="zoom:80%;">
+
+<h3 id="时间片轮转-RR"><a href="#时间片轮转-RR" class="headerlink" title="时间片轮转(RR)"></a>时间片轮转(RR)</h3><p>轮流让就绪队列中的进程依次执行一个时间片 (当前的进程会被抢占)</p>
+<p>注意：<br>(1) 每次选择的上处理机的进程都是排在就绪队列队头的进程<br>(2) 一个进程执行完会移动到就绪队列的尾部<br>(3) 一个进程时间片到，刚下处理机要移至就绪队列的尾部的同时有一个新进程到达就绪队 列，则新进程先到达就绪队列的尾部<br>时间片轮转算法过程详解(假设时间片大小为2)，如图：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094355454.png" alt="img " style="zoom:80%;">
+
+<blockquote>
+<p>(1) 0时刻，只有P1，P1运行2时间片<br>(2) 2时刻，P1下处理机(P1剩3)，同时P2到达，P2先进入就绪队列(P2 → P1)，P2运行2时间片<br>(3) 4时刻，P2下处理机(P2剩2)，同时P3到达，P3比P2先到达就绪队列(P1 → P3 → P2)，P1运行2时间片<br>(4) 5时刻，P4到达，此时的就绪队列(P1 → P3 → P2 → P4)<br>(5) 6时刻，P1下处理机(P1剩1)，P3运行1时间片，此时的就绪队列(P3 → P2 → P4 → P1)<br>(6) 7时刻，P3下处理机(P3运行结束)，P2运行2时间片<br>(7) 9时刻，P2下处理机(P2运行结束)，P4运行2时间片，就绪队列(P4 → P1)<br>(8) 11时刻，P4下处理机(P4剩4)，P1运行1时间片<br>(9) 12时刻，P1下处理机(P1运行结束)，此后一直运行P4，16时刻所有进程结束</p>
+</blockquote>
+<p>注意：<br>(1) 若时间片太大，使得每个进程都可以在一个时间片完成，此算法会退化为先来先服务算 法，因此时间片不能太大<br>(2) 若时间片太小，进程切换过于频繁，因此时间片不能太小</p>
+<p>总结如下：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094404849.png" alt="img" style="zoom:80%;">
+
+<h3 id="优先级调度"><a href="#优先级调度" class="headerlink" title="优先级调度"></a>优先级调度</h3><p>(1) 非抢占式的优先级调度算法<br>每次调度时选择当前已到达且优先级最高的进程 (执行完当前的进程才会执行下一个进 程，不会被抢占)，如图：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094424713.png" alt="img" style="zoom:80%;">
+
+<p> P2与P4优先级相同，先到达的先执行</p>
+<p>(2) 抢占式的优先级调度算法<br>每次调度时选择当前已到达且优先级最高的进程，当前进程主动放弃处理机时会发生调度， 就绪队列发生改变时会发生抢占 (当前的进程会被抢占)，如图</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094434296.png" alt="img" style="zoom:80%;">
+
+<p><font color="red">应当适当提升I/O型进程的优先级</font></p>
+<p>总结如下：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094448494.png" alt="img" style="zoom:80%;">
+
+<h3 id="多级反馈队列调度"><a href="#多级反馈队列调度" class="headerlink" title="多级反馈队列调度"></a>多级反馈队列调度</h3><p>(1) 设置多级就绪队列，各级队列优先级从高到低，时间片从小到大<br>(2) 新进程到达时先进入第一级队列，按FCFS原则排队等待被分配时间片，若用完时间片进程 还未结束，则进程进入下一级队列队尾，如果此时已经在最下级的队列，则重新放回最下级 队列的队尾<br>(3) 只有第K级队列为空时，才会为第K + 1级队列队头的进程分配时间片<br>(4) 被抢占处理机的进程重新放回原队列队尾<br>执行过程详解，如图</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/20200927094521559.png" alt="img" style="zoom:80%;">
+
+<p>P1运行1个时间片(P1剩7)，P1进入第二级队列，P2到达第一级队列，P2运行1个时间片(P2剩3)，P2进入第二级队列，第一级队列为空，执行第二级队列的P1，P1运行2时间片(P1剩5)，P1进入第三级队列，执行第二级队列的P2，P2运行1个时间片(P2被抢占，P2剩2)，P3到达第一级队列，执行P3，P3运行1个时间片(P3运行结束)，执行第二级队列的P2，P2运行2个时间片(P2运行结束)，剩余时间执行P1直至结束<br>总结如下：</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8602/2020092709452942.png" alt="img" style="zoom:80%;">
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/" class="post-title-link" itemprop="url">进程管理01</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-27 18:16:50 / 修改時間：20:50:39" itemprop="dateCreated datePublished" datetime="2021-08-27T18:16:50+08:00">2021-08-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h1><h2 id="进程的概念"><a href="#进程的概念" class="headerlink" title="进程的概念"></a>进程的概念</h2><h3 id="进程的定义"><a href="#进程的定义" class="headerlink" title="进程的定义"></a>进程的定义</h3><p>程序:就是一个指令序列。</p>
+<p>程序段、数据段、PCB三部分组成了<code>进程实体</code>(进程映像)。一般情况下，我们把进程实体就简称为进程。例如，所谓创建进程，实质上是创建进程实体中的PCB;而撤销进程，实质上是撤销进程实体中的PCB。</p>
+<blockquote>
+<p>PCB是进程存在的唯一标志 !</p>
+</blockquote>
+<p>从不同的角度，进程可以有不同的定义，比较传统典型的定义有:<br>1.进程是程序的一次执行过程。<br>2.进程是一个程序及其数据在处理机上顺序执行时所发生的活动。<br>3.进程是具有独立功能的程序在数据集合上运行的过程，它是系统进行资源分配和调度的一个独立单位。</p>
+<p>进程是进程实体的运行过程，是系统进行资源分配和调度的一个独立单位。</p>
+<h3 id="进程的组成"><a href="#进程的组成" class="headerlink" title="进程的组成"></a>进程的组成</h3><p><font size="4" color="#D2691E">进程(进程实体)</font>由程序段、数据段、PCB三 部分组成。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210505221509898.png" alt="img " style="zoom:80%;">
+
+<blockquote>
+<p>进程的管理者(操作系统)所需的数据都在PCB中。</p>
+<p>程序本身的运行所需的数据存放在程序段和数据段中。</p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210505221519928.png" alt="img" style="zoom:80%;">
+
+<h4 id="PCB"><a href="#PCB" class="headerlink" title="PCB"></a>PCB</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/202105052215334.png" alt="img" style="zoom:80%;">
+
+<h3 id="进程的组织"><a href="#进程的组织" class="headerlink" title="进程的组织"></a>进程的组织</h3><p>在一个系统中，通常有数十、数百乃至数千个PCB。为了能对他们加以有效的管理，应该用适当的方式把这些PCB组织起来。</p>
+<p>注:进程的组成讨论的是一个进程内部由哪些部分构成的问题，而进程的组织讨论的是多个进程之间的组织方式问题</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210505221547119.png" alt="img" style="zoom:80%;">
+
+<h3 id="链接方式"><a href="#链接方式" class="headerlink" title="链接方式"></a>链接方式</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210505221601693.png" alt="在这里插入图片描述" style="zoom:80%;">
+
+<h3 id="索引方式"><a href="#索引方式" class="headerlink" title="索引方式"></a>索引方式</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/202105052216120.png" alt="img" style="zoom:80%;">
+
+<h3 id="进程的特征"><a href="#进程的特征" class="headerlink" title="进程的特征"></a>进程的特征</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/image-20210827182825094.png" alt="image-20210827182825094" style="zoom:40%;">
+
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210505221638460.png" alt="img" style="zoom:80%;">
+
+<h2 id="进程状态及转换"><a href="#进程状态及转换" class="headerlink" title="进程状态及转换"></a>进程状态及转换</h2><h3 id="三种基本状态"><a href="#三种基本状态" class="headerlink" title="三种基本状态"></a>三种基本状态</h3><p>进程是程序的一次执行。在这个执行过程中，有时进程正在被CPU处理，有时又需要等待CPU服务，可见，进程的状态是会有各种变化。为了方便对各个进程的管理，操作系统需要将进程合理地划分为几种状态。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/2021050614465518.png" alt="img" style="zoom:80%;">
+
+<blockquote>
+<p><font size="4" color="#D2691E">注意:单核处理机环境下，每时刻最多只有一个进程处于运行态。(双核环境下可以同时有两个进程处于运行态)</font></p>
+<p><font size="4" color="#D2691E">进程已经拥有了除处理机之外所有需要的资源，一旦获得处理机，即可立即进入运行态开始运行。即:万事俱备，只欠CPU</font></p>
+<p><font size="4" color="#D2691E">如:等待操作系统分配打印机、等待读磁盘操作的结果。CPU是计算机中最昂贵的部件，为了提高CPU的利用率，需要先将其他进程需要的资源分配到位，才能得到CPU的服务</font></p>
+</blockquote>
+<h3 id="另外两种状态"><a href="#另外两种状态" class="headerlink" title="另外两种状态"></a>另外两种状态</h3><blockquote>
+<p>操作系统需要完成创建进程。操作系统为该进程分配所需的内存空间等系统资源，并为其创建、初始化PCB (如:为进程分配PID)</p>
+</blockquote>
+<blockquote>
+<p>进程运行结束(或者由于bug导致进程无法继续执行下去，比如数组越界错误)，需要撤销进程。操作系统需要完成撤销进程相关的工作。完成将分配给进程的资源回收，撤销进程PCB等工作</p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144707756.png" alt="img" style="zoom:80%;">
+
+<h3 id="进程状态的转换"><a href="#进程状态的转换" class="headerlink" title="进程状态的转换"></a>进程状态的转换</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144726154.png" alt="img" style="zoom:67%;">
+
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144737635.png" alt="img" style="zoom:67%;">
+
+<h2 id="进程控制"><a href="#进程控制" class="headerlink" title="进程控制"></a>进程控制</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144753359.png" alt="img" style="zoom:90%;">
+
+<p>进程控制的主要功能是对系统中的所有进程实施有效的管理，它具有创建新进程、撤销已有进程、实现进程状态转换等功能。<br>简化理解：反正进程控制就是要实现进程状态转换</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144809684.png" alt="img" style="zoom:80%;">
+
+<h3 id="如何实现进程控制？"><a href="#如何实现进程控制？" class="headerlink" title="如何实现进程控制？"></a>如何实现进程控制？</h3><blockquote>
+<p>用<font size="4" color="#D2691E">原语</font>实现</p>
+<p>原语是一种特殊的程序，它的执行具有<font size="4" color="#D2691E">原子性</font>。也就是说，这段程序的运行必须一气呵成，不可中断</p>
+</blockquote>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144822199.png" alt="img" style="zoom:67%;">
+
+<blockquote>
+<p>思考：<font size="4" color="red">为何进程控制（状态转换）的过程要“一气呵成”？</font></p>
+<p>如果不能“一气呵成”，就有可能导致操作系\统中的某些关键数据结构信息不统一的情况，这会影响操作系统进行别的管理工作。</p>
+</blockquote>
+<p>Eg：假设PCB中的变量 state 表示进程当前所处状态，1表示就绪态，2表示阻塞态…</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144839638.png" alt="img" style="zoom:100%;">
+
+<p>假设此时进程2等待的事件发生，则操作系统中，负责进程控制的内核程序至少需要做这样两件事：</p>
+<ol>
+<li>将PCB2的 state 设为1</li>
+<li>将PCB2从阻塞队列放到就绪队列</li>
+</ol>
+<p>完成了第一步后收到中断信号，那么PCB2的state=1，但是它却被放在阻塞队列里</p>
+<h3 id="如何实现原语的“原子性”？"><a href="#如何实现原语的“原子性”？" class="headerlink" title="如何实现原语的“原子性”？"></a>如何实现原语的“原子性”？</h3><p>原语的执行具有原子性，即执行过程只能一气呵成，期间不允许被中断。<br>可以用“关中断指令”和“开中断指令”这两个特权指令实现原子性</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144853436.png" alt="img " style="zoom:80%;">
+
+<p>正常情况：CPU每执行完一条指令都会例行检查是否有中断信号需要处理，如果有，则暂停运行当前这段程序，转而执行相应的中断处理程序。</p>
+<p><font size="4" color="red">CPU执行了关中断指令之后，就不再例行检查中断信号，直到执行开中断指令之后才会恢复检查。这样，关中断、开中断之间的这些指令序列就是不可被中断的，这就实现了“原子性”</font></p>
+<h3 id="进程控制相关的原语"><a href="#进程控制相关的原语" class="headerlink" title="进程控制相关的原语"></a>进程控制相关的原语</h3><h4 id="创建原语"><a href="#创建原语" class="headerlink" title="创建原语"></a>创建原语</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144909647.png" alt="img" style="zoom:80%;">
+
+<h4 id="撤消原语"><a href="#撤消原语" class="headerlink" title="撤消原语"></a>撤消原语</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144920651.png" alt="img" style="zoom:80%;">
+
+<h4 id="阻塞-唤醒"><a href="#阻塞-唤醒" class="headerlink" title="阻塞 唤醒"></a>阻塞 唤醒</h4><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144935442.png" alt="img" style="zoom:80%;"> 
+
+<h4 id="进程切换"><a href="#进程切换" class="headerlink" title="进程切换"></a>进程切换</h4><h4 id><a href="#" class="headerlink" title></a><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506144955489.png" alt="img" style="zoom:80%;"></h4><h3 id="进程控制相关的原语-1"><a href="#进程控制相关的原语-1" class="headerlink" title="进程控制相关的原语"></a>进程控制相关的原语</h3><ol>
+<li>更新PCB中的信息<br>a. 所有的进程控制原语一定都会修改进程状态标志<br>b. 剥夺当前运行进程的CPU使用权必然需要保存其运行环境<br>c. 某进程开始运行前必然要恢复期运行环境</li>
+<li>将PCB插入合适的队列</li>
+<li>分配 / 回收资源</li>
+</ol>
+<h3 id="如何实现进程控制"><a href="#如何实现进程控制" class="headerlink" title="如何实现进程控制"></a>如何实现进程控制</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506145204110.png" alt="img" style="zoom:80%;">
+
+<h2 id="进程通信"><a href="#进程通信" class="headerlink" title="进程通信"></a>进程通信</h2><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506145251732.png" alt="在这里插入图片描述" style="zoom:80%;">
+
+<p>顾名思义，进程通信就是指进程之间的信息交换。</p>
+<p>进程是分配系统资源的单位（包括内存地址空间），因此各进程拥有的内存地址空间相互独立。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506145310313.png" alt="img" style="zoom:80%;">
+
+<p>为了保证安全，一个进程不能直接访问另一个进程的地址空间。</p>
+<p>但是进程之间的信息交换又是必须实现的。为了保证进程间的安全通信，操作系统提供了一些方法。</p>
+<h3 id="进程通信——共享存储"><a href="#进程通信——共享存储" class="headerlink" title="进程通信——共享存储"></a>进程通信——共享存储</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/image-20210827202122804.png" alt="image-20210827202122804" style="zoom:80%;">
+
+<p><font size="4" color="red">基础数据结构</font>的共享：比如共享空间里只能放一个长度为10的数组。这种共享方式速度慢、限制多，是一种低级通信方式。</p>
+<p><font size="4" color="red">基于存储区</font>的共享：在内存中画出一块共享存储区，数据的形式、存放位置都由进程控制，而不是操作系统。相比之下，这种共享方式速度更快，是一种<font size="4" color="red">高级通信</font>方式。</p>
+<h3 id="进程通信——管道通信"><a href="#进程通信——管道通信" class="headerlink" title="进程通信——管道通信"></a>进程通信——管道通信</h3><p>“管道”是指用于连接读写进程的一个共享文件，又名pipe文件。其实就是在内存中开辟一个大小固定的缓冲区。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506145344648.png" alt="img" style="zoom:80%;">
+
+<ol>
+<li>管道只能采用<font size="4" color="red">半双工通信</font>，某一时间段内只能实现单向的传输。如果要实现双向同时通信，则需要设置两个管道。</li>
+<li>各进程要<font size="4" color="red">互斥</font>地访问管道。</li>
+<li>数据以字符流的形式写入管道，当管道写满时，写进程的write() 系统调用将被阻塞，等待读进程将数据取走。当读进程将数据全部取走后，管道变空，此时读进程的read() 系统调用将被阻塞。（缓冲区的特性）</li>
+<li>如果没写满，就不允许读。如果没读空，就不允许写。<strong>（缓冲区的特性）</strong></li>
+<li><font size="4" color="red">数据一旦被读出，就从管道中被抛弃，这就意味着读进程最多只能有一个，否则可能会有读错数据的情况。</font></li>
+</ol>
+<h3 id="进程通信——消息传递"><a href="#进程通信——消息传递" class="headerlink" title="进程通信——消息传递"></a>进程通信——消息传递</h3><p>进程间的数据交换以格式化的消息（Message）为单位。进程通过操作系统提供的“发送消息 / 接收消息”<font size="4" color="red">原语</font>进行数据交换。</p>
+<img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506145406491.png" alt="img" style="zoom:80%;">
+
+<ul>
+<li>直接消息传递：消息直接挂到接收进程的消息缓冲队列上</li>
+<li>间接消息传递：消息要先发送到中间实体（信箱）中，因此也称“信箱通信方式”。Eg：计网中的电子邮件系统</li>
+</ul>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><img src="/2021/08/27/%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%8601/20210506145419455.png" alt="img" style="zoom:80%;">
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1501,792 +2286,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/" class="post-title-link" itemprop="url">Golang中map的基本使用和底层理解</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-18 16:44:00 / 修改時間：19:53:38" itemprop="dateCreated datePublished" datetime="2021-08-18T16:44:00+08:00">2021-08-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="map的基本使用"><a href="#map的基本使用" class="headerlink" title="map的基本使用"></a>map的基本使用</h1><h2 id="key与value的限制"><a href="#key与value的限制" class="headerlink" title="key与value的限制"></a>key与value的限制</h2><p>key一定要是<strong>可比较</strong>的类型（可以理解为支持==的操作）：</p>
-<table>
-<thead>
-<tr>
-<th align="center">可比教类型</th>
-<th align="center">不可比较类型</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">boolean</td>
-<td align="center">slice</td>
-</tr>
-<tr>
-<td align="center">numeric</td>
-<td align="center">map</td>
-</tr>
-<tr>
-<td align="center">string</td>
-<td align="center">func</td>
-</tr>
-<tr>
-<td align="center">pointer</td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">channel</td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">interface</td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">array和struct</td>
-<td align="center"></td>
-</tr>
-</tbody></table>
-<p>如果是非法的key类型，会报错：invalid map key type xxx</p>
-<blockquote>
-<p>golang为uint32、uint64、string提供了fast access，使用这些类型作为key可以提高map访问速度。[runtime/hashmap_fast.go]</p>
-</blockquote>
-<p>value可以是<strong>任意类型</strong>。</p>
-<h2 id="新增-amp-删除-amp-更新-amp-查询"><a href="#新增-amp-删除-amp-更新-amp-查询" class="headerlink" title="新增 &amp; 删除 &amp; 更新 &amp; 查询"></a>新增 &amp; 删除 &amp; 更新 &amp; 查询</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 新增</span></span><br><span class="line">m[<span class="string">&quot;name&quot;</span>] = <span class="string">&quot;咖啡色的羊驼&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除，key不存在则啥也不干</span></span><br><span class="line"><span class="built_in">delete</span>(m, <span class="string">&quot;name&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更新</span></span><br><span class="line">m[<span class="string">&quot;name&quot;</span>] = <span class="string">&quot;咖啡色的羊驼2&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询，key不存在返回value类型的零值</span></span><br><span class="line">i := m[<span class="string">&quot;name&quot;</span>] <span class="comment">// 三种查询方式，</span></span><br><span class="line">i, ok := m[<span class="string">&quot;name&quot;</span>]</span><br><span class="line">_, ok := m[<span class="string">&quot;name&quot;</span>]</span><br></pre></td></tr></table></figure>
-
-<h2 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h2><p>需要强调的是map本身是<strong>无序的</strong>，在遍历的时候并不会按照你传入的顺序，进行传出</p>
-<p>正常遍历:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> k, v := <span class="keyword">range</span> m &#123; </span><br><span class="line">    fmt.Println(k, v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>有序遍历:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;sort&quot;</span></span><br><span class="line"><span class="keyword">var</span> keys []<span class="keyword">string</span></span><br><span class="line"><span class="comment">// 把key单独抽取出来，放在数组中</span></span><br><span class="line"><span class="keyword">for</span> k, _ := <span class="keyword">range</span> m &#123;</span><br><span class="line">    keys = <span class="built_in">append</span>(keys, k)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 进行数组的排序</span></span><br><span class="line">sort.Strings(keys)</span><br><span class="line"><span class="comment">// 遍历数组就是有序的了</span></span><br><span class="line"><span class="keyword">for</span> _, k := <span class="keyword">range</span> keys &#123;</span><br><span class="line">    fmt.Println(k, m[k])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="函数传参"><a href="#函数传参" class="headerlink" title="函数传参"></a>函数传参</h2><p>Golang中是没有引用传递的，均为值传递。这意味着传递的是数据的拷贝。<br>那么map本身是<strong>引用类型</strong>，作为形参或返回参数的时候，传递的是<strong>值的拷贝，而值是地址</strong>，<strong>扩容</strong>时也<strong>不会改变</strong>这个地址</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">changeM</span><span class="params">(m <span class="keyword">map</span>[<span class="keyword">int64</span>]<span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 函数开始时地址是： %p\n&quot;</span>, m)</span><br><span class="line">	<span class="keyword">var</span> max = <span class="number">5</span></span><br><span class="line">	<span class="keyword">for</span> i:=<span class="number">0</span>; i&lt;max; i++&#123;</span><br><span class="line">		m[<span class="keyword">int64</span>(i)] = <span class="number">2</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 在函数返回前地址是：%p\n&quot;</span>, m)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> m <span class="keyword">map</span>[<span class="keyword">int64</span>]<span class="keyword">int64</span></span><br><span class="line">	m = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">int64</span>]<span class="keyword">int64</span>, <span class="number">1</span>)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 的原始地址：%p\n&quot;</span>, m)</span><br><span class="line">	changeM(m)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;m 改变后地址：%p\n&quot;</span>, m)</span><br><span class="line">	fmt.Println(<span class="string">&quot;m 长度是：&quot;</span>, <span class="built_in">len</span>(m))</span><br><span class="line">	fmt.Println(<span class="string">&quot;m 参数是：&quot;</span>, m)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>输出：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">m 的原始地址：<span class="number">0xc00006a360</span></span><br><span class="line">m 函数开始时地址是： <span class="number">0xc00006a360</span></span><br><span class="line">m 在函数返回前地址是：<span class="number">0xc00006a360</span></span><br><span class="line">m 改变后地址：<span class="number">0xc00006a360</span></span><br><span class="line">m 长度是： <span class="number">5</span></span><br><span class="line">m 参数是： <span class="keyword">map</span>[<span class="number">0</span>:<span class="number">2</span> <span class="number">1</span>:<span class="number">2</span> <span class="number">2</span>:<span class="number">2</span> <span class="number">3</span>:<span class="number">2</span> <span class="number">4</span>:<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
-
-<h1 id="map的深入理解"><a href="#map的深入理解" class="headerlink" title="map的深入理解"></a>map的深入理解</h1><h2 id="map数据结构"><a href="#map数据结构" class="headerlink" title="map数据结构"></a>map数据结构</h2><p>Golang的map使用哈希表作为底层实现，一个哈希表里可以有多个哈希表节点，也即bucket，而每个bucket就保存了map中的一个或一组键值对。</p>
-<p>map数据结构由<code>runtime/map.go:hmap</code>定义:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> hmap <span class="keyword">struct</span> &#123;</span><br><span class="line">    count     <span class="keyword">int</span> <span class="comment">// 当前保存的元素个数</span></span><br><span class="line">    ...</span><br><span class="line">    B         <span class="keyword">uint8</span></span><br><span class="line">    ...</span><br><span class="line">    buckets    unsafe.Pointer <span class="comment">// bucket数组指针，数组的大小为2^B</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>下图展示一个拥有4个bucket的map：</p>
-<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_897a05f6373f7f966d00d1bfea6274d2_r.png" alt="img " style="zoom:80%;">
-
-<p>本例中, <code>hmap.B=2</code>， 而hmap.buckets长度是2^B为4. 元素经过哈希运算后会落到某个bucket中进行存储。查找过程类似。</p>
-<p><code>bucket</code>很多时候被翻译为桶，所谓的<code>哈希桶</code>实际上就是bucket</p>
-<h2 id="bucket数据结构"><a href="#bucket数据结构" class="headerlink" title="bucket数据结构"></a>bucket数据结构</h2><p>bucket数据结构由<code>runtime/map.go:bmap</code>定义</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> bmap <span class="keyword">struct</span> &#123;</span><br><span class="line">    tophash [<span class="number">8</span>]<span class="keyword">uint8</span> <span class="comment">//存储哈希值的高8位</span></span><br><span class="line">    data    <span class="keyword">byte</span>[<span class="number">1</span>]  <span class="comment">//key value数据:key/key/key/.../value/value/value...</span></span><br><span class="line">    overflow *bmap   <span class="comment">//溢出bucket的地址</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>每个bucket可以存储8个键值对。</p>
-<ul>
-<li>tophash是个长度为8的数组，哈希值相同的键（准确的说是哈希值低位相同的键）存入当前bucket时会将哈希值的高位存储在该数组中，以方便后续匹配。</li>
-<li>data区存放的是key-value数据，存放顺序是key/key/key/…value/value/value，如此存放是为了节省字节对齐带来的空间浪费。</li>
-<li>overflow 指针指向的是下一个bucket，据此将所有冲突的键连接起来。</li>
-</ul>
-<p>注意：上述中data和overflow并不是在结构体中显示定义的，而是直接通过指针运算进行访问的。</p>
-<p>下图展示bucket存放8个key-value对：</p>
-<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_7f0ba5a124641b1413279892581513c4_r.png" alt="img" style="zoom:80%;">
-
-<h2 id="哈希冲突"><a href="#哈希冲突" class="headerlink" title="哈希冲突"></a>哈希冲突</h2><p>当有两个或以上数量的键被哈希到了同一个bucket时，我们称这些键发生了冲突。Go使用链地址法来解决键冲突。由于每个bucket可以存放8个键值对，所以同一个bucket存放超过8个键值对时就会再创建一个键值对，用类似链表的方式将bucket连接起来。</p>
-<p>下图展示产生冲突后的map：</p>
-<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_a8b9e5919d9951a71c1c36445dd68521_r.png" alt="img" style="zoom:80%;">
-
-<p>bucket数据结构指示下一个bucket的指针称为overflow bucket，意为当前bucket盛不下而溢出的部分。事实上哈希冲突并不是好事情，它降低了存取效率，好的哈希算法可以保证哈希值的随机性，但冲突过多也是要控制的，后面会再详细介绍</p>
-<h2 id="负载因子"><a href="#负载因子" class="headerlink" title="负载因子"></a>负载因子</h2><p>负载因子用于衡量一个哈希表冲突情况，公式为：</p>
-<blockquote>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">负载因子 = 键数量/bucket数量</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>例如，对于一个bucket数量为4，包含4个键值对的哈希表来说，这个哈希表的负载因子为1.</p>
-<p>哈希表需要将负载因子控制在合适的大小，超过其阀值需要进行rehash，也即键值对重新组织：</p>
-<ul>
-<li>哈希因子过小，说明空间利用率低</li>
-<li>哈希因子过大，说明冲突严重，存取效率低</li>
-</ul>
-<p>每个哈希表的实现对负载因子容忍程度不同，比如Redis实现中负载因子大于1时就会触发rehash，而Go则在在负载因子达到6.5时才会触发rehash，因为Redis的每个bucket只能存1个键值对，而Go的bucket可能存8个键值对，所以Go可以容忍更高的负载因子。</p>
-<h2 id="渐进式扩容"><a href="#渐进式扩容" class="headerlink" title="渐进式扩容"></a>渐进式扩容</h2><h3 id="扩容的前提条件"><a href="#扩容的前提条件" class="headerlink" title="扩容的前提条件"></a>扩容的前提条件</h3><p>为了保证访问效率，当新元素将要添加进map时，都会检查是否需要扩容，扩容实际上是以空间换时间的手段。<br>触发扩容的条件有二个：</p>
-<ol>
-<li>负载因子 &gt; 6.5时，也即平均每个bucket存储的键值对达到6.5个。</li>
-<li>overflow数量 &gt; 2^15时，也即overflow数量超过32768时。</li>
-</ol>
-<h3 id="增量扩容"><a href="#增量扩容" class="headerlink" title="增量扩容"></a>增量扩容</h3><p>当负载因子过大时，就新建一个bucket，新的bucket长度是原来的2倍，然后旧bucket数据搬迁到新的bucket。<br>考虑到如果map存储了数以亿计的key-value，一次性搬迁将会造成比较大的延时，Go采用逐步搬迁策略，即每次访问map时都会触发一次搬迁，每次搬迁2个键值对。</p>
-<p>下图展示了包含一个bucket满载的map(为了描述方便，图中bucket省略了value区域):</p>
-<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_2d622a6bc19ca1b5bcb225f77869f9c2_r.png" alt="img" style="zoom:100%;">
-
-<p>当前map存储了7个键值对，只有1个bucket。此地负载因子为7。再次插入数据时将会触发扩容操作，扩容之后再将新插入键写入新的bucket。</p>
-<p>当第8个键值对插入时，将会触发扩容，扩容后示意图如下：</p>
-<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_2f0122f26e5d66ca91e6820ace6b379b_r.png" alt="img" style="zoom:100%;">
-
-<p>hmap数据结构中oldbuckets成员指身原bucket，而buckets指向了新申请的bucket。新的键值对被插入新的bucket中。<br>后续对map的访问操作会触发迁移，将oldbuckets中的键值对逐步的搬迁过来。当oldbuckets中的键值对全部搬迁完毕后，删除oldbuckets。</p>
-<p>搬迁完成后的示意图如下：</p>
-<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_b1178e0a3cea02c9386e5f5eaa6f99a6_r.png" alt="img" style="zoom:80%;">
-
-<p>数据搬迁过程中原bucket中的键值对将存在于新bucket的前面，新插入的键值对将存在于新bucket的后面。</p>
-<h3 id="等量扩容"><a href="#等量扩容" class="headerlink" title="等量扩容"></a>等量扩容</h3><p>所谓等量扩容，实际上并不是扩大容量，buckets数量不变，重新做一遍类似增量扩容的搬迁动作，而是把松散的键值对重新排列一次，以使bucket的使用率更高，进而保证更快的存取。<br>在极端场景下，比如不断地增删，而键值对正好集中在一小部分的bucket，这样会造成overflow的bucket数量增多，但负载因子又不高，从而无法执行增量搬迁的情况，如下图所示：</p>
-<img src="/2021/08/18/Golang%E4%B8%AD%E7%9A%84map/m_f3a5989c90204df9304d5ae246f3db72_r.png" alt="img" style="zoom:80%;">
-
-<p>上图可见，overflow的bucket中大部分是空的，访问效率会很差。此时进行一次等量扩容，即buckets数量不变，经过重新组织后overflow的bucket数量会减少，即节省了空间又会提高访问效率。</p>
-<h2 id="查找过程"><a href="#查找过程" class="headerlink" title="查找过程"></a>查找过程</h2><p>查找过程如下：</p>
-<ol>
-<li>根据key值算出哈希值</li>
-<li>取哈希值低位与hmap.B取模确定bucket位置</li>
-<li>取哈希值高位在tophash数组中查询</li>
-<li>如果tophash[i]中存储值也哈希值相等，则去找到该bucket中的key值进行比较</li>
-<li>当前bucket没有找到，则继续从下个overflow的bucket中查找。</li>
-<li>如果当前处于搬迁过程，则优先从oldbuckets查找</li>
-</ol>
-<p>注：如果查找不到，也不会返回空值，而是返回相应类型的0值。</p>
-<h2 id="插入过程"><a href="#插入过程" class="headerlink" title="插入过程"></a>插入过程</h2><p>新元素插入过程如下：</p>
-<ol>
-<li>根据key值算出哈希值</li>
-<li>取哈希值低位与hmap.B取模确定bucket位置</li>
-<li>查找该key是否已经存在，如果存在则直接更新值</li>
-<li>如果没找到将key，将key插入</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/18/%E5%8D%95%E5%90%91%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/18/%E5%8D%95%E5%90%91%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">单向散列函数</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-18 15:00:02 / 修改時間：15:17:22" itemprop="dateCreated datePublished" datetime="2021-08-18T15:00:02+08:00">2021-08-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="什么是单向散列函数"><a href="#什么是单向散列函数" class="headerlink" title="什么是单向散列函数"></a>什么是单向散列函数</h2><blockquote>
-<p>单向散列函数（one-wayftnction）有一个输人和一个输出，其中输人称为消息（message），输出称为散列值（hashvalue）。单向散列函数可以根据消息的内容计算出散列值，而散列值就可以被用来检查消息的完整性。</p>
-<p>散列值的长度和消息的长度无关。无论消息是1比特，还是100MB，甚至是IOOGB，单向散列函数都会计算出固定长度的散列值。以SHA-I单向散列函数为例，它所计算出的散列值的长度永远是160比特（20字节）</p>
-</blockquote>
-<img src="/2021/08/18/%E5%8D%95%E5%90%91%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0/image-20210818150209003.png" alt="image-20210818150209003" style="zoom:67%;">
-
-<h2 id="单向散列函数的性质"><a href="#单向散列函数的性质" class="headerlink" title="单向散列函数的性质"></a>单向散列函数的性质</h2><ul>
-<li><p>根据任意长度的消息计算出固定长度的散列值</p>
-</li>
-<li><p>能够快速计算出散列值</p>
-</li>
-<li><p>消息不同散列值也不同</p>
-<blockquote>
-<p>为了能够确认完整性，消息中哪怕只有1比特的改变，也必须有很高的概率产生不同的散列值。</p>
-<p>如果单向散列函数计算出的散列值没有发生变化，那么消息很容易就会被篡改，这个单向散列函数也就无法被用于完整性的检查。<strong>两个不同的消息产生同一个散列值的情况称为碰撞（collision）</strong>。如果要将单向散列函数用于完整性的检查，则需要确保在事实上不可能被人为地发现碰撞。</p>
-</blockquote>
-</li>
-<li><p><strong>具备单向性</strong></p>
-<img src="/2021/08/18/%E5%8D%95%E5%90%91%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0/image-20210818150357989.png" alt="image-20210818150357989" style="zoom:67%;"></li>
-</ul>
-<h2 id="单向散列函数的实际应用"><a href="#单向散列函数的实际应用" class="headerlink" title="单向散列函数的实际应用"></a>单向散列函数的实际应用</h2><ul>
-<li>检测软件是否被篡改</li>
-</ul>
-<blockquote>
-<p>我们可以使用单向散列函数来确认自己下载的软件是否被篡改。</p>
-<p>很多软件，尤其是安全相关的软件都会把通过单向散列函数计算出的散列值公布在自己的官方网站上。用户在下载到软件之后，可以自行计算散列值，然后与官方网站上公布的散列值进行对比。通过散列值，用户可以确认自己所下载到的文件与软件作者所提供的文件是否一致。</p>
-<p>这样的方法，在可以通过多种途径得到软件的情况下非常有用。为了减轻服务器的压力，很多软件作者都会借助多个网站（镜像站点）来发布软件，在这种情况下，单向散列函数就会在检测软件是否被篡改方面发挥重要作用。</p>
-</blockquote>
-<img src="/2021/08/18/%E5%8D%95%E5%90%91%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B0/image-20210818150530259.png" alt="image-20210818150530259" style="zoom:67%;">
-
-<ul>
-<li><p>消息认证码</p>
-<blockquote>
-<p>使用单向散列函数可以构造消息认证码。</p>
-<p>消息认证码是将“发送者和接收者之间的共享密钥”和“消息，进行混合后计算出的散列值。使用消息认证码可以检测并防止通信过程中的错误、篡改以及伪装。</p>
-<p>消息认证码在SSL/TLS中也得到了运用，关于SSL/TLS我们将后边章节中介绍。</p>
-</blockquote>
-</li>
-<li><p>数字签名</p>
-<blockquote>
-<p>在进行数字签名时也会使用单向散列函数。</p>
-<p>数字签名是现实社会中的签名（sign）和盖章这样的行为在数字世界中的实现。数字签名的处理过程非常耗时，因此一般不会对整个消息内容直接施加数字签名，而是先通过单向散列函数计算出消息的散列值，然后再对这个散列值施加数字签名。</p>
-</blockquote>
-</li>
-<li><p>伪随机数生成器</p>
-<blockquote>
-<p>使用单向散列函数可以构造伪随机数生成器。</p>
-<p>密码技术中所使用的随机数需要具备“事实上不可能根据过去的随机数列预测未来的随机数列”这样的性质。为了保证不可预测性，可以利用单向散列函数的单向性。</p>
-</blockquote>
-</li>
-<li><p>一次性口令</p>
-<blockquote>
-<p>使用单向散列函数可以构造一次性口令（one-time password）。</p>
-<p>一次性口令经常被用于服务器对客户端的合法性认证。在这种方式中，通过使用单向散列函数可以保证口令只在通信链路上传送一次（one-time），因此即使窃听者窃取了口令，也无法使用。</p>
-</blockquote>
-</li>
-</ul>
-<h2 id="常用的单向散列函数"><a href="#常用的单向散列函数" class="headerlink" title="常用的单向散列函数"></a>常用的单向散列函数</h2><h3 id="MD4、MD5"><a href="#MD4、MD5" class="headerlink" title="MD4、MD5"></a>MD4、MD5</h3><blockquote>
-<p>MD4是由Rivest于1990年设计的单向散列函数，能够产生128比特的散列值（RFC1186，修订版RFC1320）。不过，随着Dobbertin提出寻找MD4散列碰撞的方法，因此现在它已经不安全了。</p>
-<p>MD5的强抗碰撞性已经被攻破，也就是说，现在已经能够产生具备相同散列值的两条不同的消息，因此它也已经不安全了。</p>
-</blockquote>
-<p>Go中使用MD5</p>
-<ul>
-<li><p>需要导入的包</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/md5&quot;</span></span><br><span class="line">	<span class="string">&quot;encoding/hex&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
-<li><p>计算Md5的方式1</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getMD5_1</span><span class="params">(str []<span class="keyword">byte</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 计算数据的md5</span></span><br><span class="line">	result := md5.Sum(str)</span><br><span class="line">	fmt.Println(result)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%x\n&quot;</span>, result)</span><br><span class="line">	<span class="comment">// 2. 数据格式化为16进制格式字符串</span></span><br><span class="line">	res := fmt.Sprintf(<span class="string">&quot;%x&quot;</span>, result)</span><br><span class="line">	fmt.Println(res)</span><br><span class="line">	<span class="comment">// --- 这是另外一种格式化切片的方式</span></span><br><span class="line">	res = hex.EncodeToString(result[:])</span><br><span class="line">	fmt.Println(<span class="string">&quot;res: &quot;</span>, res)</span><br><span class="line">	<span class="keyword">return</span>  res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重要函数说明:</p>
-<ol>
-<li><p>返回数据data的MD5校验和</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/md5&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sum</span><span class="params">(data []<span class="keyword">byte</span>)</span> [<span class="title">Size</span>]<span class="title">byte</span></span></span><br><span class="line">    - 参数 data: 原始数据</span><br><span class="line">    - 返回值: 经过md5计算之后得到的数据, 长度为 <span class="number">16</span>字节(<span class="keyword">byte</span>)</span><br></pre></td></tr></table></figure></li>
-<li><p>将字符串编码为16进制格式</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;encoding/hex&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">EncodeToString</span><span class="params">(src []<span class="keyword">byte</span>)</span> <span class="title">string</span></span></span><br><span class="line">    - 参数 src: 要转换的数据</span><br><span class="line">    - 返回值: 转换之后得到的<span class="number">16</span>进制格式字符串</span><br></pre></td></tr></table></figure></li>
-</ol>
-</li>
-<li><p>计算Md5的方式2</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getMD5_2</span><span class="params">(str []<span class="keyword">byte</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 创建一个使用MD5校验的Hash对象`</span></span><br><span class="line">	myHash := md5.New()</span><br><span class="line">	<span class="comment">// 2. 通过io操作将数据写入hash对象中</span></span><br><span class="line">	io.WriteString(myHash, <span class="string">&quot;hello&quot;</span>)</span><br><span class="line">	<span class="comment">//io.WriteString(myHash, &quot;, world&quot;)</span></span><br><span class="line">	myHash.Write([]<span class="keyword">byte</span>(<span class="string">&quot;, world&quot;</span>))</span><br><span class="line">	<span class="comment">// 3. 计算结果</span></span><br><span class="line">	result := myHash.Sum(<span class="literal">nil</span>)</span><br><span class="line">	fmt.Println(result)</span><br><span class="line">	<span class="comment">// 4. 将结果转换为16进制格式字符串</span></span><br><span class="line">	res := fmt.Sprintf(<span class="string">&quot;%x&quot;</span>, result)</span><br><span class="line">	fmt.Println(res)</span><br><span class="line">	<span class="comment">// --- 这是另外一种格式化切片的方式</span></span><br><span class="line">	res = hex.EncodeToString(result)</span><br><span class="line">	fmt.Println(res)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重要函数说明:</p>
-<ol>
-<li><p>创建一个新的使用MD5校验的hash.Hash接口 </p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/md5&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span> <span class="title">hash</span>.<span class="title">Hash</span></span></span><br></pre></td></tr></table></figure>
-
-<p>Hash是一个被所有hash函数实现的公共接口。 </p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Hash <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// 通过嵌入的匿名io.Writer接口的Write方法向hash中添加更多数据，永远不返回错误</span></span><br><span class="line">    io.Writer</span><br><span class="line">    <span class="comment">// 返回添加b到当前的hash值后的新切片，不会改变底层的hash状态</span></span><br><span class="line">    Sum(b []<span class="keyword">byte</span>) []<span class="keyword">byte</span></span><br><span class="line">    <span class="comment">// 重设hash为无数据输入的状态</span></span><br><span class="line">    Reset()</span><br><span class="line">    <span class="comment">// 返回Sum会返回的切片的长度</span></span><br><span class="line">    Size() <span class="keyword">int</span></span><br><span class="line">    <span class="comment">// 返回hash底层的块大小；Write方法可以接受任何大小的数据，</span></span><br><span class="line">    <span class="comment">// 但提供的数据是块大小的倍数时效率更高</span></span><br><span class="line">    BlockSize() <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="string">&quot;io&quot;</span> 包中 Writer 接口用于包装基本的写入方法。</span><br><span class="line"><span class="keyword">type</span> Writer <span class="keyword">interface</span> &#123;</span><br><span class="line">    Write(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err error)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><p>通过io操作将数据写入hash对象中</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 第一种方式</span><br><span class="line">函数所属的包: <span class="string">&quot;io&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WriteString</span><span class="params">(w Writer, s <span class="keyword">string</span>)</span> <span class="params">(n <span class="keyword">int</span>, err error)</span></span></span><br><span class="line">    - 参数 w: 实现了/包含Writer接口的对象</span><br><span class="line">    - 参数 s: 要添加到IO对象中的数据</span><br><span class="line">    - 返回值 n: 数据长度</span><br><span class="line">    - 返回值 err: 错误信息</span><br><span class="line"># 第二种方式</span><br><span class="line">使用md5包中的New()方法得到的hash.Hash接口(假设名为: myHash)添加数据</span><br><span class="line">myHash.Write([]<span class="keyword">byte</span>(<span class="string">&quot;测试数据&quot;</span>))</span><br></pre></td></tr></table></figure></li>
-<li><p>使用hash.Hash接口中的Sum方法计算结果</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Sum(b []byte) []byte</span><br><span class="line">    - 参数 b: 将b中的数据进行哈希计算, 结果添加到原始数据的前面, </span><br><span class="line">      		 一般情况下该参数指定为空, 即: nil</span><br><span class="line">    - 返回值: 进行哈希运算之后得到的结果 </span><br></pre></td></tr></table></figure></li>
-</ol>
-</li>
-</ul>
-<h2 id="SHA-1、SHA-224、SHA-256、SHA-384、SHA-512"><a href="#SHA-1、SHA-224、SHA-256、SHA-384、SHA-512" class="headerlink" title="SHA-1、SHA-224、SHA-256、SHA-384、SHA-512"></a>SHA-1、SHA-224、SHA-256、SHA-384、SHA-512</h2><blockquote>
-<p>SHA-1是由NIST（NationalInstituteOfStandardsandTechnology，美国国家标准技术研究所）设计的一种能够产生160比特的散列值的单向散列函数。1993年被作为美国联邦信息处理标准规格（FIPS PUB 180）发布的是SHA,1995年发布的修订版FIPS PUB 180-1称为SHA-1。</p>
-<p>SHA-1的消息长度存在上限，但这个值接近于2^64^比特，是个非常巨大的数值，因此在实际应用中没有问题。</p>
-<p>SHA-256、SHA-384和SHA-512都是由NIST设计的单向散列函数，它们的散列值长度分别为256比特、384比特和512比特。这些单向散列函数合起来统称SHA-2，它们的消息长度也存在上限（SHA-256的上限接近于 2^64^ 比特，SHA-384 和 SHA-512的上限接近于 2^128^ 比特）。这些单向散列函数是于2002年和 SHA-1 一起作为 FIPS PUB 180-2发布的 SHA-1 的强抗碰撞性已于2005年被攻破, 也就是说，现在已经能够产生具备相同散列值的两条不同的消息。不过，SHA-2还尚未被攻破。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th></th>
-<th align="center">比特数</th>
-<th align="center">字节数</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>MD4</td>
-<td align="center">128bit</td>
-<td align="center">16byte</td>
-</tr>
-<tr>
-<td>MD5</td>
-<td align="center">128bit</td>
-<td align="center">16byte</td>
-</tr>
-<tr>
-<td>SHA-1</td>
-<td align="center">160bit</td>
-<td align="center">20byte</td>
-</tr>
-<tr>
-<td>SHA-224</td>
-<td align="center">224bit</td>
-<td align="center">28byte</td>
-</tr>
-<tr>
-<td>SHA-256</td>
-<td align="center">256bit</td>
-<td align="center">32byte</td>
-</tr>
-<tr>
-<td>SHA-384</td>
-<td align="center">384bit</td>
-<td align="center">48byte</td>
-</tr>
-<tr>
-<td>SHA-512</td>
-<td align="center">512bit</td>
-<td align="center">64byte</td>
-</tr>
-</tbody></table>
-<h3 id="Go中对SHA-1、SHA-2的使用"><a href="#Go中对SHA-1、SHA-2的使用" class="headerlink" title="Go中对SHA-1、SHA-2的使用"></a>Go中对SHA-1、SHA-2的使用</h3><ul>
-<li>需要导入的包</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/sha1&quot;</span></span><br><span class="line">	<span class="string">&quot;encoding/hex&quot;</span></span><br><span class="line">    <span class="string">&quot;crypto/sha256&quot;</span></span><br><span class="line">    <span class="string">&quot;crypto/sha512&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>使用sha1计算文件指纹</li>
-</ul>
-<blockquote>
-<p>上一小节介绍了如何使用go提供的API计算数据的md5指纹, sha1的计算方式和md5的套路是一样的, 需要将md5包, 替换为sh1, 下面给大家介绍一下如何使用sha1计算文件的指纹(md5亦如此) </p>
-</blockquote>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">getSha1</span><span class="params">(src <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1. 打开文件</span></span><br><span class="line">	fp, err := os.Open(src)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;文件打开失败&quot;</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. 创建基于sha1算法的Hash对象</span></span><br><span class="line">	myHash := sha1.New()</span><br><span class="line">	<span class="comment">// 3. 将文件数据拷贝给哈希对象</span></span><br><span class="line">	num, err := io.Copy(myHash, fp)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;拷贝文件失败&quot;</span></span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(<span class="string">&quot;文件大小: &quot;</span>, num)</span><br><span class="line">	<span class="comment">// 4. 计算文件的哈希值</span></span><br><span class="line">	tmp1 := myHash.Sum(<span class="literal">nil</span>)</span><br><span class="line">	<span class="comment">// 5. 数据格式转换</span></span><br><span class="line">    result := hex.EncodeToString(tmp1)</span><br><span class="line">	fmt.Println(<span class="string">&quot;sha1: &quot;</span>, result)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/" class="post-title-link" itemprop="url">非对称加密</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-      
-
-      <time title="創建時間：2021-08-18 14:15:44 / 修改時間：15:17:52" itemprop="dateCreated datePublished" datetime="2021-08-18T14:15:44+08:00">2021-08-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h1><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;非对称加密也叫公钥密码: 使用公钥加密, 使用私钥解密&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="对称加密的弊端"><a href="#对称加密的弊端" class="headerlink" title="对称加密的弊端"></a>对称加密的弊端</h2><ul>
-<li><p>秘钥分发困难</p>
-</li>
-<li><p>可以通过非对称加密完成秘钥的分发</p>
-<blockquote>
-<p>https</p>
-<p>Alice 和 Bob通信, Alice给bob发送数据, 使用对称加密的方式</p>
-<ol>
-<li>生成一个非对称的秘钥对, bob生成</li>
-<li>bob将公钥发送给alice</li>
-<li>alice生成一个用于对称加密的秘钥</li>
-<li>alice使用bob的公钥就对称加密的秘钥进行加密, 并且发送给bob</li>
-<li>bob使用私钥就数据解密, 得到对称加密的秘钥</li>
-<li>通信的双方使用写好的秘钥进行对称加密数据加密</li>
-</ol>
-</blockquote>
-</li>
-</ul>
-<h2 id="非对称加密的秘钥"><a href="#非对称加密的秘钥" class="headerlink" title="非对称加密的秘钥"></a>非对称加密的秘钥</h2><ul>
-<li>不存在秘钥分发困难的问题</li>
-</ul>
-<h3 id="场景分析"><a href="#场景分析" class="headerlink" title="场景分析"></a>场景分析</h3><p>数据对谁更重要, 谁就拿私钥</p>
-<ul>
-<li>直观上看: 私钥比公钥长</li>
-<li>使用第三方工具生成密钥对: 公钥文件xxx.pub xxx </li>
-</ul>
-<blockquote>
-<ol>
-<li><p>通信流程, 信息加密  （A写数据, 发送给B, 信息只允许B读）</p>
-<p>A: 公钥</p>
-<p>B: 私钥</p>
-</li>
-<li><p>登录认证 （客户端要登录, 连接服务器, 向服务器请求个人数据）</p>
-<p>客户端:  私钥</p>
-<p>服务器:  公钥</p>
-</li>
-<li><p>数字签名（表明信息没有受到伪造，确实是信息拥有者发出来的，附在信息原文的后面）</p>
-<ul>
-<li>发送信息的人:   私钥</li>
-<li>收到信息的人:   公钥</li>
-</ul>
-</li>
-<li><p>网银U盾</p>
-<ul>
-<li>个人: 私钥</li>
-<li>银行拿公钥</li>
-</ul>
-</li>
-</ol>
-</blockquote>
-<h2 id="RSA"><a href="#RSA" class="headerlink" title="RSA"></a>RSA</h2><h3 id="RSA加密"><a href="#RSA加密" class="headerlink" title="RSA加密"></a>RSA加密</h3><blockquote>
-<p>非对称加密的代表—RSA。在RSA中，明文、密钥和密文都是数字。RSA的加密过程可以用下列公式来表达，如下:                                                                                    </p>
-</blockquote>
-<p>$$<br>密文=明文 ^ E  mod     N（RSA加密）<br>$$</p>
-<blockquote>
-<p>也就是说，RSA的密文是对代表明文的数字的E次方求modN的结果。换句话说，就是将明文自己做E次乘法，然后将其结果除以N求余数，这个余数就是密文。</p>
-<p>加密公式中出现的两个数一一一E和N，到底都是什么数呢？RSA的加密是求明文的E次方modN，因此只要知道E和N这两个数，任何人都可以完成加密的运算。所以说，E和N是RSA加密的密钥，也就是说，<strong>E和N的组合就是公钥</strong>。</p>
-<p>不过，E和N并不是随便什么数都可以的，它们是经过严密计算得出的。顺便说一句，<strong>E是加密（Encryption）的首字母，N是数字（Number)的首字母</strong>。</p>
-<p>有一个很容易引起误解的地方需要大家注意一一E和N这两个数并不是密钥对（公钥和私钥的密钥对）。E和N两个数才组成了一个公钥，因此我们一般会写成 “公钥是(E，N)” 或者 “公钥是{E, N}” 这样的形式，将E和N用括号括起来。</p>
-<p>现在大家应该已经知道，==<strong>RSA的加密就是 “求E次方的modN”</strong>==，接下来我们来看看RSA的解密。</p>
-</blockquote>
-<h3 id="RSA解密"><a href="#RSA解密" class="headerlink" title="RSA解密"></a>RSA解密</h3><blockquote>
-<p>RSA的解密和加密一样简单，可以用下面的公式来表达：</p>
-</blockquote>
-<p>$$<br>明文=密文^DmodN（RSA解密）<br>$$</p>
-<blockquote>
-<p>也就是说，对表示密文的数字的D次方求modN就可以得到明文。换句话说，将密文自己做D次乘法，再对其结果除以N求余数，就可以得到明文。</p>
-<p>这里所使用的数字N和加密时使用的数字N是相同的。<strong>数D和数N组合起来就是RSA的解密密钥，因此D和N的组合就是私钥</strong>。只有知道D和N两个数的人才能够完成解密的运算。</p>
-<p>大家应该已经注意到，<strong>在RSA中，加密和解密的形式是相同的。加密是求 “E次方的mod N”，而解密则是求 “D次方的modN”</strong>，这真是太美妙了。</p>
-<p>当然，D也并不是随便什么数都可以的，作为解密密钥的D，和数字E有着相当紧密的联系。否则，用E加密的结果可以用D来解密这样的机制是无法实现的。</p>
-<p>顺便说一句，<strong>D是解密〈Decryption）的首字母，N是数字（Number）的首字母</strong>。</p>
-<p>我们将上面讲过的内容整理一下，如下表所示。</p>
-</blockquote>
-<img src="/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210818143403596.png" alt="image-20210818143403596" style="zoom:67%;">
-
-<img src="/2021/08/18/%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/image-20210818143417941.png" alt="image-20210818143417941" style="zoom:67%;">
-
-<h2 id="一些概念"><a href="#一些概念" class="headerlink" title="一些概念"></a>一些概念</h2><ol>
-<li>x509证书规范、pem、base64<ul>
-<li>pem编码规范 - 数据加密</li>
-<li>base64 - 对数据编码, 可逆<ul>
-<li>不管原始数据是什么, 将原始数据使用64个字符来替代<ul>
-<li>a-z  A-Z 0-9 + /</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>ASN.1抽象语法标记</li>
-<li>PKCS1标准</li>
-</ol>
-<h2 id="Go中生成公钥和私钥"><a href="#Go中生成公钥和私钥" class="headerlink" title="Go中生成公钥和私钥"></a>Go中生成公钥和私钥</h2><p>需要引入的包:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/rand&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line">	<span class="string">&quot;encoding/pem&quot;</span></span><br><span class="line">	<span class="string">&quot;os&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>生成私钥操作流程概述:</p>
-<blockquote>
-<ol>
-<li>使用rsa中的GenerateKey方法生成私钥</li>
-<li>通过x509标准将得到的ras私钥序列化为ASN.1 的 DER编码字符串</li>
-<li>将私钥字符串设置到pem格式块中</li>
-<li>通过pem将设置好的数据进行编码, 并写入磁盘文件中</li>
-</ol>
-</blockquote>
-<p>生成公钥操作流程:</p>
-<blockquote>
-<ol>
-<li>从得到的私钥对象中将公钥信息取出</li>
-<li>通过x509标准将得到 的rsa公钥序列化为字符串</li>
-<li>将公钥字符串设置到pem格式块中</li>
-<li>通过pem将设置好的数据进行编码, 并写入磁盘文件</li>
-</ol>
-</blockquote>
-<p>生成公钥和私钥的源代码:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 参数bits: 指定生成的秘钥的长度, 单位: bit</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RsaGenKey</span><span class="params">(bits <span class="keyword">int</span>)</span> <span class="title">error</span></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 生成私钥件</span></span><br><span class="line">	<span class="comment">// GenerateKey函数使用随机数据生成器random生成一对具有指定字位数的RSA密钥</span></span><br><span class="line">	<span class="comment">// 参数1: Reader是一个全局、共享的密码用强随机数生成器</span></span><br><span class="line">	<span class="comment">// 参数2: 秘钥的位数 - bit</span></span><br><span class="line">	privateKey, err := rsa.GenerateKey(rand.Reader, bits)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 2. MarshalPKCS1PrivateKey将rsa私钥序列化为ASN.1 PKCS#1 DER编码</span></span><br><span class="line">	derStream := x509.MarshalPKCS1PrivateKey(privateKey)</span><br><span class="line">	<span class="comment">// 3. Block代表PEM编码的结构, 对其进行设置</span></span><br><span class="line">	block := pem.Block&#123;</span><br><span class="line">		Type: <span class="string">&quot;RSA PRIVATE KEY&quot;</span>,<span class="comment">//&quot;RSA PRIVATE KEY&quot;,</span></span><br><span class="line">		Bytes: derStream,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 4. 创建文件</span></span><br><span class="line">	privFile, err := os.Create(<span class="string">&quot;private.pem&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 5. 使用pem编码, 并将数据写入文件中</span></span><br><span class="line">	err = pem.Encode(privFile, &amp;block)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 6. 最后的时候关闭文件</span></span><br><span class="line">	<span class="keyword">defer</span> privFile.Close()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 7. 生成公钥文件</span></span><br><span class="line">	publicKey := privateKey.PublicKey</span><br><span class="line">	derPkix, err := x509.MarshalPKIXPublicKey(&amp;publicKey)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	block = pem.Block&#123;</span><br><span class="line">		Type: <span class="string">&quot;RSA PUBLIC KEY&quot;</span>,<span class="comment">//&quot;PUBLIC KEY&quot;,</span></span><br><span class="line">		Bytes: derPkix,</span><br><span class="line">	&#125;</span><br><span class="line">	pubFile, err := os.Create(<span class="string">&quot;public.pem&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 8. 编码公钥, 写入文件</span></span><br><span class="line">	err = pem.Encode(pubFile, &amp;block)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="built_in">panic</span>(err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> pubFile.Close()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重要的函数介绍:</p>
-<ol>
-<li><p>GenerateKey函数使用随机数据生成器random生成一对具有指定字位数的RSA密钥。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;crypto/rsa&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GenerateKey</span><span class="params">(random io.Reader, bits <span class="keyword">int</span>)</span> <span class="params">(priv *PrivateKey, err error)</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: io.Reader: 赋值为: rand.Reader</span><br><span class="line">        -- rand包实现了用于加解密的更安全的随机数生成器。</span><br><span class="line">        -- <span class="keyword">var</span> Reader io.Reader (rand包中的变量)</span><br><span class="line">    - 参数<span class="number">2</span>: bits: 秘钥长度</span><br><span class="line">    - 返回值<span class="number">1</span>: 代表一个RSA私钥。</span><br><span class="line">    - 返回值<span class="number">2</span>: 错误信息</span><br></pre></td></tr></table></figure></li>
-<li><p>通过x509 将rsa私钥序列化为ASN.1 PKCS#1 DER编码</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;crypto/x509&quot;</span> 包中的函数 (x509包解析X<span class="number">.509</span>编码的证书和密钥)。</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MarshalPKCS1PrivateKey</span><span class="params">(key *rsa.PrivateKey)</span> []<span class="title">byte</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: 通过rsa.GenerateKey得到的私钥</span><br><span class="line">    - 返回值: 将私钥通过ASN<span class="number">.1</span>序列化之后得到的私钥编码数据</span><br></pre></td></tr></table></figure></li>
-<li><p>设置Pem编码结构</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Block代表PEM编码的结构。</span><br><span class="line"><span class="keyword">type</span> Block <span class="keyword">struct</span> &#123;</span><br><span class="line">    Type    <span class="keyword">string</span>            <span class="comment">// 得自前言的类型（如&quot;RSA PRIVATE KEY&quot;）</span></span><br><span class="line">    Headers <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span> <span class="comment">// 可选的头项，Headers是可为空的多行键值对。</span></span><br><span class="line">    Bytes   []<span class="keyword">byte</span>            <span class="comment">// 内容解码后的数据，一般是DER编码的ASN.1结构</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><p>将得到的Pem格式私钥通过文件指针写入磁盘中</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;encoding/pem&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Encode</span><span class="params">(out io.Writer, b *Block)</span> <span class="title">error</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: 可进行写操作的IO对象, 此处需要指定一个文件指针</span><br><span class="line">    - 参数<span class="number">2</span>: 初始化完成的Pem块对象, 即Block对象</span><br></pre></td></tr></table></figure></li>
-<li><p>通过RSA私钥得到公钥</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 私钥</span></span><br><span class="line"><span class="keyword">type</span> PrivateKey <span class="keyword">struct</span> &#123;</span><br><span class="line">    PublicKey            <span class="comment">// 公钥</span></span><br><span class="line">    D         *big.Int   <span class="comment">// 私有的指数</span></span><br><span class="line">    Primes    []*big.Int <span class="comment">// N的素因子，至少有两个</span></span><br><span class="line">    <span class="comment">// 包含预先计算好的值，可在某些情况下加速私钥的操作</span></span><br><span class="line">    Precomputed PrecomputedValues</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 公钥</span></span><br><span class="line"><span class="keyword">type</span> PublicKey <span class="keyword">struct</span> &#123;</span><br><span class="line">    N   *big.Int <span class="comment">// 模</span></span><br><span class="line">    E   <span class="keyword">int</span>      <span class="comment">// 公开的指数</span></span><br><span class="line">&#125;</span><br><span class="line">通过私钥获取公钥</span><br><span class="line">publicKey := privateKey.PublicKey <span class="comment">// privateKey为私钥对象</span></span><br></pre></td></tr></table></figure></li>
-<li><p>通过x509将公钥序列化为PKIX格式DER编码。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;crypto/x509&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MarshalPKIXPublicKey</span><span class="params">(pub <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span></span><br><span class="line">    - 参数<span class="number">1</span>: 通过私钥对象得到的公钥</span><br><span class="line">    - 返回值<span class="number">1</span>：将公钥通过ASN<span class="number">.1</span>序列化之后得到的编码数据</span><br><span class="line">    - 返回值<span class="number">2</span>: 错误信息</span><br></pre></td></tr></table></figure></li>
-<li><p>将公钥编码之后的数据格式化为Pem结构, 参考私钥的操作</p>
-</li>
-<li><p>将得到的Pem格式公钥通过文件指针写入磁盘中</p>
-</li>
-<li><p>生成的私钥和公钥文件数据</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">// 私钥文件数据</span><br><span class="line">-----BEGIN RSA PRIVATE KEY-----</span><br><span class="line">MIICXgIBAAKBgQC5bm0DCEV+EFeiLUqSshziqhSB30jXy5BWbPV5SlMq4aWiEknM</span><br><span class="line">i+Mw1aXic4bEsM3YyT73eWsifqZNSc/4fRaV4qz5OL8IIe9AZoGDSLX/Ar9AQMJf</span><br><span class="line">OHbAtdIlCGQ4d80KjpDpPs2wZkTqllWCg31d7U3DVEm5kqTGtSYIu9e7JQIDAQAB</span><br><span class="line">AoGARGdn72ZtvENrEHiEufjajwMO7Zng1TpS1I79PvEcHQWAhHkaoEo6VRl7SD41</span><br><span class="line">yPkv9njGsaQo0WDHGFvSTGhYm/EWGrBWRPc5xXbSBg7ty9Iza9B1ekAj8VfWryen</span><br><span class="line">Wje3xDOCVCDUiCcYdaSfPiJPYuWMSnNMNa+0cR921zBQg0ECQQDpCMljuH7LrpbC</span><br><span class="line">NDF5q+LbUWMAE2KLDPX4WmDSdZdIO3mPux3MdwOUEfrcvSBGZNB7gyaEG7goZL8G</span><br><span class="line">BqL22MJHAkEAy7SqbVPoPbMPHuLI52VQ2FDp6xxSWLhjmv1ePCHGo28MDCaHeVzZ</span><br><span class="line">QaxyuIbnY8A6NHfu/QGwz/eB941IjYNBMwJBAI9XEEl+mr++zIz4fdZRnGE7VqId</span><br><span class="line">SmgtuL7jGNtb6YpMyyFV/6ZdLp5N0PkmfEvQh0zyBycLxeNS1Q1n16Xu/tECQQCZ</span><br><span class="line">dF42wdDgOfWYFMu31VETw9CTtuApya3vYhMNRXx4Pf1bYeMIf/OCT8CUVbwWHwc5</span><br><span class="line">42d73TwvTorvy9TuFgSVAkEA6F69THlTn5oIP8IWHcHuqS01fIR/vGfEwQ4cFZGR</span><br><span class="line">ketfieyeeF8rjn4qzwT/ugwRNjkhfKmoILnIC8UhEEJdjA==</span><br><span class="line">-----END RSA PRIVATE KEY-----</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 公钥文件数据</span></span><br><span class="line">-----BEGIN RSA PUBLIC KEY-----</span><br><span class="line">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5bm0DCEV+EFeiLUqSshziqhSB</span><br><span class="line"><span class="number">30</span>jXy5BWbPV5SlMq4aWiEknMi+Mw1aXic4bEsM3YyT73eWsifqZNSc/<span class="number">4</span>fRaV4qz5</span><br><span class="line">OL8IIe9AZoGDSLX/Ar9AQMJfOHbAtdIlCGQ4d80KjpDpPs2wZkTqllWCg31d7U3D</span><br><span class="line">VEm5kqTGtSYIu9e7JQIDAQAB</span><br><span class="line">-----END RSA PUBLIC KEY-----</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="Go中使用RSA加解密"><a href="#Go中使用RSA加解密" class="headerlink" title="Go中使用RSA加解密"></a>Go中使用RSA加解密</h2><ol>
-<li><p>操作步骤</p>
-<ul>
-<li><p>公钥加密</p>
-<blockquote>
-<ol>
-<li>将公钥文件中的公钥读出, 得到使用pem编码的字符串</li>
-<li>将得到的字符串解码</li>
-<li>使用x509将编码之后的公钥解析出来</li>
-<li>使用得到的公钥通过rsa进行数据加密</li>
-</ol>
-</blockquote>
-</li>
-<li><p>私钥解密</p>
-<blockquote>
-<ol>
-<li>将私钥文件中的私钥读出, 得到使用pem编码的字符串</li>
-<li>将得到的字符串解码</li>
-<li>使用x509将编码之后的私钥解析出来</li>
-<li>使用得到的私钥通过rsa进行数据解密</li>
-</ol>
-</blockquote>
-</li>
-</ul>
-</li>
-<li><p>代码实现</p>
-<ul>
-<li>RSA公钥加密</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RSAEncrypt</span><span class="params">(src, filename []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">    <span class="comment">// 1. 根据文件名将文件内容从文件中读出</span></span><br><span class="line">    file, err := os.Open(<span class="keyword">string</span>(filename))</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 2. 读文件</span></span><br><span class="line">    info, _ := file.Stat()</span><br><span class="line">    allText := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">    file.Read(allText)</span><br><span class="line">    <span class="comment">// 3. 关闭文件</span></span><br><span class="line">    file.Close()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 从数据中查找到下一个PEM格式的块</span></span><br><span class="line">    block, _ := pem.Decode(allText)</span><br><span class="line">    <span class="keyword">if</span> block == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 5. 解析一个DER编码的公钥</span></span><br><span class="line">    pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    pubKey := pubInterface.(*rsa.PublicKey)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 6. 公钥加密</span></span><br><span class="line">    result, _ := rsa.EncryptPKCS1v15(rand.Reader, pubKey, src)</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>RSA私钥解密</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RSADecrypt</span><span class="params">(src, filename []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</span><br><span class="line">  <span class="comment">// 1. 根据文件名将文件内容从文件中读出</span></span><br><span class="line">  file, err := os.Open(<span class="keyword">string</span>(filename))</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 2. 读文件</span></span><br><span class="line">  info, _ := file.Stat()</span><br><span class="line">  allText := <span class="built_in">make</span>([]<span class="keyword">byte</span>, info.Size())</span><br><span class="line">  file.Read(allText)</span><br><span class="line">  <span class="comment">// 3. 关闭文件</span></span><br><span class="line">  file.Close()</span><br><span class="line">  <span class="comment">// 4. 从数据中查找到下一个PEM格式的块</span></span><br><span class="line">  block, _ := pem.Decode(allText)</span><br><span class="line">  <span class="comment">// 5. 解析一个pem格式的私钥</span></span><br><span class="line">  privateKey , err := x509.ParsePKCS1PrivateKey(block.Bytes)</span><br><span class="line">  <span class="comment">// 6. 私钥解密</span></span><br><span class="line">  result, _ := rsa.DecryptPKCS1v15(rand.Reader, privateKey, src)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>重要的函数介绍</li>
-</ul>
-<ol>
-<li>将得到的Pem格式私钥通过文件指针写入磁盘中</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;encoding/pem&quot;</span> 包中的函数</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Decode</span><span class="params">(data []<span class="keyword">byte</span>)</span> <span class="params">(p *Block, rest []<span class="keyword">byte</span>)</span></span></span><br><span class="line">    - 参数 data: 需要解析的数据块</span><br><span class="line">    - 返回值<span class="number">1</span>: 从参数中解析出的PEM格式的块</span><br><span class="line">    - 返回值<span class="number">2</span>: 参数data剩余的未被解码的数据</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>解析一个DER编码的公钥 , pem中的Block结构体中的数据格式为ASN.1编码</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParsePKIXPublicKey</span><span class="params">(derBytes []<span class="keyword">byte</span>)</span> <span class="params">(pub <span class="keyword">interface</span>&#123;&#125;, err error)</span></span></span><br><span class="line">    - 参数 derBytes: 从pem的Block结构体中取的ASN<span class="number">.1</span>编码数据</span><br><span class="line">    - 返回值 pub: 接口对象, 实际是公钥数据</span><br><span class="line">    - 参数 err:   错误信息</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>解析一个DER编码的私钥 , pem中的Block结构体中的数据格式为ASN.1编码</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/x509&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ParsePKCS1PrivateKey</span><span class="params">(der []<span class="keyword">byte</span>)</span> <span class="params">(key *rsa.PrivateKey, err error)</span></span></span><br><span class="line">    - 参数 der: 从pem的Block结构体中取的ASN<span class="number">.1</span>编码数据</span><br><span class="line">    - 返回值 key: 解析出的私钥</span><br><span class="line">    - 返回值 err: 错误信息</span><br></pre></td></tr></table></figure>
-
-<ol start="4">
-<li>将接口转换为公钥</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pubKey := pubInterface.(*rsa.PublicKey)</span><br><span class="line">    - pubInterface: ParsePKIXPublicKey函数返回的 <span class="keyword">interface</span>&#123;&#125; 对象</span><br><span class="line">    - pubInterface.(*rsa.PublicKey): 将pubInterface转换为公钥类型 rsa.PublicKey</span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>使用公钥加密数据</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">EncryptPKCS1v15</span><span class="params">(rand io.Reader, pub *PublicKey, msg []<span class="keyword">byte</span>)</span> <span class="params">(out []<span class="keyword">byte</span>, err error)</span></span></span><br><span class="line">    - 参数 rand: 随机数生成器, 赋值为 rand.Reader</span><br><span class="line">    - 参数 pub:  非对称加密加密使用的公钥</span><br><span class="line">    - 参数 msg:  要使用公钥加密的原始数据</span><br><span class="line">    - 返回值 out: 加密之后的数据</span><br><span class="line">    - 返回值 err: 错误信息</span><br></pre></td></tr></table></figure>
-
-<ol start="6">
-<li>使用私钥解密数据</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">函数所属的包: <span class="string">&quot;crypto/rsa&quot;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DecryptPKCS1v15</span><span class="params">(rand io.Reader, priv *PrivateKey, ciphertext []<span class="keyword">byte</span>)</span> <span class="params">(out []<span class="keyword">byte</span>, err error)</span></span></span><br><span class="line">    - 参数 rand: 随机数生成器, 赋值为 rand.Reader</span><br><span class="line">    - 参数 priv: 非对称加密解密使用的私钥</span><br><span class="line">    - 参数 ciphertext: 需要使用私钥解密的数据</span><br><span class="line">    - 返回值 out: 解密之后得到的数据</span><br><span class="line">    - 返回值 err: 错误信</span><br></pre></td></tr></table></figure></li>
-</ol>
-<h2 id="ECC椭圆曲线"><a href="#ECC椭圆曲线" class="headerlink" title="ECC椭圆曲线"></a>ECC椭圆曲线</h2><blockquote>
-<ol>
-<li>概念</li>
-</ol>
-<p>椭圆曲线密码学（英语：Elliptic curve cryptography，缩写为 ECC），一种建立公开密钥加密的算法，基于椭圆曲线数学。椭圆曲线在密码学中的使用是在1985年由Neal Koblitz和Victor Miller分别独立提出的。</p>
-<p>ECC的主要优势是在某些情况下它比其他的方法使用更小的密钥——比如RSA加密算法——提供相当的或更高等级的安全。</p>
-<p>椭圆曲线密码学的许多形式有稍微的不同，所有的都依赖于被广泛承认的解决椭圆曲线离散对数问题的困难性上。与传统的基于大质数因子分解困难性的加密方法不同，ECC通过椭圆曲线方程式的性质产生密钥。</p>
-<p>ECC 164位的密钥产生的一个安全级相当于RSA 1024位密钥提供的保密强度，而且计算量较小，处理速度更快，存储空间和传输带宽占用较少。目前我国<code>居民二代身份证</code>正在使用 256 位的椭圆曲线密码，虚拟货币<code>比特币</code>也选择ECC作为加密算法。</p>
-<p>具体算法详解参考：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Kalafinaian/p/7392505.html">https://www.cnblogs.com/Kalafinaian/p/7392505.html</a></li>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/taifei/article/details/73277247">https://blog.csdn.net/taifei/article/details/73277247</a></li>
-</ul>
-<ol start="2">
-<li>数学原理</li>
-</ol>
-<p>不管是RSA还是ECC或者其它，公钥加密算法都是依赖于某个正向计算很简单（多项式时间复杂度），而逆向计算很难（指数级时间复杂度）的数学问题。</p>
-<p>椭圆曲线依赖的数学难题是:</p>
-<p><code>k为正整数，P是椭圆曲线上的点（称为基点）, k*P=Q , 已知Q和P，很难计算出k</code></p>
-</blockquote>
-<h2 id="非对称加密解惑"><a href="#非对称加密解惑" class="headerlink" title="非对称加密解惑"></a>非对称加密解惑</h2><ul>
-<li>非对称加密比对称加密机密性更高吗?</li>
-</ul>
-<blockquote>
-<p>这个问题无法回答, 以为机密性高低是根据秘钥长度而变化的</p>
-</blockquote>
-<ul>
-<li><strong>采用1024bit 秘钥长度的非对称加密, 和采用128bit秘钥长度的对称加密中, 是秘钥更长的非对称加密更安全吗?</strong></li>
-</ul>
-<blockquote>
-<p>不是。</p>
-<p>非对称加密的密钥长度不能与对称加密的密钥长度进行直接比较。下表是一张密钥长度的比较表（本表摘自《应用密码学》），根据这张表我们可以看出，1024比特的公钥密码与128比特的对称密码相比，反而是128比特的对称密码抵御暴力破解的能力更强。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="center">对称加密秘钥长度</th>
-<th align="center">非对称加密秘钥长度</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">128 比特</td>
-<td align="center">2304 比特</td>
-</tr>
-<tr>
-<td align="center">112 比特</td>
-<td align="center">1792 比特</td>
-</tr>
-<tr>
-<td align="center">80 比特</td>
-<td align="center">768 比特</td>
-</tr>
-<tr>
-<td align="center">64 比特</td>
-<td align="center">512 比特</td>
-</tr>
-<tr>
-<td align="center">56 比特</td>
-<td align="center">384 比特</td>
-</tr>
-</tbody></table>
-<ul>
-<li><strong>有了非对称加密， 以后对称加密会被替代吗？</strong></li>
-</ul>
-<blockquote>
-<p>不会</p>
-<p>一般来说，在采用具备同等机密性的密钥长度的情况下，非对称加密的处理速度只有对称加密的几百分之一。因此，非对称加密并不适合用来对很长的消息内容进行加密。根据目的的不同，还可能会配合使用对称加密和非对称加密，如，混合密码系统就是将这两种密码组合而成的。</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一頁"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一頁"></i></a>
   </nav>
@@ -2300,7 +2299,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
