@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-count">41</span>
           <span class="site-state-item-name">文章</span>
         </a>
       </div>
@@ -200,6 +200,147 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="zzy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="上善若水">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/" class="post-title-link" itemprop="url">消息认证码</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">發表於</span>
+      
+
+      <time title="創建時間：2021-08-24 15:48:51 / 修改時間：15:59:12" itemprop="dateCreated datePublished" datetime="2021-08-24T15:48:51+08:00">2021-08-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分類於</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">密码学</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="消息认证码"><a href="#消息认证码" class="headerlink" title="消息认证码"></a>消息认证码</h1><h2 id="消息认证"><a href="#消息认证" class="headerlink" title="消息认证"></a>消息认证</h2><blockquote>
+<p><strong>消息认证码（message authentication code）是一种确认完整性并进行认证的技术，取三个单词的首字母，简称为MAC。</strong></p>
+</blockquote>
+<p><img src="/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/1539176665517.png" alt="1539176665517"></p>
+<ul>
+<li><p>思考改进方案?</p>
+<p>从哈希函数入手</p>
+<p>需要将要发送的数据进行哈希运算, 将哈希值和原始数据一并发送</p>
+<p>需要在进行哈希运算的时候引入加密的步骤</p>
+<ul>
+<li>在alice对数据进行哈希运算的时候引入一个秘钥, 让其参与哈希运算, 生成散列值</li>
+<li>bob对数据校验<ul>
+<li>bob收到原始和散列值之后, <ul>
+<li>处理原始数据: 通过秘钥和哈希算法对原始数据生成散列值</li>
+<li>散列值比较: 生成的散列值 和  接收到的散列值进行比对</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="消息认证码的使用步骤"><a href="#消息认证码的使用步骤" class="headerlink" title="消息认证码的使用步骤"></a>消息认证码的使用步骤</h2><p><img src="/2021/08/24/%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81%E7%A0%81/1539177690828.png" alt="1539177690828"></p>
+<blockquote>
+<p>前提条件:</p>
+<ul>
+<li>在消息认证码生成的一方和校验的一方, 必须有一个秘钥</li>
+<li>双方约定好使用同样的哈希函数对数据进行运算</li>
+</ul>
+<p>流程:</p>
+<p>发送者: </p>
+<ul>
+<li>发送原始法消息</li>
+<li>将原始消息生成消息认证码<ul>
+<li>((原始消息) + 秘钥)  *   函数函数 = 散列值(消息认证码)</li>
+</ul>
+</li>
+<li>将消息认证码发送给对方</li>
+</ul>
+<p>接收者:</p>
+<ul>
+<li>接收原始数据</li>
+<li>接收消息认证码</li>
+<li>校验: <ul>
+<li>( 接收的消息  +  秘钥 ) * 哈希函数   = 新的散列值</li>
+<li>通过新的散列值和接收的散列值进行比较</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h2 id="go中对消息认证码的使用"><a href="#go中对消息认证码的使用" class="headerlink" title="go中对消息认证码的使用"></a>go中对消息认证码的使用</h2><blockquote>
+<p>有一个包: crypto/hmac</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(h <span class="keyword">func</span>()</span> <span class="title">hash</span>.<span class="title">Hash</span>, <span class="title">key</span> []<span class="title">byte</span>) <span class="title">hash</span>.<span class="title">Hash</span></span></span><br><span class="line">- 返回值: hash接口</span><br><span class="line">- 参数<span class="number">1</span>: 哈希函数的函数名</span><br><span class="line">	sha1.<span class="built_in">new</span></span><br><span class="line">	md5.<span class="built_in">new</span></span><br><span class="line">	sha256.<span class="built_in">new</span></span><br><span class="line">- 参数<span class="number">2</span>: 秘钥</span><br><span class="line"></span><br><span class="line">第二步: 添加数据</span><br><span class="line"><span class="keyword">type</span> Hash <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// 通过嵌入的匿名io.Writer接口的Write方法向hash中添加更多数据，永远不返回错误</span></span><br><span class="line">    io.Writer</span><br><span class="line">    <span class="comment">// 返回添加b到当前的hash值后的新切片，不会改变底层的hash状态</span></span><br><span class="line">    Sum(b []<span class="keyword">byte</span>) []<span class="keyword">byte</span></span><br><span class="line">    <span class="comment">// 重设hash为无数据输入的状态</span></span><br><span class="line">    Reset()</span><br><span class="line">    <span class="comment">// 返回Sum会返回的切片的长度</span></span><br><span class="line">    Size() <span class="keyword">int</span></span><br><span class="line">    <span class="comment">// 返回hash底层的块大小；Write方法可以接受任何大小的数据，</span></span><br><span class="line">    <span class="comment">// 但提供的数据是块大小的倍数时效率更高</span></span><br><span class="line">    BlockSize() <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Writer <span class="keyword">interface</span> &#123;</span><br><span class="line">    Write(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err error)</span><br><span class="line">&#125;</span><br><span class="line">第三步: 计算散列值</span><br></pre></td></tr></table></figure>
+
+<p>实例：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/hmac&quot;</span></span><br><span class="line">	<span class="string">&quot;crypto/sha1&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span> <span class="params">()</span></span> &#123;</span><br><span class="line">	src := []<span class="keyword">byte</span>(<span class="string">&quot;在消息认证码中，需要发送者和接收者之间共享密钥，而这个密钥不能被主动攻击者Mallory获取。&quot;</span> +</span><br><span class="line">		<span class="string">&quot;如果这个密钥落入Mallory手中，则Mallory也可以计算出MAC值，从而就能够自由地进行篡改和伪装攻击，&quot;</span> +</span><br><span class="line">		<span class="string">&quot;这样一来消息认证码就无法发挥作用了。&quot;</span>)</span><br><span class="line">	key := []<span class="keyword">byte</span>(<span class="string">&quot;helloworld&quot;</span>)</span><br><span class="line">	hamc1 := GenerateHamc(src, key)</span><br><span class="line">	bl := VerifyHamc(src, key, hamc1)</span><br><span class="line">	<span class="comment">//fmt.Printf(&quot;校验结果: %t\n&quot;, bl)</span></span><br><span class="line">	fmt.Println(bl)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 生成消息认证码</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GenerateHamc</span><span class="params">(plainText, key []<span class="keyword">byte</span>)</span>[]<span class="title">byte</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1.创建哈希接口, 需要指定使用的哈希算法, 和秘钥</span></span><br><span class="line">	myhash := hmac.New(sha1.New, key)</span><br><span class="line">	<span class="comment">// 2. 给哈希对象添加数据</span></span><br><span class="line">	myhash.Write(plainText)</span><br><span class="line">	<span class="comment">// 3. 计算散列值</span></span><br><span class="line">	hashText := myhash.Sum(<span class="literal">nil</span>)</span><br><span class="line">	<span class="keyword">return</span> hashText</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 验证消息认证码</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">VerifyHamc</span><span class="params">(plainText, key, hashText []<span class="keyword">byte</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// 1.创建哈希接口, 需要指定使用的哈希算法, 和秘钥</span></span><br><span class="line">	myhash := hmac.New(sha1.New, key)</span><br><span class="line">	<span class="comment">// 2. 给哈希对象添加数据</span></span><br><span class="line">	myhash.Write(plainText)</span><br><span class="line">	<span class="comment">// 3. 计算散列值</span></span><br><span class="line">	hamc1 := myhash.Sum(<span class="literal">nil</span>)</span><br><span class="line">	<span class="comment">// 4. 两个散列值比较</span></span><br><span class="line">	<span class="keyword">return</span> hmac.Equal(hashText, hamc1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h2 id="消息认证码的问题"><a href="#消息认证码的问题" class="headerlink" title="消息认证码的问题"></a>消息认证码的问题</h2><ol>
+<li>弊端<ul>
+<li>有秘钥分发困难的问题</li>
+</ul>
+</li>
+<li>无法解决的问题<ul>
+<li>不能进行第三方证明</li>
+<li>不能防止否认</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -2261,238 +2402,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="http://zhudalao243.github.io/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="zzy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="上善若水">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/" class="post-title-link" itemprop="url">01周易基础及其应用</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">發表於</span>
-
-      <time title="創建時間：2021-08-15 14:59:26" itemprop="dateCreated datePublished" datetime="2021-08-15T14:59:26+08:00">2021-08-15</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新於</span>
-        <time title="修改時間：2021-09-03 22:09:58" itemprop="dateModified" datetime="2021-09-03T22:09:58+08:00">2021-09-03</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分類於</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%93%B2%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">哲学</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%93%B2%E5%AD%A6/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A8/" itemprop="url" rel="index"><span itemprop="name">周易基础及其应用</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="周易基础及应用"><a href="#周易基础及应用" class="headerlink" title="周易基础及应用"></a>周易基础及应用</h1><p>千古奇书《周易》</p>
-<p>人更三圣：伏羲    周文王    孔夫子</p>
-<p>事历三古：远古    中古         近古</p>
-<p>《易经》它是以八卦为核心，以卦的形式来说明问题，以阴爻和阳爻来说明问题，以阴爻和阳爻的相互配合，以文字系统与符号系统相结合说明万事万物的根本规律。</p>
-<p>《易经》为群经之首。</p>
-<p>系词： <strong>夫《易》何为者也，开物成务斯如此也。</strong>  开物成务：开物是认识事物的本质，成务是怎么去解决这个问题。</p>
-<p><strong>不善易者，不得为将相。</strong>   </p>
-<p><strong>不知易不足以言大医。   ————孙思邈</strong></p>
-<p>易道广大，无所不包。</p>
-<p>《易》与天地准，故能弥纶天地之道。</p>
-<p>百姓日用而不知。</p>
-<img src="/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/image-20210815150334560.png" alt="image-20210815150334560" style="zoom:33%;">
-
-<h2 id="阴阳学说"><a href="#阴阳学说" class="headerlink" title="阴阳学说"></a>阴阳学说</h2><p>易以道阴阳。 ——庄子</p>
-<p>天地间无往而非阴阳，一动一静一语一默，皆是阴阳之理。 ———朱熹</p>
-<p>阳：天    上    昼    男    君    贵    福 ….</p>
-<p>阴：地    下    夜    女    臣    贱    祸 ….</p>
-<p><strong>一阴一阳之谓道。</strong></p>
-<p>主要内容：</p>
-<ul>
-<li>阴阳对立</li>
-<li>阴阳依存（互根）。有无相生，难易相成，长短相盈，高低相形，音声相合，前后相随，恒也。</li>
-<li>阴阳消长。阴阳动态变化，动态平衡。阴盛则阳病，阳盛则阴病。</li>
-<li>阴阳转换。消长属于量变，转化属于质变。</li>
-</ul>
-<p>中国哲学三大问题：天人、群己、身心</p>
-<p>重视对立，追求平衡。</p>
-<h2 id="五行学说"><a href="#五行学说" class="headerlink" title="五行学说"></a>五行学说</h2><p>世界上的万事万物的运动和发生发展都是”金木水火土“这五种状态，相互作用、相互运动的结果。  ——&gt;系统观</p>
-<h3 id="五行特点"><a href="#五行特点" class="headerlink" title="五行特点"></a>五行特点</h3><blockquote>
-<p>五行顺序              特性        方位    五德            季节</p>
-<p>一曰水    润下    润下寒冷    北方    智               冬季</p>
-<p>二曰火    炎上    炎热向上    南方    礼               夏季</p>
-<p>三曰木    曲直    生发条达    东方    仁               春季</p>
-<p>四曰金    从草    清凉萧杀    西方    义                秋季</p>
-<p>五曰土    稼穑    长养化育    中央    信      农历（三、六、九、十二月）</p>
-</blockquote>
-<h3 id="五行生克"><a href="#五行生克" class="headerlink" title="五行生克"></a>五行生克</h3><img src="/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/image-20210815160518695.png" alt="image-20210815160518695" style="zoom:33%;">
-
-<h3 id="五行的旺、相、休、囚、死"><a href="#五行的旺、相、休、囚、死" class="headerlink" title="五行的旺、相、休、囚、死"></a>五行的旺、相、休、囚、死</h3><p>生克制化之理</p>
-<table>
-<thead>
-<tr>
-<th align="center"></th>
-<th align="center">旺</th>
-<th align="center">相</th>
-<th align="center">死</th>
-<th align="center">囚</th>
-<th align="center">休</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">春</td>
-<td align="center">木</td>
-<td align="center">火</td>
-<td align="center">土</td>
-<td align="center">金</td>
-<td align="center">水</td>
-</tr>
-<tr>
-<td align="center">夏</td>
-<td align="center">火</td>
-<td align="center">土</td>
-<td align="center">金</td>
-<td align="center">水</td>
-<td align="center">木</td>
-</tr>
-<tr>
-<td align="center">秋</td>
-<td align="center">金</td>
-<td align="center">水</td>
-<td align="center">木</td>
-<td align="center">火</td>
-<td align="center">土</td>
-</tr>
-<tr>
-<td align="center">冬</td>
-<td align="center">水</td>
-<td align="center">木</td>
-<td align="center">火</td>
-<td align="center">土</td>
-<td align="center">金</td>
-</tr>
-<tr>
-<td align="center">四季</td>
-<td align="center">土</td>
-<td align="center">金</td>
-<td align="center">水</td>
-<td align="center">木</td>
-<td align="center">火</td>
-</tr>
-</tbody></table>
-<h2 id="天干地支"><a href="#天干地支" class="headerlink" title="天干地支"></a>天干地支</h2><h3 id="十天干"><a href="#十天干" class="headerlink" title="十天干"></a>十天干</h3><blockquote>
-<p>甲        乙        丙        丁        戊        己        庚        辛        壬        癸</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="center"></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">甲乙同属木</td>
-<td>东方</td>
-<td>甲阳木</td>
-<td>乙阴木</td>
-</tr>
-<tr>
-<td align="center">丙丁同属火</td>
-<td>南方</td>
-<td>丙阳火</td>
-<td>丁阴火</td>
-</tr>
-<tr>
-<td align="center">戊己同属土</td>
-<td>中央</td>
-<td>戊阳土</td>
-<td>己阴土</td>
-</tr>
-<tr>
-<td align="center">庚辛同属金</td>
-<td>西方</td>
-<td>庚阳金</td>
-<td>辛阴金</td>
-</tr>
-<tr>
-<td align="center">壬癸同属水</td>
-<td>北方</td>
-<td>壬阳水</td>
-<td>癸阴水</td>
-</tr>
-</tbody></table>
-<h4 id="天干相和"><a href="#天干相和" class="headerlink" title="天干相和"></a>天干相和</h4><blockquote>
-<p>甲己合土</p>
-<p>乙庚合金</p>
-<p>丙辛合水</p>
-<p>丁壬合木</p>
-<p>戊癸合火</p>
-</blockquote>
-<h4 id="十天干的相生相克"><a href="#十天干的相生相克" class="headerlink" title="十天干的相生相克"></a>十天干的相生相克</h4><img src="/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/image-20210816165629369.png" alt="image-20210815160518695">
-
-<img src="/2021/08/15/%E5%91%A8%E6%98%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%85%B6%E5%BA%94%E7%94%A801/image-20210816165743365.png" alt="image-20210815160518695">
-
-
-
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一頁"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一頁"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="下一頁"></i></a>
   </nav>
 
 </div>
